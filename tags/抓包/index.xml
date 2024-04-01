@@ -1,0 +1,340 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>抓包 on bitxeno's notes</title><link>https://blog.xenori.com/tags/%E6%8A%93%E5%8C%85/</link><description>Recent content in 抓包 on bitxeno's notes</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Mon, 15 May 2023 15:27:10 +0800</lastBuildDate><atom:link href="https://blog.xenori.com/tags/%E6%8A%93%E5%8C%85/index.xml" rel="self" type="application/rss+xml"/><item><title>通过 WSA 抓取 android 的 https 网络请求包</title><link>https://blog.xenori.com/2023/05/capture-android-https-network-packet-with-wsa/</link><pubDate>Mon, 15 May 2023 15:27:10 +0800</pubDate><guid>https://blog.xenori.com/2023/05/capture-android-https-network-packet-with-wsa/</guid><description>&lt;img src="https://blog.xenori.com/2023/05/capture-android-https-network-packet-with-wsa/cover.jpeg" alt="Featured image of post 通过 WSA 抓取 android 的 https 网络请求包" />&lt;p>android 9 以上版本，app 不再信任用户安装的证书，只能通过 root 手机把证书移动到 system 分区才能实现抓包。一般日常使用手机为了安全是不可能 root 的，这里通过 Windows 的 WSA 来实现抓包。&lt;/p>
+&lt;h2 id="准备环境">准备环境&lt;/h2>
+&lt;ol>
+&lt;li>
+&lt;p>到 &lt;a class="link" href="https://github.com/MustardChef/WSABuilds/releases" target="_blank" rel="noopener"
+>WSABuilds&lt;/a> 下载安装已 root 带 &lt;strong>magisk&lt;/strong> 的 WSA 镜像（假如之前已安装过 WSA，需要先到系统应用列表中，把旧的卸载）&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>安装后，开始菜单中搜索 &lt;code>android&lt;/code>，找到 WSA 设置应用并打开，选择 &lt;code>开发人员&lt;/code>，并打开&lt;code>开发人员模式&lt;/code>&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://blog.xenori.com/2023/05/capture-android-https-network-packet-with-wsa/1.png"
+width="1084"
+height="718"
+srcset="https://blog.xenori.com/2023/05/capture-android-https-network-packet-with-wsa/1_hub311dd2faff923cd2dc66f0ae9a4776d_92901_480x0_resize_box_3.png 480w, https://blog.xenori.com/2023/05/capture-android-https-network-packet-with-wsa/1_hub311dd2faff923cd2dc66f0ae9a4776d_92901_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="150"
+data-flex-basis="362px"
+>&lt;/p>
+&lt;ol start="3">
+&lt;li>
+&lt;p>安装&lt;a class="link" href="https://www.microsoft.com/store/productId/9P2JFQ43FPPG" target="_blank" rel="noopener"
+>APK 安装程序&lt;/a>，实现双击安装 apk 和自动安装 adb 命令工具&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>安装&lt;a class="link" href="ms-windows-store://pdp/?productid=9PPSP2MKVTGT" >WSA 工具箱&lt;/a>，用于上传文件到 WSA&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>下载&lt;a class="link" href="https://github.com/topjohnwu/Magisk/releases" target="_blank" rel="noopener"
+>Magisk app&lt;/a>，并安装&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;h2 id="安装-charles-证书">安装 charles 证书&lt;/h2>
+&lt;ol>
+&lt;li>
+&lt;p>打开 &lt;strong>charles&lt;/strong>，选择菜单 &lt;code>Help -&amp;gt; SSL Proxying -&amp;gt; Save Charles Root Certificate&lt;/code>，并选择把证书保存为 &lt;code>.cer&lt;/code> 格式&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>打开&lt;strong>WSA 工具箱&lt;/strong>，使用&lt;code>文件传输&lt;/code>功能把刚刚保存的证书上传到 wsa 的&lt;code>Download&lt;/code>目录&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>点击&lt;strong>WSA 工具箱&lt;/strong>首页的&lt;code>Android设置&lt;/code>，选择&lt;code>安全-&amp;gt;更多安全设置-&amp;gt;加密与凭据-&amp;gt;安装证书&lt;/code>菜单，选择并安装&lt;code>Download&lt;/code>目录的&lt;code>charles&lt;/code>证书&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://blog.xenori.com/2023/05/capture-android-https-network-packet-with-wsa/2.png"
+width="1390"
+height="864"
+srcset="https://blog.xenori.com/2023/05/capture-android-https-network-packet-with-wsa/2_huc11281a385f0323f7fb22346342b05c5_278663_480x0_resize_box_3.png 480w, https://blog.xenori.com/2023/05/capture-android-https-network-packet-with-wsa/2_huc11281a385f0323f7fb22346342b05c5_278663_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="160"
+data-flex-basis="386px"
+>&lt;/p>
+&lt;ol start="4">
+&lt;li>证书安装成功后，正常在&lt;code>加密与凭据-&amp;gt;信任的凭据-&amp;gt;用户&lt;/code>项中能看到已安装的证书&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://blog.xenori.com/2023/05/capture-android-https-network-packet-with-wsa/3.png"
+width="582"
+height="688"
+srcset="https://blog.xenori.com/2023/05/capture-android-https-network-packet-with-wsa/3_hu6752eb6c708844501a8d4a854f8e7790_62810_480x0_resize_box_3.png 480w, https://blog.xenori.com/2023/05/capture-android-https-network-packet-with-wsa/3_hu6752eb6c708844501a8d4a854f8e7790_62810_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="84"
+data-flex-basis="203px"
+>&lt;/p>
+&lt;h2 id="把用户区证书移动到-system-分区">把用户区证书移动到 system 分区&lt;/h2>
+&lt;ol>
+&lt;li>下载 &lt;strong>Magisk&lt;/strong> 的&lt;a class="link" href="https://github.com/NVISOsecurity/MagiskTrustUserCerts/releases" target="_blank" rel="noopener"
+>MagiskTrustUserCerts&lt;/a>模块压缩包，并通过&lt;strong>WSA 工具箱&lt;/strong>上传到&lt;code>Download&lt;/code>目录&lt;/li>
+&lt;/ol>
+&lt;ol start="2">
+&lt;li>打开 &lt;strong>Magisk&lt;/strong> app，点击&lt;code>模块 -&amp;gt; 从本地安装&lt;/code>，选择刚刚上传的&lt;code>Download&lt;/code>目录下的&lt;code>AlwaysTrustUserCerts&lt;/code>压缩包&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://blog.xenori.com/2023/05/capture-android-https-network-packet-with-wsa/4.png"
+width="544"
+height="718"
+srcset="https://blog.xenori.com/2023/05/capture-android-https-network-packet-with-wsa/4_hu62ae5ce2897a65b7a4027a8ee750a16e_45040_480x0_resize_box_3.png 480w, https://blog.xenori.com/2023/05/capture-android-https-network-packet-with-wsa/4_hu62ae5ce2897a65b7a4027a8ee750a16e_45040_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="75"
+data-flex-basis="181px"
+>&lt;/p>
+&lt;ol start="3">
+&lt;li>
+&lt;p>安装成功后，正常会提示你重启 wsa，没的话，在命令行中执行&lt;code>adb reboot&lt;/code>手工重启下&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>重启后正常能在&lt;code>加密与凭据-&amp;gt;信任的凭据-&amp;gt;系统&lt;/code>中，看到&lt;code>charles&lt;/code>证书&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://blog.xenori.com/2023/05/capture-android-https-network-packet-with-wsa/5.png"
+width="544"
+height="696"
+srcset="https://blog.xenori.com/2023/05/capture-android-https-network-packet-with-wsa/5_hub5c871cd5d01a8af30fa5218ac6cbbd2_106297_480x0_resize_box_3.png 480w, https://blog.xenori.com/2023/05/capture-android-https-network-packet-with-wsa/5_hub5c871cd5d01a8af30fa5218ac6cbbd2_106297_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="78"
+data-flex-basis="187px"
+>&lt;/p>
+&lt;h2 id="配置代理抓包">配置代理抓包&lt;/h2>
+&lt;ol>
+&lt;li>打开 &lt;strong>charles&lt;/strong>，选择菜单&lt;code>Proxy -&amp;gt; SSL Proxying Settings...&lt;/code>，勾选 &lt;code>Enable SSL Proxying&lt;/code>，并添加新的 location，&lt;code>Host&lt;/code>填&lt;code>*&lt;/code>，&lt;code>Port&lt;/code>填&lt;code>443&lt;/code>&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://blog.xenori.com/2023/05/capture-android-https-network-packet-with-wsa/6.png"
+width="1620"
+height="808"
+srcset="https://blog.xenori.com/2023/05/capture-android-https-network-packet-with-wsa/6_hudd5d61aff7f94b1e6ad1eb93fdacf997_349536_480x0_resize_box_3.png 480w, https://blog.xenori.com/2023/05/capture-android-https-network-packet-with-wsa/6_hudd5d61aff7f94b1e6ad1eb93fdacf997_349536_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="200"
+data-flex-basis="481px"
+>&lt;/p>
+&lt;ol start="2">
+&lt;li>打开命令行，执行下面的命令设置 WSA 代理：&lt;/li>
+&lt;/ol>
+&lt;pre tabindex="0">&lt;code>adb connect 127.0.0.1:58526
+adb shell settings put global http_proxy 192.168.x.x:8888
+&lt;/code>&lt;/pre>&lt;p>其中&lt;code>192.168.x.x&lt;/code>需改为&lt;strong>charles&lt;/strong>所在的 ip 地址&lt;/p>
+&lt;ol start="3">
+&lt;li>下载安装需要抓包的 app，访问就能在&lt;strong>charles&lt;/strong>看到 https 流量了：）&lt;/li>
+&lt;/ol>
+&lt;h2 id="删除代理">删除代理&lt;/h2>
+&lt;p>去掉代理需执行下面命令：&lt;/p>
+&lt;pre tabindex="0">&lt;code>adb shell settings delete global http_proxy
+adb shell settings delete global global_http_proxy_host
+adb shell settings delete global global_http_proxy_port
+&lt;/code>&lt;/pre></description></item><item><title>如何抓取 AppleTV (tvOS) 的 https 网络请求包</title><link>https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/</link><pubDate>Sun, 14 May 2023 11:27:10 +0800</pubDate><guid>https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/</guid><description>&lt;img src="https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/cover.webp" alt="Featured image of post 如何抓取 AppleTV (tvOS) 的 https 网络请求包" />&lt;p>AppleTV 无法直接安装证书和修改代理，需要借助添加自定义描述文件的方式来实现，才能对 app 进行抓包。&lt;/p>
+&lt;h2 id="准备环境">准备环境&lt;/h2>
+&lt;ol>
+&lt;li>
+&lt;p>安装 &lt;a class="link" href="https://apps.apple.com/us/app/apple-configurator/id1037126344?mt=12" target="_blank" rel="noopener"
+>Apple Configurator&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>安装 charles&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>保证 Mac 和 AppleTV 连接同一局域网&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;h2 id="charles-配置抓包-https-流量">charles 配置抓包 https 流量&lt;/h2>
+&lt;ol>
+&lt;li>打开 &lt;strong>charles&lt;/strong>，选择菜单&lt;code>Proxy -&amp;gt; SSL Proxying Settings...&lt;/code>，勾选 &lt;code>Enable SSL Proxying&lt;/code>，并添加新的 location，&lt;code>Host&lt;/code>填&lt;code>*&lt;/code>，&lt;code>Port&lt;/code>填&lt;code>443&lt;/code>&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/ssl_proxy.png"
+width="1408"
+height="1176"
+srcset="https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/ssl_proxy_hu9385ff29d123eaef73d64fd1ef688db4_954487_480x0_resize_box_3.png 480w, https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/ssl_proxy_hu9385ff29d123eaef73d64fd1ef688db4_954487_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="ssl_proxy"
+class="gallery-image"
+data-flex-grow="119"
+data-flex-basis="287px"
+>&lt;/p>
+&lt;blockquote>
+&lt;p>建议把&lt;code>Proxy&lt;/code>菜单中的&lt;code>macOS Proxy&lt;/code>去掉勾选，避免 Mac 的流量和 AppleTV 的流量混在一起&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="创建代理描述文件">创建代理描述文件&lt;/h2>
+&lt;ol>
+&lt;li>打开 &lt;strong>charles&lt;/strong>，选择菜单 &lt;code>Help -&amp;gt; SSL Proxying -&amp;gt; Save Charles Root Certificate&lt;/code>，并选择把证书保存为 &lt;code>.cer&lt;/code> 格式&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/1.png"
+width="1620"
+height="808"
+srcset="https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/1_hudd5d61aff7f94b1e6ad1eb93fdacf997_349536_480x0_resize_box_3.png 480w, https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/1_hudd5d61aff7f94b1e6ad1eb93fdacf997_349536_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="200"
+data-flex-basis="481px"
+>&lt;/p>
+&lt;ol start="2">
+&lt;li>
+&lt;p>打开 &lt;strong>Apple configurator&lt;/strong>，选择菜单 &lt;code>文件 -&amp;gt; 新建描述文件&lt;/code>&lt;/p>
+&lt;p>点击&lt;code>通用&lt;/code>，在&lt;code>名称&lt;/code>中填一个易于识别的名称，如&lt;code>charles proxy&lt;/code>&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/2.png"
+width="1832"
+height="1220"
+srcset="https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/2_hu42109b38b626d0cede6f1f90334f83b5_1241515_480x0_resize_box_3.png 480w, https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/2_hu42109b38b626d0cede6f1f90334f83b5_1241515_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="150"
+data-flex-basis="360px"
+>&lt;/p>
+&lt;p>点击&lt;code>证书&lt;/code>，并把刚刚保存的 charles root 证书上传上去&lt;/p>
+&lt;p>&lt;img src="https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/3.png"
+width="1832"
+height="1220"
+srcset="https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/3_hu42109b38b626d0cede6f1f90334f83b5_1206667_480x0_resize_box_3.png 480w, https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/3_hu42109b38b626d0cede6f1f90334f83b5_1206667_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="150"
+data-flex-basis="360px"
+>&lt;/p>
+&lt;p>点击&lt;code>Wi-Fi&lt;/code>，填上 AppleTV 连接的 wifi 信息和 charles 代理信息&lt;/p>
+&lt;p>&lt;img src="https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/4.png"
+width="1832"
+height="1670"
+srcset="https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/4_hue2f3b8746f0cc5ecc63a05b2db26589a_1581556_480x0_resize_box_3.png 480w, https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/4_hue2f3b8746f0cc5ecc63a05b2db26589a_1581556_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="109"
+data-flex-basis="263px"
+>&lt;/p>
+&lt;p>最后使用快捷键 &lt;code>cmd+s&lt;/code> 保存描述文件到本地或 iCloud 中，推荐保存到 iCloud&lt;/p>
+&lt;h2 id="在-appletv-中添加描述文件">在 AppleTV 中添加描述文件&lt;/h2>
+&lt;ol>
+&lt;li>点击 &lt;strong>Apple configurator&lt;/strong> 主菜单，选择&lt;code>配对设备&lt;/code>，把 &lt;code>AppleTV&lt;/code> 配置并连接上&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/5.png"
+width="552"
+height="640"
+srcset="https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/5_hu83a8338785ad8bbb0a93cad6a53b3d51_139507_480x0_resize_box_3.png 480w, https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/5_hu83a8338785ad8bbb0a93cad6a53b3d51_139507_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="86"
+data-flex-basis="207px"
+>&lt;img src="https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/6.png"
+width="1160"
+height="728"
+srcset="https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/6_huebb36bc3bfe44e4cb28ade3e23c31819_649582_480x0_resize_box_3.png 480w, https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/6_huebb36bc3bfe44e4cb28ade3e23c31819_649582_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="159"
+data-flex-basis="382px"
+>&lt;/p>
+&lt;ol start="2">
+&lt;li>连接上后，&lt;strong>Apple configurator&lt;/strong> 主界面等一会会显示 AppleTV，右键选择 &lt;code>添加 -&amp;gt; 描述文件&lt;/code>，选择刚刚保存的描述文件&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/7.png"
+width="1972"
+height="1218"
+srcset="https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/7_hu347e9fcf991c51822b535619a81cf78b_517017_480x0_resize_box_3.png 480w, https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/7_hu347e9fcf991c51822b535619a81cf78b_517017_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="161"
+data-flex-basis="388px"
+>&lt;/p>
+&lt;ol start="3">
+&lt;li>等一会 AppleTV 会提示安装描述文件，一路选择安装就可以&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/tv1.png"
+width="1244"
+height="702"
+srcset="https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/tv1_hu9e7601cd7d518e2459b2e26fc21fb9bf_123632_480x0_resize_box_3.png 480w, https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/tv1_hu9e7601cd7d518e2459b2e26fc21fb9bf_123632_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="177"
+data-flex-basis="425px"
+>&lt;/p>
+&lt;ol start="4">
+&lt;li>安装完成后，会显示刚刚安装的描述文件&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/tv2.png"
+width="1244"
+height="702"
+srcset="https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/tv2_hua1f44c6a77eb76decf16669d3280ca88_100363_480x0_resize_box_3.png 480w, https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/tv2_hua1f44c6a77eb76decf16669d3280ca88_100363_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="177"
+data-flex-basis="425px"
+>&lt;/p>
+&lt;ol start="5">
+&lt;li>进入 AppleTV 设置，选择&lt;code>通用 -&amp;gt; 关于 -&amp;gt; 证书信任设置&lt;/code>，把&lt;code>charles&lt;/code>证书设置为信任（假如&lt;code>关于&lt;/code>中没出现&lt;code>证书信任设置&lt;/code>，证明描述文件配置有误，导致描述文件没添加成功）&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/tv3.png"
+width="1244"
+height="702"
+srcset="https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/tv3_hu1cb442105a5193c5aa586fa8d8025ec3_158194_480x0_resize_box_3.png 480w, https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/tv3_hu1cb442105a5193c5aa586fa8d8025ec3_158194_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="177"
+data-flex-basis="425px"
+>&lt;/p>
+&lt;ol start="6">
+&lt;li>AppleTV 选择&lt;code>系统 -&amp;gt; 重新启动&lt;/code>，重启后 AppleTV 会改为使用描述文件中配置的代理 wifi 连接&lt;/li>
+&lt;/ol>
+&lt;div class="notices warning" >&lt;blockquote>&lt;p>使用完后可以到菜单&lt;code>通用 -&amp;gt; 描述文件&lt;/code>中删除添加的自定义描述文件，删除后连接的 wifi 会丢失断网，需要自已再次手工连接&lt;/p>
+&lt;/blockquote>&lt;/div>
+&lt;h2 id="charles-查看-https-流量">charles 查看 https 流量&lt;/h2>
+&lt;p>等 AppleTV 重启完成，打开想要抓包的 app，在 charles 就能看到 app 的 https 请求了&lt;/p>
+&lt;h2 id="参考资料">参考资料&lt;/h2>
+&lt;ul>
+&lt;li>&lt;a class="link" href="https://github.com/DualSubs/DualSubs/wiki/%E5%9C%A8Apple-TV-%28tvOS%29-%E4%B8%8A%E6%B7%BB%E5%8A%A0%E6%8F%8F%E8%BF%B0%E6%96%87%E4%BB%B6%E6%88%96MitM%E8%AF%81%E4%B9%A6" target="_blank" rel="noopener"
+>在Apple TV (tvOS) 上添加描述文件或MitM证书&lt;/a>&lt;/li>
+&lt;/ul></description></item><item><title>[更新]使用httpcanary在android 9以上版本抓取https网络请求包</title><link>https://blog.xenori.com/2020/07/how-capture-https-network-packet/</link><pubDate>Wed, 01 Jul 2020 11:27:10 +0800</pubDate><guid>https://blog.xenori.com/2020/07/how-capture-https-network-packet/</guid><description>&lt;img src="https://blog.xenori.com/2020/07/how-capture-https-network-packet/cover.png" alt="Featured image of post [更新]使用httpcanary在android 9以上版本抓取https网络请求包" />&lt;p>在 android 9 以上版本，很多 app 都使用&lt;a class="link" href="https://github.com/moxie0/AndroidPinning" target="_blank" rel="noopener"
+>certificate pinning&lt;/a>技术来防止 https 中间人攻击，当 app 检测到证书不正确时，会自动断开网络请求，导致抓取不到 https 网络请求包。&lt;/p>
+&lt;p>要顺利抓到 https 请求包，需要借助VMOS来避开certificate pinning检测。&lt;/p>
+&lt;h2 id="1安装vmos">1、安装VMOS&lt;/h2>
+&lt;p>在网盘中下载&lt;code>VMOS&lt;/code>，安装完后，打开VMOS，点击右上方的&lt;code>+&lt;/code>按钮添加虚拟机，选择最下方的&lt;code>安卓7.1极客版&lt;/code>，下载并安装完成。
+&lt;img src="https://blog.xenori.com/2020/07/how-capture-https-network-packet/1.jpg"
+width="1080"
+height="2340"
+srcset="https://blog.xenori.com/2020/07/how-capture-https-network-packet/1_hue87aad7deec839ffe0e011d351530d61_609274_480x0_resize_q75_box.jpg 480w, https://blog.xenori.com/2020/07/how-capture-https-network-packet/1_hue87aad7deec839ffe0e011d351530d61_609274_1024x0_resize_q75_box.jpg 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="46"
+data-flex-basis="110px"
+>&lt;/p>
+&lt;p>回到首页，点击启动虚拟机，进入虚拟机
+&lt;img src="https://blog.xenori.com/2020/07/how-capture-https-network-packet/2.jpg"
+width="1080"
+height="2340"
+srcset="https://blog.xenori.com/2020/07/how-capture-https-network-packet/2_hu736f23926ef0ac4ad33f71e9374fb3e8_349102_480x0_resize_q75_box.jpg 480w, https://blog.xenori.com/2020/07/how-capture-https-network-packet/2_hu736f23926ef0ac4ad33f71e9374fb3e8_349102_1024x0_resize_q75_box.jpg 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="46"
+data-flex-basis="110px"
+>&lt;/p>
+&lt;p>点击下方的&lt;code>常用工具&lt;/code>-&amp;gt;&lt;code>应用&lt;/code>，找到需抓包的软件，点击后导入安装
+&lt;img src="https://blog.xenori.com/2020/07/how-capture-https-network-packet/3.jpg"
+width="1440"
+height="3120"
+srcset="https://blog.xenori.com/2020/07/how-capture-https-network-packet/3_hu489ee71d1210f341130b295703923855_556682_480x0_resize_q75_box.jpg 480w, https://blog.xenori.com/2020/07/how-capture-https-network-packet/3_hu489ee71d1210f341130b295703923855_556682_1024x0_resize_q75_box.jpg 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="46"
+data-flex-basis="110px"
+>&lt;/p>
+&lt;p>VMOS下载地址：&lt;a class="link" href="https://pan.baidu.com/s/1UBNon-dT37G3NuFMcO_szw" target="_blank" rel="noopener"
+>https://pan.baidu.com/s/1UBNon-dT37G3NuFMcO_szw&lt;/a> 提取码: wis3&lt;/p>
+&lt;h2 id="2安装抓包软件httpcanary">2、安装抓包软件httpcanary&lt;/h2>
+&lt;p>自行下载安装：&lt;/p>
+&lt;p>蓝奏：&lt;a class="link" href="https://www.lanzous.com/i6hw4ti" target="_blank" rel="noopener"
+>https://www.lanzous.com/i6hw4ti&lt;/a>&lt;/p>
+&lt;p>百度：&lt;a class="link" href="https://pan.baidu.com/s/11fx67kcqQOwxCLdItAXIxA" target="_blank" rel="noopener"
+>https://pan.baidu.com/s/11fx67kcqQOwxCLdItAXIxA&lt;/a> 提取码: ccbd&lt;/p>
+&lt;h2 id="3抓取-app-的-https-请求">3、抓取 app 的 https 请求&lt;/h2>
+&lt;p>先运行&lt;code>httpcanary&lt;/code>，再在&lt;code>VMOS&lt;/code>中访问需抓包的 app，就能看到所有 https 请求了，在&lt;code>VMOS&lt;/code>中运行的 app，是不会检测certificate pinning的&lt;/p>
+&lt;p>&lt;img src="https://blog.xenori.com/2020/07/how-capture-https-network-packet/4.jpg"
+width="1080"
+height="2340"
+srcset="https://blog.xenori.com/2020/07/how-capture-https-network-packet/4_hu3131e9057829df9b315e2c9944db091d_461027_480x0_resize_q75_box.jpg 480w, https://blog.xenori.com/2020/07/how-capture-https-network-packet/4_hu3131e9057829df9b315e2c9944db091d_461027_1024x0_resize_q75_box.jpg 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="46"
+data-flex-basis="110px"
+>&lt;/p></description></item></channel></rss>

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Dash on bitxeno's notes</title><link>https://blog.xenori.com/tags/dash/</link><description>Recent content in Dash on bitxeno's notes</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Mon, 22 Nov 2021 14:40:11 +0800</lastBuildDate><atom:link href="https://blog.xenori.com/tags/dash/index.xml" rel="self" type="application/rss+xml"/><item><title>dash实时转换hls流媒体播放</title><link>https://blog.xenori.com/2021/11/dash-to-hls/</link><pubDate>Mon, 22 Nov 2021 14:40:11 +0800</pubDate><guid>https://blog.xenori.com/2021/11/dash-to-hls/</guid><description>&lt;img src="https://blog.xenori.com/2021/11/dash-to-hls/cover.jpeg" alt="Featured image of post dash实时转换hls流媒体播放" />&lt;p>本文主要是探讨下b站的音视频流分离dash格式实时转为hls流媒体，以方便在旧的播放器上播放。&lt;/p>
+&lt;h2 id="什么是dash">什么是DASH&lt;/h2>
+&lt;p>dash是基于HTTP的动态自适应流（英語：Dynamic Adaptive Streaming over HTTP，也称MPEG-DASH）的简称。现在b站最新的视频都是返回这种格式，并且是音视频分离的。b站dash实践可以参考这篇ppt: &lt;a class="link" href="https://www.w3.org/2019/03/23-chinese-web-jianqiang-bilibili.pdf" target="_blank" rel="noopener"
+>MPEG-DASH在bilibili的应用与实践&lt;/a>&lt;/p>
+&lt;h2 id="转换hls的实现方式">转换HLS的实现方式&lt;/h2>
+&lt;p>b站dash音视频分别为单独的两个链接，不同的码率和编码对应不同的链接，下面只是使用其中一个音视频链接来举例。实现方式如下：&lt;/p>
+&lt;ol>
+&lt;li>提供生成m3u8文件的http服务，m3u8视频块根据时长(duration)切分为5秒为一片，m3u8格式如下：
+&lt;pre tabindex="0">&lt;code> #EXTM3U
+#EXT-X-VERSION:3
+#EXT-X-MEDIA-SEQUENCE:0
+#EXT-X-ALLOW-CACHE:YES
+#EXT-X-TARGETDURATION:5
+#EXT-X-PLAYLIST-TYPE:VOD
+#EXTINF: 5.000000,
+http://xxx/api/hls/segments/1
+#EXTINF: 5.000000,
+http://xxx/api/hls/segments/2
+....
+&lt;/code>&lt;/pre>拿不到总的时长的话，可以通过&lt;code>ffprobe&lt;/code>命令获取：
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">ffprobe -v quiet -print_format json -show_format &lt;span class="s2">&amp;#34;http://xxx/video.m4s&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>http服务的响应头&lt;code>content-type&lt;/code>需设为&lt;code>application/vnd.apple.mpegurl&lt;/code>&lt;/li>
+&lt;li>提供切片下载的http服务，如上面m3u8文件中的&lt;code>http://xxx/api/hls/segments/1&lt;/code>，切片可以通过ffmpeg进行音视合并和切分，命令如下：
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># 切分从视频第(-ss)5.00秒开始，时长(-t)5.00秒&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># -ss和-initial_offset数值需要根据当前切片递增&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">ffmpeg -timelimit &lt;span class="m">45&lt;/span> -ss 5.00 -i http://xxx/video.m4s -ss 5.00 -i http://xxx/audio.m4s -t 5.00 -c:v libx264 -preset veryfast -c:a copy -force_key_frames &lt;span class="s2">&amp;#34;expr:gte(t,n_forced*5.000)&amp;#34;&lt;/span> -f ssegment -segment_time 5.00 -initial_offset 5.00 pipe:out%03d.ts
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># 同时合并字幕xxx.srt&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">ffmpeg -timelimit &lt;span class="m">45&lt;/span> -ss 5.00 -copyts -i http://xxx/video.m4s -ss 5.00 -i http://xxx/audio.m4s -t 5.00 -vf &lt;span class="nv">subtitles&lt;/span>&lt;span class="o">=&lt;/span>xxx.srt -c:v libx264 -preset veryfast -c:a copy -force_key_frames &lt;span class="s2">&amp;#34;expr:gte(t,n_forced*5.000)&amp;#34;&lt;/span> -f ssegment -segment_time 5.00 -initial_offset 5.00 -ss 5.00 pipe:out%03d.ts
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>本命令是把重新编码后的视频数据输出到控制台，需要http服务把输出数据实时写入到响应中，这样播放器就能实时下载播放了&lt;/li>
+&lt;/ol>
+&lt;h2 id="会遇到的问题">会遇到的问题&lt;/h2>
+&lt;p>ffmpeg切片时音频使用了&lt;code>copy&lt;/code>命令，但视频却使用&lt;code>libx264&lt;/code>重新编码，导致转码很慢，而且cpu占用居高不下，为什么视频不也用&lt;code>copy&lt;/code>模式，避免重新转码？&lt;/p>
+&lt;p>这是因为ffmpeg视频copy模式切片时只能根据关键帧切分，这样会导致每个切片可能会多几帧，播放时出现画面重复播放和声画不同步，具体问题可参考：&lt;a class="link" href="https://www.jianshu.com/p/f7d83fdec111" target="_blank" rel="noopener"
+>https://www.jianshu.com/p/f7d83fdec111&lt;/a>&lt;/p>
+&lt;p>切片重新编码是避免不了了，如何可以提高转码速度，降低cpu占用？&lt;/p>
+&lt;p>——视频编码硬件加速！&lt;/p>
+&lt;h2 id="ffmpeg硬件加速">ffmpeg硬件加速&lt;/h2>
+&lt;p>视频编码硬件加速主要有如下几种：&lt;/p>
+&lt;ul>
+&lt;li>VAAPI：intel集显支持，是openwrt中最常见和使用的&lt;/li>
+&lt;li>QSV：intel集显支持，可在&lt;a class="link" href="https://ark.intel.com/content/www/cn/zh/ark/products/78867/intel-celeron-processor-j1900-2m-cache-up-to-2-42-ghz.html" target="_blank" rel="noopener"
+>intel产品规格页&lt;/a>搜索自己的cpu，看下有没支持&lt;code>Quick Sync Video&lt;/code>&lt;/li>
+&lt;li>NVENC：nvidia显卡支持，openwrt中一般没独立显卡，很少使用到&lt;/li>
+&lt;/ul>
+&lt;p>这里只介绍最常用的vaapi方式，ffmpeg编码时使用vaapi硬件加速切片命令如下：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># 开启vaapi硬件加速编码&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">ffmpeg -vaapi_device /dev/dri/renderD128 -timelimit &lt;span class="m">45&lt;/span> -ss 5.00 -i http://xxx/video.m4s -ss 5.00 -i http://xxx/audio.m4s -t 5.00 -vf &lt;span class="s1">&amp;#39;format=nv12,hwupload&amp;#39;&lt;/span> -c:v h264_vaapi -c:a copy -force_key_frames &lt;span class="s2">&amp;#34;expr:gte(t,n_forced*5.000)&amp;#34;&lt;/span> -f ssegment -segment_time 5.00 -initial_offset 5.00 pipe:out%03d.ts
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># 同时合并字幕xxx.srt&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">ffmpeg -vaapi_device /dev/dri/renderD128 -timelimit &lt;span class="m">45&lt;/span> -ss 5.00 -copyts -i http://xxx/video.m4s -ss 5.00 -i http://xxx/audio.m4s -t 5.00 -vf &lt;span class="s1">&amp;#39;subtitles=xxx.srt,format=nv12,hwupload&amp;#39;&lt;/span> -c:v h264_vaapi -c:a copy -force_key_frames &lt;span class="s2">&amp;#34;expr:gte(t,n_forced*5.000)&amp;#34;&lt;/span> -f ssegment -segment_time 5.00 -initial_offset 5.00 -ss 5.00 pipe:out%03d.ts
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;code>-vaapi_device /dev/dri/renderD128&lt;/code>，&lt;code>-vf 'format=nv12,hwupload'&lt;/code>和&lt;code>-c:v h264_vaapi&lt;/code>这三个参数是必须的&lt;/p>
+&lt;h2 id="如何在docker中使用硬件加速">如何在docker中使用硬件加速&lt;/h2>
+&lt;p>假如hls流服务是部署在docker中使用的，打开硬件加速可以使用已经安装了vaapi支持的镜像。&lt;a class="link" href="https://hub.docker.com/r/jrottenberg/ffmpeg" target="_blank" rel="noopener"
+>jrottenberg/ffmpeg&lt;/a>有生成好的支持vaapi的docker镜像，镜像名称带有&lt;code>vaapi&lt;/code>标签，可自行搜索需要的ffmpeg版本使用&lt;/p>
+&lt;p>docker启动时，需要使用&lt;code>--device&lt;/code>参数绑定显卡设备：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">docker run --device /dev/dri:/dev/dri jrottenberg/ffmpeg:vaapi
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在openwrt中使用的话中，可在docker配置页&lt;code>device&lt;/code>栏绑定显卡设备&lt;/p>
+&lt;p>&lt;img src="https://blog.xenori.com/2021/11/dash-to-hls/1.jpg"
+width="1104"
+height="210"
+srcset="https://blog.xenori.com/2021/11/dash-to-hls/1_hu3cc7554004a4f82bf46186159a47e918_23956_480x0_resize_q75_box.jpg 480w, https://blog.xenori.com/2021/11/dash-to-hls/1_hu3cc7554004a4f82bf46186159a47e918_23956_1024x0_resize_q75_box.jpg 1024w"
+loading="lazy"
+alt="图片"
+class="gallery-image"
+data-flex-grow="525"
+data-flex-basis="1261px"
+>&lt;/p>
+&lt;h2 id="参考资料">参考资料&lt;/h2>
+&lt;ul>
+&lt;li>FFMPEG参数说明：&lt;a class="link" href="https://ffmpeg.org/ffmpeg-all.html#Format-Options" target="_blank" rel="noopener"
+>https://ffmpeg.org/ffmpeg-all.html#Format-Options&lt;/a>&lt;/li>
+&lt;li>DASH协议直播应用：&lt;a class="link" href="https://cloud.tencent.com/developer/article/1895146" target="_blank" rel="noopener"
+>https://cloud.tencent.com/developer/article/1895146&lt;/a>&lt;/li>
+&lt;/ul></description></item></channel></rss>

@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>AppleTv on bitxeno's notes</title><link>https://blog.xenori.com/tags/appletv/</link><description>Recent content in AppleTv on bitxeno's notes</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Sun, 14 May 2023 11:27:10 +0800</lastBuildDate><atom:link href="https://blog.xenori.com/tags/appletv/index.xml" rel="self" type="application/rss+xml"/><item><title>如何抓取 AppleTV (tvOS) 的 https 网络请求包</title><link>https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/</link><pubDate>Sun, 14 May 2023 11:27:10 +0800</pubDate><guid>https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/</guid><description>&lt;img src="https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/cover.webp" alt="Featured image of post 如何抓取 AppleTV (tvOS) 的 https 网络请求包" />&lt;p>AppleTV 无法直接安装证书和修改代理，需要借助添加自定义描述文件的方式来实现，才能对 app 进行抓包。&lt;/p>
+&lt;h2 id="准备环境">准备环境&lt;/h2>
+&lt;ol>
+&lt;li>
+&lt;p>安装 &lt;a class="link" href="https://apps.apple.com/us/app/apple-configurator/id1037126344?mt=12" target="_blank" rel="noopener"
+>Apple Configurator&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>安装 charles&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>保证 Mac 和 AppleTV 连接同一局域网&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;h2 id="charles-配置抓包-https-流量">charles 配置抓包 https 流量&lt;/h2>
+&lt;ol>
+&lt;li>打开 &lt;strong>charles&lt;/strong>，选择菜单&lt;code>Proxy -&amp;gt; SSL Proxying Settings...&lt;/code>，勾选 &lt;code>Enable SSL Proxying&lt;/code>，并添加新的 location，&lt;code>Host&lt;/code>填&lt;code>*&lt;/code>，&lt;code>Port&lt;/code>填&lt;code>443&lt;/code>&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/ssl_proxy.png"
+width="1408"
+height="1176"
+srcset="https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/ssl_proxy_hu9385ff29d123eaef73d64fd1ef688db4_954487_480x0_resize_box_3.png 480w, https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/ssl_proxy_hu9385ff29d123eaef73d64fd1ef688db4_954487_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="ssl_proxy"
+class="gallery-image"
+data-flex-grow="119"
+data-flex-basis="287px"
+>&lt;/p>
+&lt;blockquote>
+&lt;p>建议把&lt;code>Proxy&lt;/code>菜单中的&lt;code>macOS Proxy&lt;/code>去掉勾选，避免 Mac 的流量和 AppleTV 的流量混在一起&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="创建代理描述文件">创建代理描述文件&lt;/h2>
+&lt;ol>
+&lt;li>打开 &lt;strong>charles&lt;/strong>，选择菜单 &lt;code>Help -&amp;gt; SSL Proxying -&amp;gt; Save Charles Root Certificate&lt;/code>，并选择把证书保存为 &lt;code>.cer&lt;/code> 格式&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/1.png"
+width="1620"
+height="808"
+srcset="https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/1_hudd5d61aff7f94b1e6ad1eb93fdacf997_349536_480x0_resize_box_3.png 480w, https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/1_hudd5d61aff7f94b1e6ad1eb93fdacf997_349536_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="200"
+data-flex-basis="481px"
+>&lt;/p>
+&lt;ol start="2">
+&lt;li>
+&lt;p>打开 &lt;strong>Apple configurator&lt;/strong>，选择菜单 &lt;code>文件 -&amp;gt; 新建描述文件&lt;/code>&lt;/p>
+&lt;p>点击&lt;code>通用&lt;/code>，在&lt;code>名称&lt;/code>中填一个易于识别的名称，如&lt;code>charles proxy&lt;/code>&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/2.png"
+width="1832"
+height="1220"
+srcset="https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/2_hu42109b38b626d0cede6f1f90334f83b5_1241515_480x0_resize_box_3.png 480w, https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/2_hu42109b38b626d0cede6f1f90334f83b5_1241515_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="150"
+data-flex-basis="360px"
+>&lt;/p>
+&lt;p>点击&lt;code>证书&lt;/code>，并把刚刚保存的 charles root 证书上传上去&lt;/p>
+&lt;p>&lt;img src="https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/3.png"
+width="1832"
+height="1220"
+srcset="https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/3_hu42109b38b626d0cede6f1f90334f83b5_1206667_480x0_resize_box_3.png 480w, https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/3_hu42109b38b626d0cede6f1f90334f83b5_1206667_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="150"
+data-flex-basis="360px"
+>&lt;/p>
+&lt;p>点击&lt;code>Wi-Fi&lt;/code>，填上 AppleTV 连接的 wifi 信息和 charles 代理信息&lt;/p>
+&lt;p>&lt;img src="https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/4.png"
+width="1832"
+height="1670"
+srcset="https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/4_hue2f3b8746f0cc5ecc63a05b2db26589a_1581556_480x0_resize_box_3.png 480w, https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/4_hue2f3b8746f0cc5ecc63a05b2db26589a_1581556_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="109"
+data-flex-basis="263px"
+>&lt;/p>
+&lt;p>最后使用快捷键 &lt;code>cmd+s&lt;/code> 保存描述文件到本地或 iCloud 中，推荐保存到 iCloud&lt;/p>
+&lt;h2 id="在-appletv-中添加描述文件">在 AppleTV 中添加描述文件&lt;/h2>
+&lt;ol>
+&lt;li>点击 &lt;strong>Apple configurator&lt;/strong> 主菜单，选择&lt;code>配对设备&lt;/code>，把 &lt;code>AppleTV&lt;/code> 配置并连接上&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/5.png"
+width="552"
+height="640"
+srcset="https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/5_hu83a8338785ad8bbb0a93cad6a53b3d51_139507_480x0_resize_box_3.png 480w, https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/5_hu83a8338785ad8bbb0a93cad6a53b3d51_139507_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="86"
+data-flex-basis="207px"
+>&lt;img src="https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/6.png"
+width="1160"
+height="728"
+srcset="https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/6_huebb36bc3bfe44e4cb28ade3e23c31819_649582_480x0_resize_box_3.png 480w, https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/6_huebb36bc3bfe44e4cb28ade3e23c31819_649582_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="159"
+data-flex-basis="382px"
+>&lt;/p>
+&lt;ol start="2">
+&lt;li>连接上后，&lt;strong>Apple configurator&lt;/strong> 主界面等一会会显示 AppleTV，右键选择 &lt;code>添加 -&amp;gt; 描述文件&lt;/code>，选择刚刚保存的描述文件&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/7.png"
+width="1972"
+height="1218"
+srcset="https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/7_hu347e9fcf991c51822b535619a81cf78b_517017_480x0_resize_box_3.png 480w, https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/7_hu347e9fcf991c51822b535619a81cf78b_517017_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="161"
+data-flex-basis="388px"
+>&lt;/p>
+&lt;ol start="3">
+&lt;li>等一会 AppleTV 会提示安装描述文件，一路选择安装就可以&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/tv1.png"
+width="1244"
+height="702"
+srcset="https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/tv1_hu9e7601cd7d518e2459b2e26fc21fb9bf_123632_480x0_resize_box_3.png 480w, https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/tv1_hu9e7601cd7d518e2459b2e26fc21fb9bf_123632_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="177"
+data-flex-basis="425px"
+>&lt;/p>
+&lt;ol start="4">
+&lt;li>安装完成后，会显示刚刚安装的描述文件&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/tv2.png"
+width="1244"
+height="702"
+srcset="https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/tv2_hua1f44c6a77eb76decf16669d3280ca88_100363_480x0_resize_box_3.png 480w, https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/tv2_hua1f44c6a77eb76decf16669d3280ca88_100363_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="177"
+data-flex-basis="425px"
+>&lt;/p>
+&lt;ol start="5">
+&lt;li>进入 AppleTV 设置，选择&lt;code>通用 -&amp;gt; 关于 -&amp;gt; 证书信任设置&lt;/code>，把&lt;code>charles&lt;/code>证书设置为信任（假如&lt;code>关于&lt;/code>中没出现&lt;code>证书信任设置&lt;/code>，证明描述文件配置有误，导致描述文件没添加成功）&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/tv3.png"
+width="1244"
+height="702"
+srcset="https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/tv3_hu1cb442105a5193c5aa586fa8d8025ec3_158194_480x0_resize_box_3.png 480w, https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/tv3_hu1cb442105a5193c5aa586fa8d8025ec3_158194_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="177"
+data-flex-basis="425px"
+>&lt;/p>
+&lt;ol start="6">
+&lt;li>AppleTV 选择&lt;code>系统 -&amp;gt; 重新启动&lt;/code>，重启后 AppleTV 会改为使用描述文件中配置的代理 wifi 连接&lt;/li>
+&lt;/ol>
+&lt;div class="notices warning" >&lt;blockquote>&lt;p>使用完后可以到菜单&lt;code>通用 -&amp;gt; 描述文件&lt;/code>中删除添加的自定义描述文件，删除后连接的 wifi 会丢失断网，需要自已再次手工连接&lt;/p>
+&lt;/blockquote>&lt;/div>
+&lt;h2 id="charles-查看-https-流量">charles 查看 https 流量&lt;/h2>
+&lt;p>等 AppleTV 重启完成，打开想要抓包的 app，在 charles 就能看到 app 的 https 请求了&lt;/p>
+&lt;h2 id="参考资料">参考资料&lt;/h2>
+&lt;ul>
+&lt;li>&lt;a class="link" href="https://github.com/DualSubs/DualSubs/wiki/%E5%9C%A8Apple-TV-%28tvOS%29-%E4%B8%8A%E6%B7%BB%E5%8A%A0%E6%8F%8F%E8%BF%B0%E6%96%87%E4%BB%B6%E6%88%96MitM%E8%AF%81%E4%B9%A6" target="_blank" rel="noopener"
+>在Apple TV (tvOS) 上添加描述文件或MitM证书&lt;/a>&lt;/li>
+&lt;/ul></description></item><item><title>tvOS 开发实践 - SwiftUI篇</title><link>https://blog.xenori.com/2022/06/tvos-development-practice-with-swiftui/</link><pubDate>Tue, 21 Jun 2022 11:58:08 +0800</pubDate><guid>https://blog.xenori.com/2022/06/tvos-development-practice-with-swiftui/</guid><description>&lt;img src="https://blog.xenori.com/2022/06/tvos-development-practice-with-swiftui/cover.png" alt="Featured image of post tvOS 开发实践 - SwiftUI篇" />&lt;h2 id="焦点非对齐移动">焦点非对齐移动&lt;/h2>
+&lt;p>默认tvOS焦点移动是需要移动方向上有能获取焦点的button，假如button是左右靠边对齐的，就移动不上去。需要使用&lt;code>focusSetion&lt;/code>把button所在的整行范围变成可焦点识别的，才能自动移动到靠边的button上。&lt;/p>
+&lt;p>示例：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-swift" data-lang="swift">&lt;span class="line">&lt;span class="cl">&lt;span class="n">VStack&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">HStack&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">Button&lt;/span> &lt;span class="p">{}&lt;/span> &lt;span class="n">label&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">Text&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;test&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">.&lt;/span>&lt;span class="n">frame&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">maxWidth&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="p">.&lt;/span>&lt;span class="n">infinity&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">alignment&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="p">.&lt;/span>&lt;span class="n">trailing&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">.&lt;/span>&lt;span class="n">focusSection&lt;/span>&lt;span class="p">()&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">Button&lt;/span> &lt;span class="p">{}&lt;/span> &lt;span class="n">label&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">Text&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;Save&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="实现parralw效果">实现Parralw效果&lt;/h2>
+&lt;p>需要使用开源库&lt;a class="link" href="https://github.com/PGSSoft/ParallaxView/" target="_blank" rel="noopener"
+>ParallaxView&lt;/a>编写自定义控件实现&lt;/p>
+&lt;h2 id="优化滚动列表性能">优化滚动列表性能&lt;/h2>
+&lt;p>SwiftUI滚动列表中有异步加载的图片时，向下快速滚动会停顿，不能持续滚动，看着像是tvOS焦点切换到indicator时出现了问题。要解决只能改为使用UICollectionView来实现滚动列表，推荐使用第三方开源的&lt;a class="link" href="https://github.com/apptekstudios/ASCollectionView" target="_blank" rel="noopener"
+>ASCollectionView&lt;/a>或&lt;a class="link" href="https://github.com/SwiftUIX/SwiftUIX" target="_blank" rel="noopener"
+>SwiftUIX&lt;/a>来实现。&lt;/p>
+&lt;h2 id="tabbar随内容滚动">tabbar随内容滚动&lt;/h2>
+&lt;p>需要借助&lt;a class="link" href="https://github.com/siteline/SwiftUI-Introspect" target="_blank" rel="noopener"
+>Introspect&lt;/a>库&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-swift" data-lang="swift">&lt;span class="line">&lt;span class="cl">&lt;span class="kd">import&lt;/span> &lt;span class="nc">Foundation&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="kd">import&lt;/span> &lt;span class="nc">SwiftUI&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="kd">struct&lt;/span> &lt;span class="nc">TabBarScrollModifier&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">ViewModifier&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="kd">func&lt;/span> &lt;span class="nf">body&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">content&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">Content&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">-&amp;gt;&lt;/span> &lt;span class="n">some&lt;/span> &lt;span class="n">View&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">content&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">introspectViewController&lt;/span> &lt;span class="p">{&lt;/span> &lt;span class="n">viewController&lt;/span> &lt;span class="k">in&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="kd">let&lt;/span> &lt;span class="nv">scrollView&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="n">findScrollViewIn&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">view&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">viewController&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">view&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="kd">let&lt;/span> &lt;span class="nv">scrollView&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="n">scrollView&lt;/span> &lt;span class="k">as&lt;/span>&lt;span class="p">?&lt;/span> &lt;span class="n">UIScrollView&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">viewController&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">setContentScrollView&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">scrollView&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="k">for&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="p">.&lt;/span>&lt;span class="n">top&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="kd">private&lt;/span> &lt;span class="kd">func&lt;/span> &lt;span class="nf">findScrollViewIn&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">view&lt;/span> &lt;span class="p">:&lt;/span> &lt;span class="n">UIView&lt;/span>&lt;span class="p">?)&lt;/span> &lt;span class="p">-&amp;gt;&lt;/span> &lt;span class="n">UIView&lt;/span>&lt;span class="p">?&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">guard&lt;/span> &lt;span class="kd">let&lt;/span> &lt;span class="nv">view&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="n">view&lt;/span> &lt;span class="k">else&lt;/span> &lt;span class="p">{&lt;/span> &lt;span class="k">return&lt;/span> &lt;span class="kc">nil&lt;/span> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="n">view&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">subviews&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="bp">count&lt;/span> &lt;span class="o">&amp;lt;=&lt;/span> &lt;span class="mi">0&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="kc">nil&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">for&lt;/span> &lt;span class="n">sub&lt;/span> &lt;span class="k">in&lt;/span> &lt;span class="n">view&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">subviews&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="n">sub&lt;/span> &lt;span class="k">is&lt;/span> &lt;span class="n">UIScrollView&lt;/span> &lt;span class="o">||&lt;/span> &lt;span class="n">sub&lt;/span> &lt;span class="k">is&lt;/span> &lt;span class="n">UICollectionView&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">sub&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="kd">let&lt;/span> &lt;span class="nv">item&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="n">findScrollViewIn&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">view&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">sub&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">item&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="kc">nil&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="kd">extension&lt;/span> &lt;span class="nc">View&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="kd">func&lt;/span> &lt;span class="nf">tabBarScroll&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="p">-&amp;gt;&lt;/span> &lt;span class="n">some&lt;/span> &lt;span class="n">View&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">modifier&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">TabBarScrollModifier&lt;/span>&lt;span class="p">())&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在内容的ScrollView中调用：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-swift" data-lang="swift">&lt;span class="line">&lt;span class="cl">&lt;span class="n">ScrollView&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1">// content&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">.&lt;/span>&lt;span class="n">tabBarScroll&lt;/span>&lt;span class="p">()&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="onlongpressgesture导致跳转失效">onLongPressGesture导致跳转失效&lt;/h2>
+&lt;p>假如在 &lt;code>NavigationLink&lt;/code> 上使用 &lt;code>onLongPressGesture&lt;/code>，那么 &lt;code>NavigartionLink&lt;/code> 的跳转会失效&lt;/p>
+&lt;pre tabindex="0">&lt;code>NavigationLink{
+EmptyView()
+} label: {
+Text(&amp;#34;Click&amp;#34;)
+}
+.onLongPressGesture {
+// 加上这句会没法触发跳转
+print(&amp;#34;long press&amp;#34;)
+}
+&lt;/code>&lt;/pre>&lt;p>看网上说法这是appletv的bug，可在 &lt;code>onLongPressGesture&lt;/code> 前面加上 &lt;code>onPlayPauseCommand&lt;/code> 来避免这问题&lt;/p>
+&lt;pre tabindex="0">&lt;code>NavigationLink{
+EmptyView()
+} label: {
+Text(&amp;#34;Click&amp;#34;)
+}
+.onPlayPauseCommand {
+// fixed navigate!!!
+}
+.onLongPressGesture {
+print(&amp;#34;long press&amp;#34;)
+}
+&lt;/code>&lt;/pre>&lt;h2 id="如何本地修改导入的swift-package">如何本地修改导入的swift package&lt;/h2>
+&lt;p>需要把swift package先下载到本地，然后在finder中找到文件夹，直接拖到xcode项目根目录中&lt;/p>
+&lt;p>这样修改本地代码，就可以在xcode中看到修改后的效果&lt;/p></description></item></channel></rss>

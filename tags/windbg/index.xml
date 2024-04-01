@@ -1,0 +1,908 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>WinDbg on bitxeno's notes</title><link>https://blog.xenori.com/tags/windbg/</link><description>Recent content in WinDbg on bitxeno's notes</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Tue, 24 Apr 2012 15:52:37 +0000</lastBuildDate><atom:link href="https://blog.xenori.com/tags/windbg/index.xml" rel="self" type="application/rss+xml"/><item><title>WinDbg入门</title><link>https://blog.xenori.com/2012/04/windbg-tutorial/</link><pubDate>Tue, 24 Apr 2012 15:52:37 +0000</pubDate><guid>https://blog.xenori.com/2012/04/windbg-tutorial/</guid><description>&lt;p>这是准备在每周技术分享会中分享的内容，但因为团队都忙于各种需求和服务器迁移，分享就一直搁置了。&lt;/p>
+&lt;p>这个ppt还是有用心做的，如ppt的背景，和debug流程的箭头都是使用photoshop偷下来的= =！&lt;/p>
+&lt;!-- raw HTML omitted -->
+&lt;p>示例程序：&lt;a class="link" href="http://bitxeno.me/wp-content/uploads/2012/04/WindbgTestExample.zip" target="_blank" rel="noopener"
+>Download Example&lt;/a>&lt;/p></description></item><item><title>WinDbg常用命令</title><link>https://blog.xenori.com/2012/02/windbg-useful-commands/</link><pubDate>Thu, 02 Feb 2012 03:33:37 +0000</pubDate><guid>https://blog.xenori.com/2012/02/windbg-useful-commands/</guid><description>&lt;p>&lt;a class="link" href="2012/02/intro-to-windbg-for-dotnet-developers/" >前一篇文章&lt;/a>介绍了WinDbg入门，本篇主要介绍WinDbg常用命令和用法。&lt;/p>
+&lt;p>调试程序的CPU满载问题，关键是要知道程序当前正在进行什么操作。假如我们在cpu满载时创建了一个dump文件，使用下面几个命令可以查看当前程序正在进行什么处理：
+&lt;strong>.time&lt;/strong>
+运行.time命令会显示时间相关的信息，如系统运行时间，进程运行时间和CPU花费在内核态和用户态的时间。&lt;/p>
+&lt;pre>&lt;code>0:000&amp;gt; .time
+Debug session time: Tue Oct 23 08:38:35.000 2007 (GMT+1)
+System Uptime: 4 days 17:48:01.906
+Process Uptime: 0 days 0:24:37.000
+Kernel time: 0 days 0:04:23.000
+User time: 0 days 0:03:28.000
+&lt;/code>&lt;/pre>
+&lt;p>你可以看到系统已正常运行超过4天，进程运行了24分钟，CPU在内核态和用户态累积使用了8分钟。根据进程时间和CPU时间能大概估算出CPU使用率平均值是32.5%。&lt;/p>
+&lt;p>&lt;strong>!threadpool&lt;/strong>&lt;/p>
+&lt;p>****通过!threadpool命令我们能准确知道创建dump时cpu的使用率。也能知道在队列中的待处理请求数，Completion Port(IOCP)线程数和定时器time数。&lt;/p>
+&lt;pre>&lt;code>0:000&amp;gt; !threadpool
+CPU utilization 100%
+Worker Thread: Total: 5 Running: 4 Idle: 1 MaxLimit: 200 MinLimit: 2
+Work Request in Queue: 16
+Unknown Function: 6a2d945d Context: 023ede30
+Unknown Function: 6a2d945d Context: 023ee1e8
+AsyncTimerCallbackCompletion TimerInfo@11b53760
+Unknown Function: 6a2d945d Context: 023ee3a8
+Unknown Function: 6a2d945d Context: 023e3040
+Unknown Function: 6a2d945d Context: 023ee178
+Unknown Function: 6a2d945d Context: 023edfb0
+AsyncTimerCallbackCompletion TimerInfo@11b36428
+AsyncTimerCallbackCompletion TimerInfo@11b53868
+Unknown Function: 6a2d945d Context: 023ee060
+Unknown Function: 6a2d945d Context: 023ee290
+Unknown Function: 6a2d945d Context: 023eded0
+Unknown Function: 6a2d945d Context: 023edd88
+Unknown Function: 6a2d945d Context: 023ede98
+Unknown Function: 6a2d945d Context: 023ee258
+Unknown Function: 6a2d945d Context: 023edfe8
+--------------------------------------
+Number of Timers: 9
+--------------------------------------
+Completion Port Thread:Total: 3 Free: 3 MaxFree: 4 CurrentLimit: 2 MaxLimit: 200 MinLimit: 2
+&lt;/code>&lt;/pre>
+&lt;p>我们可以看到当前CPU已100%使用率，我们进入下一命令。&lt;/p>
+&lt;p>&lt;strong>!runaway&lt;/strong>&lt;/p>
+&lt;p>这个命令用于显示所有正在运行的线程和它们的CPU使用率。这个命令对于查找高CPU使用率问题很有帮助！&lt;/p>
+&lt;pre>&lt;code>0:000&amp;gt; !runaway
+User Mode Time
+Thread Time
+25:1a94 0 days 0:00:39.937
+16:1bc0 0 days 0:00:38.390
+50:1e8c 0 days 0:00:08.859
+52:1e40 0 days 0:00:08.687
+20:1c2c 0 days 0:00:08.234
+51:1340 0 days 0:00:08.171
+21:1bcc 0 days 0:00:06.953
+26:13ec 0 days 0:00:06.671
+44:131c 0 days 0:00:03.906
+22:d8c 0 days 0:00:03.375
+33:78c 0 days 0:00:02.656
+34:1a8c 0 days 0:00:00.906
+29:1f5c 0 days 0:00:00.828
+6:e28 0 days 0:00:00.625
+5:1c78 0 days 0:00:00.546
+23:14a4 0 days 0:00:00.484
+4:5ac 0 days 0:00:00.437
+45:5dc 0 days 0:00:00.421
+3:13b4 0 days 0:00:00.421
+47:19c8 0 days 0:00:00.375
+28:1b6c 0 days 0:00:00.250
+46:1dac 0 days 0:00:00.156
+7:1dd8 0 days 0:00:00.109
+48:cdc 0 days 0:00:00.093
+49:1eac 0 days 0:00:00.062
+15:1a64 0 days 0:00:00.062
+0:1804 0 days 0:00:00.046
+36:4a4 0 days 0:00:00.031
+11:1eb4 0 days 0:00:00.031
+1:10b4 0 days 0:00:00.031
+31:16ac 0 days 0:00:00.015
+14:4ac 0 days 0:00:00.015
+2:186c 0 days 0:00:00.015
+59:590 0 days 0:00:00.000
+58:294 0 days 0:00:00.000
+57:16d0 0 days 0:00:00.000
+56:1578 0 days 0:00:00.000
+55:1428 0 days 0:00:00.000
+54:16d8 0 days 0:00:00.000
+53:fd8 0 days 0:00:00.000
+43:1b8c 0 days 0:00:00.000
+42:1c24 0 days 0:00:00.000
+41:1e2c 0 days 0:00:00.000
+40:11b0 0 days 0:00:00.000
+39:edc 0 days 0:00:00.000
+38:1a08 0 days 0:00:00.000
+37:171c 0 days 0:00:00.000
+35:1254 0 days 0:00:00.000
+32:1f9c 0 days 0:00:00.000
+30:1ae8 0 days 0:00:00.000
+27:190c 0 days 0:00:00.000
+24:1d2c 0 days 0:00:00.000
+19:1e38 0 days 0:00:00.000
+18:ee4 0 days 0:00:00.000
+17:fb8 0 days 0:00:00.000
+13:1b54 0 days 0:00:00.000
+12:1a48 0 days 0:00:00.000
+10:f64 0 days 0:00:00.000
+9:1024 0 days 0:00:00.000
+8:1b78 0 days 0:00:00.000
+&lt;/code>&lt;/pre>
+&lt;p>你可以看到运行线程的总时间和使用.time命令看到的总cpu使用时间并不相等。原因很简单，因为线程被重复使用或回收了。这也意味着一个线程的CPU使用时间可能是处理多个请求的结果。&lt;/p>
+&lt;p>&lt;strong>!threads&lt;/strong>&lt;/p>
+&lt;p>!threads显示当前所有的托管线程信息。输出如下：&lt;/p>
+&lt;pre>&lt;code>0:000&amp;gt; !threads
+ThreadCount: 48
+UnstartedThread: 0
+BackgroundThread: 29
+PendingThread: 0
+DeadThread: 19
+Hosted Runtime: no
+PreEmptive GC Alloc Lock
+ID OSID ThreadOBJ State GC Context Domain Count APT Exception
+16 1 1bc0 001fccd0 1808220 Enabled 00000000:00000000 0019daf0 0 Ukn (Threadpool Worker)
+22 2 d8c 002016f0 b220 Enabled 00000000:00000000 0019daf0 0 MTA (Finalizer)
+14 4 4ac 00242e58 880a220 Enabled 00000000:00000000 0019daf0 0 MTA (Threadpool Completion Port)
+23 5 14a4 11b39f18 80a220 Enabled 00000000:00000000 0019daf0 0 MTA (Threadpool Completion Port)
+24 6 1d2c 11b41ad8 1220 Enabled 00000000:00000000 0019daf0 0 Ukn
+25 7 1a94 11b46c70 180b220 Enabled 27240c98:27241fd8 11b42540 1 MTA (Threadpool Worker)
+26 9 13ec 12ce2888 200b220 Enabled 2a9f1434:2a9f33c0 11b42540 0 MTA
+27 a 190c 12d85eb8 200b220 Enabled 00000000:00000000 11b42540 0 MTA
+29 b 1f5c 13df6a50 200b220 Enabled 2ab1da6c:2ab1f1c0 11b42540 0 MTA
+30 c 1ae8 12d44a58 b220 Enabled 00000000:00000000 11b42540 0 MTA
+31 d 16ac 12e2e008 200b220 Enabled 2a81348c:2a8153c0 11b42540 1 MTA
+5 e 1c78 12da2160 220 Enabled 00000000:00000000 0019daf0 0 Ukn
+33 8 78c 11b674c8 200b220 Enabled 2707b818:2707c1d8 11b42540 0 MTA
+34 12 1a8c 13f163c8 220 Enabled 00000000:00000000 0019daf0 0 Ukn
+36 13 4a4 13eef718 200b220 Enabled 2a7db4a4:2a7dd3c0 11b42540 0 MTA
+4 14 5ac 13ef2008 220 Enabled 00000000:00000000 0019daf0 0 Ukn
+42 10 1c24 13f0e950 880b220 Enabled 00000000:00000000 0019daf0 0 MTA (Threadpool Completion Port)
+6 11 e28 13f16008 220 Enabled 00000000:00000000 0019daf0 0 Ukn
+3 f 13b4 13eba008 220 Enabled 00000000:00000000 0019daf0 0 Ukn
+43 15 1b8c 140db008 880b220 Enabled 00000000:00000000 0019daf0 0 MTA (Threadpool Completion Port)
+44 17 131c 140ceb28 200b220 Enabled 272288c8:27229fd8 11b42540 0 MTA
+45 1d 5dc 140cd0a0 220 Enabled 00000000:00000000 0019daf0 0 Ukn
+47 20 19c8 1651a008 220 Enabled 00000000:00000000 0019daf0 0 Ukn
+XXXX 24 0 16468880 1801820 Enabled 00000000:00000000 0019daf0 0 Ukn (Threadpool Worker)
+46 1f 1dac 1650ab48 220 Enabled 00000000:00000000 0019daf0 0 Ukn
+XXXX 1a 0 140d5008 1801820 Enabled 00000000:00000000 0019daf0 0 Ukn (Threadpool Worker)
+XXXX 16 0 140c5008 1801820 Enabled 00000000:00000000 0019daf0 0 Ukn (Threadpool Worker)
+50 3 1e8c 14064420 180b220 Enabled 27246f54:27247fd8 11b42540 1 MTA (Threadpool Worker)
+XXXX 35 0 1406e800 1801820 Enabled 00000000:00000000 0019daf0 0 Ukn (Threadpool Worker)
+51 36 1340 140df008 180b220 Enabled 2adec9cc:2aded1c0 11b42540 1 MTA (Threadpool Worker)
+XXXX 37 0 16566868 1801820 Enabled 00000000:00000000 0019daf0 0 Ukn (Threadpool Worker)
+48 38 cdc 16578840 220 Enabled 00000000:00000000 0019daf0 0 Ukn
+XXXX 39 0 16566c28 1801820 Enabled 00000000:00000000 0019daf0 0 Ukn (Threadpool Worker)
+XXXX 3b 0 1646b8b0 1801820 Enabled 00000000:00000000 0019daf0 0 Ukn (Threadpool Worker)
+XXXX 3c 0 16674008 1801820 Enabled 00000000:00000000 0019daf0 0 Ukn (Threadpool Worker)
+XXXX 3d 0 16676418 1801820 Enabled 00000000:00000000 0019daf0 0 Ukn (Threadpool Worker)
+XXXX 3e 0 16676fb8 1801820 Enabled 00000000:00000000 0019daf0 0 Ukn (Threadpool Worker)
+XXXX 3f 0 16674d48 1801820 Enabled 00000000:00000000 0019daf0 0 Ukn (Threadpool Worker)
+XXXX 40 0 1667de10 1801820 Enabled 00000000:00000000 0019daf0 0 Ukn (Threadpool Worker)
+XXXX 41 0 16680050 1801820 Enabled 00000000:00000000 0019daf0 0 Ukn (Threadpool Worker)
+XXXX 42 0 166812e8 1801820 Enabled 00000000:00000000 0019daf0 0 Ukn (Threadpool Worker)
+XXXX 43 0 16683e60 1801820 Enabled 00000000:00000000 0019daf0 0 Ukn (Threadpool Worker)
+52 44 1e40 165259e8 180b220 Enabled 2adf126c:2adf31c0 11b42540 1 MTA (Threadpool Worker)
+XXXX 45 0 165b7c08 1801820 Enabled 00000000:00000000 0019daf0 0 Ukn (Threadpool Worker)
+XXXX 46 0 165aa3d8 1801820 Enabled 00000000:00000000 0019daf0 0 Ukn (Threadpool Worker)
+XXXX 47 0 165242c8 1801820 Enabled 00000000:00000000 0019daf0 0 Ukn (Threadpool Worker)
+XXXX 48 0 165e9500 1801820 Enabled 00000000:00000000 0019daf0 0 Ukn (Threadpool Worker)
+49 3a 1eac 165676f0 220 Enabled 00000000:00000000 0019daf0 0 Ukn
+&lt;/code>&lt;/pre>
+&lt;p>线程ID为XXXX表示该线程已结束，并在等待回收。我们也能看到线程ID为22的线程正在终结(finalizer)。假如我们使用!runaway命令时看到22线程有大量的cpu活动，可能我们的程序有终结(finalizer)问题。&lt;/p>
+&lt;p>&lt;strong>切换到指定线程&lt;/strong>&lt;/p>
+&lt;p>要切换到指定的线程，可以使用下面的格式命令：~[thread id]s，假如我们要切换到50线程，命令如下：&lt;/p>
+&lt;pre>&lt;code>0:000&amp;gt; ~50s
+&lt;/code>&lt;/pre>
+&lt;p>现在我们已切换到线程50，可以使用很多其他有用的命令。&lt;/p>
+&lt;p>&lt;strong>!clrstack&lt;/strong>
+!clrstack显示当前线程的堆栈信息，通过指定“-p”参数，还能看到方法调用的参数和局部变量信息。
+下面是线程50的堆栈信息：&lt;/p>
+&lt;pre>&lt;code>0:050&amp;gt; !clrstack
+OS Thread Id: 0x1e8c (50)
+ESP EIP
+17a9e750 7d61c828 [NDirectMethodFrameSlim: 17a9e750] System.DirectoryServices.Protocols.Wldap32.ldap_bind_s(IntPtr, System.String, System.DirectoryServices.Protocols.SEC_WINNT_AUTH_IDENTITY_EX, System.DirectoryServices.Protocols.BindMethod)
+17a9e768 14df70f9 System.DirectoryServices.Protocols.LdapConnection.BindHelper(System.Net.NetworkCredential, Boolean)
+17a9e794 14df6de0 System.DirectoryServices.Protocols.LdapConnection.Bind()
+17a9e79c 14df59e9 System.DirectoryServices.Protocols.LdapConnection.SendRequestHelper(System.DirectoryServices.Protocols.DirectoryRequest, Int32 ByRef)
+17a9e8b8 14df56e8 System.DirectoryServices.Protocols.LdapConnection.SendRequest(System.DirectoryServices.Protocols.DirectoryRequest, System.TimeSpan)
+17a9e8bc 14df5657 [InlinedCallFrame: 17a9e8bc]
+&lt;/code>&lt;/pre>
+&lt;p>从下向上看，我们能知道LdapConnection调用了SendRequest方法，而SendRequest又调用了SendRequestHelper方法等等。
+如果我们执行“!clrstack -p”命令，我们得到信息：&lt;/p>
+&lt;pre>&lt;code>0:050&amp;gt; !clrstack -p
+OS Thread Id: 0x1e8c (50)
+ESP EIP
+17a9e750 7d61c828 [NDirectMethodFrameSlim: 17a9e750] System.DirectoryServices.Protocols.Wldap32.ldap_bind_s(IntPtr, System.String, System.DirectoryServices.Protocols.SEC_WINNT_AUTH_IDENTITY_EX, System.DirectoryServices.Protocols.BindMethod)
+17a9e768 14df70f9 System.DirectoryServices.Protocols.LdapConnection.BindHelper(System.Net.NetworkCredential, Boolean)
+PARAMETERS:
+this = 0x271fdfe0
+newCredential =
+needSetCredential =
+17a9e794 14df6de0 System.DirectoryServices.Protocols.LdapConnection.Bind()
+PARAMETERS:
+this =
+17a9e79c 14df59e9 System.DirectoryServices.Protocols.LdapConnection.SendRequestHelper(System.DirectoryServices.Protocols.DirectoryRequest, Int32 ByRef)
+PARAMETERS:
+this = 0x271fdfe0
+request = 0x27246e38
+messageID = 0x17a9e8ec
+17a9e8b8 14df56e8 System.DirectoryServices.Protocols.LdapConnection.SendRequest(System.DirectoryServices.Protocols.DirectoryRequest, System.TimeSpan)
+PARAMETERS:
+this = 0x271fdfe0
+request = 0x27246e38
+requestTimeout =
+17a9e8bc 14df5657 [InlinedCallFrame: 17a9e8bc]
+&lt;/code>&lt;/pre>
+&lt;p>我们可以看到DirectoryRequest参数传递给了SendRequest和SendRequestHelper，要查看DirectoryRequest的相关信息，我们只需复制它的地址（0x27246e38），并在下个命令中使用。&lt;/p>
+&lt;p>&lt;strong>!dumpobject (!do)&lt;/strong>
+这是另外一个重要的命令。Dumpobject会打印出指定地址的对象的相关信息。我们使用刚才的地址试下:&lt;/p>
+&lt;pre>&lt;code>0:050&amp;gt; !do 0x27246e38
+Name: System.DirectoryServices.Protocols.SearchRequest
+MethodTable: 14b394c4
+EEClass: 14d97ce0
+Size: 52(0x34) bytes
+GC Generation: 0
+(C:\WINDOWS\assembly\GAC_MSIL\System.DirectoryServices.Protocols\2.0.0.0__b03f5f7f11d50a3a\System.DirectoryServices.Protocols.dll)
+Fields:
+MT Field Offset Type VT Attr Value Name
+02c39310 4000102 4 System.String 0 instance 00000000 directoryRequestID
+14b398bc 4000103 8 ...ControlCollection 0 instance 27246e90 directoryControlCollection
+02c39310 4000111 c System.String 0 instance 27246d00 dn
+12579f5c 4000112 10 ....StringCollection 0 instance 27246eb4 directoryAttributes
+02c36ca0 4000113 14 System.Object 0 instance 27246ddc directoryFilter
+14b39344 4000114 18 System.Int32 1 instance 1 directoryScope
+14b393fc 4000115 1c System.Int32 1 instance 0 directoryRefAlias
+0fd3da00 4000116 20 System.Int32 1 instance 0 directorySizeLimit
+1202af88 4000117 28 System.TimeSpan 1 instance 27246e60 directoryTimeLimit
+120261c8 4000118 24 System.Boolean 1 instance 0 directoryTypesOnly
+&lt;/code>&lt;/pre>
+&lt;p>通过打印的信息，可以知道它是System.DirectoryServices.Protocols.SearchRequest的一个对象，而显示的都是 System.DirectoryServices.Protocols.SearchRequest的属性值。要知道SearchRequest类的相关属性信息，可以&lt;a class="link" href="http://msdn2.microsoft.com/en-us/library/system.directoryservices.protocols.searchrequest_properties.aspx" target="_blank" rel="noopener"
+>查看MSDN&lt;/a>。当前我们已有RequestId, Scope和DistinguishedName等等。
+所以，假如我们想知道SearchRequest对象的DistinguishedName属性值，即是上面列表中的dn，我们只需再复制它的地址（27246d00），并再次使用!dumpobject命令。因为DistinguishedName是System.String类型，所以输出结果很明显：&lt;/p>
+&lt;pre>&lt;code>0:050&amp;gt; !do 27246d00
+Name: System.String
+MethodTable: 02c39310
+EEClass: 0fb610ac
+Size: 112(0x70) bytes
+GC Generation: 0
+(C:\WINDOWS\assembly\GAC_32\mscorlib\2.0.0.0__b77a5c561934e089\mscorlib.dll)
+String: CN=Dummy,CN=Accounts,CN=useradm,DC=dummy,DC=net
+Fields:
+MT Field Offset Type VT Attr Value Name
+0fd3da00 4000096 4 System.Int32 1 instance 48 m_arrayLength
+0fd3da00 4000097 8 System.Int32 1 instance 47 m_stringLength
+0fb80010 4000098 c System.Char 1 instance 43 m_firstChar
+02c39310 4000099 10 System.String 0 shared static Empty
+&amp;gt;&amp;gt; Domain:Value 0019daf0:03380310 11b42540:03380310 &amp;lt;&amp;lt; 0fb86d44 400009a 14 System.Char[] 0 shared static WhitespaceChars &amp;gt;&amp;gt; Domain:Value 0019daf0:03380324 11b42540:033855bc &amp;lt;&amp;lt;
+&lt;/code>&lt;/pre>
+&lt;p>通过输出的信息我们很容易知道DistinguishedName属性的值是“CN=Dummy,CN=Accounts,CN=useradm,DC=dummy,DC=net”。如果我们想查看更多内容，只需继续使用!dumpobject命令即可。&lt;/p>
+&lt;p>&lt;strong>!dumpstackobjects (!dso)&lt;/strong>
+使用该命令我们可以查看到当前线程的堆栈引用的所有托管对象。打印信息如下：&lt;/p>
+&lt;pre>&lt;code>0:050&amp;gt; !dso
+OS Thread Id: 0x1e8c (50)
+ESP/REG Object Name
+17a9e534 0741f860 System.RuntimeType
+17a9e6b8 271fdfe0 System.DirectoryServices.Protocols.LdapConnection
+17a9e6bc 27246f20 System.DirectoryServices.Protocols.SEC_WINNT_AUTH_IDENTITY_EX
+17a9e740 271fdfe0 System.DirectoryServices.Protocols.LdapConnection
+17a9e744 27246f20 System.DirectoryServices.Protocols.SEC_WINNT_AUTH_IDENTITY_EX
+17a9e764 27246f20 System.DirectoryServices.Protocols.SEC_WINNT_AUTH_IDENTITY_EX
+17a9e768 271fdfe0 System.DirectoryServices.Protocols.LdapConnection
+17a9e780 271fdfe0 System.DirectoryServices.Protocols.LdapConnection
+17a9e784 27246e38 System.DirectoryServices.Protocols.SearchRequest
+17a9e794 271fdf14 System.DirectoryServices.Protocols.LdapDirectoryIdentifier
+17a9e7a8 27246ef8 System.Collections.ArrayList
+17a9e7bc 27246ef8 System.Collections.ArrayList
+17a9e7c8 271fdfe0 System.DirectoryServices.Protocols.LdapConnection
+17a9e8a4 27246e38 System.DirectoryServices.Protocols.SearchRequest
+17a9e8d0 27246ed8 System.Object[] (System.Object[])
+17a9e8e0 073ff6b8 System.String cn
+17a9e8e4 271fdfe0 System.DirectoryServices.Protocols.LdapConnection
+17a9e8f4 27246d00 System.String CN=Dummy,CN=Accounts,CN=useradm,DC=Dummy,DC=net
+17a9e8f8 271fdfe0 System.DirectoryServices.Protocols.LdapConnection
+17a9e8fc 27246e38 System.DirectoryServices.Protocols.SearchRequest
+17a9e910 03380310 System.String
+17a9e914 27246e24 System.Object[] (System.String[])
+17a9e918 272399a8 System.String CN=OID-Dummy-ABC123,CN=Dummy,CN=Accounts,CN=useradm,DC=Dummy,DC=net
+17a9e91c 27246ddc System.String (CN=OID-Dummy-ABC123)
+...etc...
+&lt;/code>&lt;/pre>
+&lt;p>这个命令对于查找当前线程引用了那些对象很有用。假如你想查看某一对象，只需复制[Object]字段的地址，并使用 !dumpobject命令：&lt;/p>
+&lt;pre>&lt;code>0:050&amp;gt; !do 271fdfe0
+Name: System.DirectoryServices.Protocols.LdapConnection
+MethodTable: 14a2040c
+EEClass: 149daf08
+Size: 56(0x38) bytes
+(C:\WINDOWS\assembly\GAC_MSIL\System.DirectoryServices.Protocols\2.0.0.0__b03f5f7f11d50a3a\System.DirectoryServices.Protocols.dll)
+Fields:
+MT Field Offset Type VT Attr Value Name
+14a2078c 40000c3 4 ...NetworkCredential 0 instance 00000000 directoryCredential
+14a2144c 40000c4 8 ...ificateCollection 0 instance 271fe018 certificatesCollection
+1202af88 40000c5 10 System.TimeSpan 1 instance 271fdff0 connectionTimeOut
+1466fe50 40000c6 c ...rectoryIdentifier 0 instance 271fdf14 directoryIdentifier
+14a2034c 4000236 24 System.Int32 0 instance 2 connectionAuthType
+14a223a4 4000237 18 ...dapSessionOptions 0 instance 271fe2d8 options
+0fb896d8 4000238 28 System.IntPtr 0 instance 564180944 ldapHandle
+120261c8 4000239 2c System.Boolean 0 instance 0 disposed
+120261c8 400023a 2d System.Boolean 0 instance 0 bounded
+120261c8 400023b 2e System.Boolean 0 instance 0 needRebind
+14a22084 400023e 1c ...pResponseCallback 0 instance 271fe03c fd
+120261c8 4000243 2f System.Boolean 0 instance 0 setFQDNDone
+120261c8 4000244 30 System.Boolean 0 instance 1 automaticBind
+120261c8 4000245 31 System.Boolean 0 instance 1 needDispose
+120261c8 4000246 32 System.Boolean 0 instance 1 connected
+14a2267c 4000247 20 ...s.QUERYCLIENTCERT 0 instance 271fe394 clientCertificateRoutine
+0fd314bc 400023c 20 ...ections.Hashtable 0 shared static handleTable
+&amp;gt;&amp;gt; Domain:Value 0019daf0:NotInit 11b42540:073fe504 &amp;lt; &amp;lt;
+02c36ca0 400023d 24 System.Object 0 shared static objectLock
+&amp;gt;&amp;gt; Domain:Value 0019daf0:NotInit 11b42540:073fe53c &amp;lt; &amp;lt;
+0fd314bc 400023f 28 ...ections.Hashtable 0 shared static asyncResultTable
+&amp;gt;&amp;gt; Domain:Value 0019daf0:NotInit 11b42540:073fe610 &amp;lt; &amp;lt;
+14a21864 4000240 2c ...lResultsProcessor 0 shared static partialResultsProcessor
+&amp;gt;&amp;gt; Domain:Value 0019daf0:NotInit 11b42540:073fe678 &amp;lt; &amp;lt;
+12305e94 4000241 30 ....ManualResetEvent 0 shared static waitHandle
+&amp;gt;&amp;gt; Domain:Value 0019daf0:NotInit 11b42540:073fe64c &amp;lt; &amp;lt;
+14a21954 4000242 34 ...lResultsRetriever 0 shared static retriever
+&amp;gt;&amp;gt; Domain:Value 0019daf0:NotInit 11b42540:073fe6a8 &amp;lt; &amp;lt;
+&lt;/code>&lt;/pre>
+&lt;p>&lt;strong>!dumparray (!da)&lt;/strong>
+你可能已经注意到有很多对象数组在堆栈中，在上面的列表中查找System.Object[]类型就能找到。如果你对对象数组使用 !dumpobject命令，你只能看到数组信息，而不能看到数组的内容信息，要看到数组内容信息，就需要使用!dumparray命令，或简称!da:&lt;/p>
+&lt;pre>&lt;code>0:050&amp;gt; !do 27239b98
+Name: System.Object[]
+MethodTable: 02c3896c
+EEClass: 02c388ec
+Size: 24(0x18) bytes
+Array: Rank 1, Number of elements 2, Type CLASS
+Element Type: System.String
+Fields:
+None
+0:050&amp;gt; !da 27239b98
+Name: System.String[]
+MethodTable: 02c3896c
+EEClass: 02c388ec
+Size: 24(0x18) bytes
+Array: Rank 1, Number of elements 2, Type CLASS
+Element Methodtable: 02c39310
+[0] 272399a8
+[1] 27239a44
+&lt;/code>&lt;/pre>
+&lt;p>通过!dumparray命令我们能知道该数组对象是字符串数组，并给出了数组项的地址。再使用!dumpobject命令我们就能看到数组项的具体内容。&lt;/p>
+&lt;p>&lt;strong>!objsize&lt;/strong>
+如果你查看上面打印的信息，可以看到对象的大小是24字节。从某方面来说，这是对的，24字节是System.Object[]数组对象本身大小，但并不包括数组内容的大小!要获得整个对象的大小，就要使用到 !objsize命令:&lt;/p>
+&lt;pre>&lt;code>0:050&amp;gt; !objsize 27239b98
+sizeof(27239b98) =          348 (       0x15c) bytes (System.Object[])
+&lt;/code>&lt;/pre>
+&lt;p>!objsize会遍历对象引用的所有子对象，并计算出总的大小。如上面数组对象和它的内容的总大小是348字节。
+如果对象有引用很多子对象，那么!objsize会花费较多的时间计算出总大小。&lt;/p>
+&lt;p>&lt;strong>!dumpheap&lt;/strong>
+这是另一个较频繁使用的命令。!dumpheap会打印出所有在托管堆中的对象信息。直接执行该命令会打印出大量的信息，所以一般使用时都至少带上一个参数。加上-stat参数后会输出总结后的信息，如下面是截取的是!dumpheap -stat命令输出的一部分:&lt;/p>
+&lt;pre>&lt;code>0:050&amp;gt; !dumpheap -stat
+------------------------------
+Heap 0
+total 2754508 objects
+------------------------------
+Heap 1
+total 2761329 objects
+------------------------------
+total 5515837 objects
+Statistics:
+      MT    Count    TotalSize Class Name
+16e0a6d8        1           12 System.Collections.Generic.ObjectEqualityComparer`1[[System.Data.ProviderBase.DbConnectionInternal, System.Data]]
+16d9cd9c        1           12 System.Xml.Serialization.Configuration.DateTimeSerializationSection+DateTimeSerializationMode
+16d9bf30        1           12 System.Diagnostics.OrdinalCaseInsensitiveComparer
+16d9112c        1           12 System.Xml.Serialization.NameTable
+16d7f664        1           12 System.Xml.Serialization.TempAssemblyCache
+163ea85c        1           12 System.Data.Res
+1501e4c4        1           12 System.Collections.Generic.ObjectEqualityComparer`1[[System.Web.UI.Control, System.Web]]
+14efb138        1           12 System.Net.TimeoutValidator
+14ef9964        1           12 System.Net.Cache.HttpRequestCacheLevel
+14ef77a8        1           12 Microsoft.Win32.WinInetCache
+14ef68e4        1           12 System.Net.WebRequest+WebProxyWrapper
+14ef658c        1           12 System.Net.Configuration.ProxyElement+BypassOnLocalValues
+14ef63d8        1           12 System.Net.Configuration.ProxyElement+AutoDetectValues
+14ef5b68        1           12 System.Net.CaseInsensitiveAscii
+14ef5610        1           12 System.Net.HeaderInfoTable
+14ef4718        1           12 System.Net.HttpRequestCreator
+14db6710        1           12 System.Web.Configuration.MachineKeyValidationConverter
+14db3140        1           12 System.Collections.Generic.ObjectEqualityComparer`1[[System.Runtime.Serialization.MemberHolder, mscorlib]]
+14b3f4d8        1           12 System.Web.UI.SupportsEventValidationAttribute
+...etc...
+14a276a8    19578       704808 System.DirectoryServices.Interop.AdsValueHelper
+14a2ea24     9196       735680 System.Web.UI.WebControls.Label
+14a2e51c    16862       741928 System.Web.UI.WebControls.Style
+125778ec    48015       768240 System.Collections.Specialized.NameObjectCollectionBase+NameObjectEntry
+120261c8    65842       790104 System.Boolean
+14a2ee7c     9198       809424 System.Web.UI.WebControls.Table
+14b311c4     9647       810348 System.Web.UI.WebControls.Image
+13a2b7dc    34913       837912 System.Web.HttpServerVarsCollectionEntry
+14b303a4    10605       848400 System.Web.UI.WebControls.HyperLink
+14d8e3d4    77748       932976 Microsoft.Web.UI.WebControls.BaseChildNodeCollection+ActionType
+14db90ac    81372       976464 System.Web.UI.WebControls.FontInfo
+14b30694    28648      1031328 System.Web.UI.WebControls.TableRow+CellControlCollection
+14d8fdbc    38912      1089536 Microsoft.Web.UI.WebControls.TreeNodeCollection
+14b3d0bc    86592      1385472 System.Web.UI.Pair
+1466c5c4    39305      1414980 System.Web.UI.ControlCollection
+14d8e48c    77748      1865952 Microsoft.Web.UI.WebControls.BaseChildNodeCollection+Action
+1545061c    38874      2176944 Microsoft.Web.UI.WebControls.TreeNode
+14b30eec    52668      2317392 System.Web.UI.WebControls.TableItemStyle
+14a2f804    28515      2395260 System.Web.UI.WebControls.TableRow
+14a2be6c    40894      2453640 System.Web.UI.LiteralControl
+0fd3da00   228792      2745504 System.Int32
+14b3e3ac   244793      2937516 System.Web.UI.IndexedString
+14a2de94   198580      3177280 System.Web.UI.StateBag
+1466c454    80512      3542528 System.Web.UI.Control+OccasionalFields
+12302c2c   205849      4116980 System.Collections.Specialized.HybridDictionary
+14b30024    52934      4446456 System.Web.UI.WebControls.TableCell
+12302f2c   178294      4992232 System.Collections.Specialized.ListDictionary
+14a2e284   412762      6604192 System.Web.UI.StateItem
+14d8ce64   117078      7024680 Microsoft.Web.UI.WebControls.CssCollection
+0fd314bc   132065      7395640 System.Collections.Hashtable
+1230319c   422580      8451600 System.Collections.Specialized.ListDictionary+DictionaryNode
+1202a58c   380438      9130512 System.Collections.ArrayList
+0fd32050   133000     22582944 System.Collections.Hashtable+bucket[]
+02c3896c   649842     23275900 System.Object[]
+0fd3c12c     3471     36385536 System.Byte[]
+001fee20      338     65409920      Free
+02c39310   683083    161821000 System.String
+Total 5515837 objects
+Fragmented blocks larger than 0.5 MB:
+    Addr     Size      Followed by
+2adf31cc    2.0MB         2aff85d8 System.String
+2b006a2c   20.3MB         2c4530d8 System.Net.SocketAddress
+&lt;/code>&lt;/pre>
+&lt;p>输出信息按对象类型的总大小升序排序，你一般可以在列表的最下面找到string对象的大小，因为字符串在程序中一般是最常用的。
+其他比较有用的参数是-type和-mt（MethodTable的意思）。使用它们你可以查看指定对象类型的详细信息，例如假如我们想查看System.Net.HttpRequestCreator类型的具体信息，可以复制上面列表中它的MT字段地址（14ef4718），然后使用 !dumpheap -mt命令：&lt;/p>
+&lt;pre>&lt;code>0:050&amp;gt; !dumpheap -mt 14ef4718
+------------------------------
+Heap 0
+Address MT Size
+0342ccf8 14ef4718 12
+total 1 objects
+------------------------------
+Heap 1
+Address MT Size
+total 0 objects
+------------------------------
+total 1 objects
+Statistics:
+MT Count TotalSize Class Name
+14ef4718 1 12 System.Net.HttpRequestCreator
+&lt;/code>&lt;/pre>
+&lt;p>上面列出了所有System.Net.HttpRequestCreator类型的对象的地址，假如我们想查看指定对象的信息，再使用!dumpobject命令就可以了。
+!dumpheap -type可以根据字符串来匹配对应的对象类型。如我们输入命令“!dumpheap -type System.Web”，是指显示所有类名包含有“System.Web”字符串的对象信息。
+其他参数-min和-max是接受表示对象大小的最大值和最小值（单位字节），命令会只列出大于指定值或小于指定值的对象信息。这两个参数对于查找滥用字符串问题很有帮助。&lt;/p>
+&lt;p>&lt;strong>实战训练&lt;/strong>
+&lt;strong>查明缓存使用的大小&lt;/strong>
+为了知道在System.Web.Caching.Cache类型中有多少数据，我执行了“ !dumpheap -stat -type System.Web.Caching.Cache”命令。注意，我用了-stat参数，否则我会得到一个包含有System.Web.Caching.CacheKeys和System.Web.Caching.CacheEntrys对象的很长的列表。下面的执行结果：&lt;/p>
+&lt;pre>&lt;code>0:050&amp;gt; !dumpheap -type System.Web.Caching.Cache -stat
+------------------------------
+Heap 0
+total 665 objects
+------------------------------
+Heap 1
+total 1084 objects
+------------------------------
+total 1749 objects
+Statistics:
+MT Count TotalSize Class Name
+123056f8 1 12 System.Web.Caching.CacheKeyComparer
+1230494c 1 12 System.Web.Caching.Cache
+1230500c 1 24 System.Web.Caching.CacheMultiple
+1230514c 1 32 System.Web.Caching.CacheMemoryStats
+123053b4 1 36 System.Web.Caching.CacheMemoryTotalMemoryPressure
+123059bc 2 40 System.Web.Caching.CacheUsage
+12304bdc 1 48 System.Web.Caching.CacheCommon
+123054f4 1 52 System.Web.Caching.CacheMemoryPrivateBytesPressure
+12305874 2 64 System.Web.Caching.CacheExpires
+12304e64 2 200 System.Web.Caching.CacheSingle
+1255b594 85 1360 System.Web.Caching.CacheDependency+DepFileInfo
+123046c4 40 1440 System.Web.Caching.CacheDependency
+123042ec 47 1504 System.Web.Caching.CacheItemRemovedCallback
+123063fc 832 16640 System.Web.Caching.CacheKey
+12306820 732 52704 System.Web.Caching.CacheEntry
+Total 1749 objects
+&lt;/code>&lt;/pre>
+&lt;p>很明显System.Web.Caching.Cache的方法列表地址（MethodTable）是1230494c，再使用!dumpheap命令我就能看到它的所有对象信息，如下：&lt;/p>
+&lt;pre>&lt;code>0:050&amp;gt; !dumpheap -mt 1230494c
+------------------------------
+Heap 0
+Address MT Size
+03392d20 1230494c 12
+total 1 objects
+------------------------------
+Heap 1
+Address MT Size
+total 0 objects
+------------------------------
+total 1 objects
+Statistics:
+MT Count TotalSize Class Name
+1230494c 1 12 System.Web.Caching.Cache
+Total 1 objects
+&lt;/code>&lt;/pre>
+&lt;p>可以看到System.Web.Caching.Cache类型只有一个对象，地址是03392d20，再通过!objsize命令就能计算出它的大小。因为缓存对象很复杂，并包含有大量的子对象，要计算出总大小需要花些时间：&lt;/p>
+&lt;pre>&lt;code>0:050&amp;gt; !objsize 03392d20
+sizeof(03392d20) = 266640828 ( 0xfe49dbc) bytes (System.Web.Caching.Cache)
+&lt;/code>&lt;/pre>
+&lt;p>所以缓存的总大小是 266 MB。&lt;/p>
+&lt;p>&lt;strong>缓存了什么东西？&lt;/strong>
+为了弄清缓存中保存了什么内容，我查看了System.Web.Caching.CacheEntry的对象信息。通过之前的信息可以知道System.Web.Caching.CacheEntry类型的方法列表(MethodTable)是12306820。执行!dumpheap命令取CacheEntry的所有对象信息：&lt;/p>
+&lt;pre>&lt;code>0:050&amp;gt; !dumpheap -mt 12306820
+------------------------------
+Heap 0
+Address MT Size
+033950bc 12306820 72
+033a20d8 12306820 72
+033ac79c 12306820 72
+033da21c 12306820 72
+033f04c4 12306820 72
+03428ec8 12306820 72
+0344dab4 12306820 72
+03815d00 12306820 72
+038265d8 12306820 72
+....etc...
+03af7010 12306820 72
+03b291bc 12306820 72
+03b2c674 12306820 72
+03b6dca0 12306820 72
+03b797dc 12306820 72
+03b85318 12306820 72
+03ba9150 12306820 72
+03c258cc 12306820 72
+03de43c8 12306820 72
+03e160f8 12306820 72
+total 382 objects
+------------------------------
+total 732 objects
+&lt;/code>&lt;/pre>
+&lt;p>要显示上面的信息，也可以使用“!dumpheap -type System.Web.Caching.CacheEntry”命令。
+有了所有CacheEntry对象的地址信息，我随机拿了一个地址查看它的内容：&lt;/p>
+&lt;pre>&lt;code>0:050&amp;gt; !do 03b2c674
+Name: System.Web.Caching.CacheEntry
+MethodTable: 12306820
+EEClass: 122f6470
+Size: 72(0x48) bytes
+(C:\WINDOWS\assembly\GAC_32\System.Web\2.0.0.0__b03f5f7f11d50a3a\System.Web.dll)
+Fields:
+MT Field Offset Type VT Attr Value Name
+02c39310 4001327 4 System.String 0 instance 03b2c600 _key
+0fb8f1f8 4001328 c System.Byte 0 instance 2 _bits
+0fd3da00 4001329 8 System.Int32 0 instance -1314181915 _hashCode
+02c36ca0 4001330 10 System.Object 0 instance 03b2c644 _value
+120219d0 4001331 1c System.DateTime 1 instance 03b2c690 _utcCreated
+120219d0 4001332 24 System.DateTime 1 instance 03b2c698 _utcExpires
+1202af88 4001333 2c System.TimeSpan 1 instance 03b2c6a0 _slidingExpiration
+0fb8f1f8 4001334 d System.Byte 0 instance 7 _expiresBucket
+123062d8 4001335 34 ...g.ExpiresEntryRef 1 instance 03b2c6a8 _expiresEntryRef
+0fb8f1f8 4001336 e System.Byte 0 instance 4294967295 _usageBucket
+12306738 4001337 38 ...ing.UsageEntryRef 1 instance 03b2c6ac _usageEntryRef
+120219d0 4001338 3c System.DateTime 1 instance 03b2c6b0 _utcLastUpdate
+123046c4 4001339 14 ...g.CacheDependency 0 instance 00000000 _dependency
+02c36ca0 400133a 18 System.Object 0 instance 033d8344 _onRemovedTargets
+120219d0 400132d 1bc System.DateTime 1 shared static NoAbsoluteExpiration
+&amp;gt;&amp;gt; Domain:Value 0019daf0:NotInit 11b42540:03395104 &amp;lt; &amp;lt;
+1202af88 400132e 1c0 System.TimeSpan 1 shared static NoSlidingExpiration
+&amp;gt;&amp;gt; Domain:Value 0019daf0:NotInit 11b42540:03395114 &amp;lt; &amp;lt;
+1202af88 400132f 1c4 System.TimeSpan 1 shared static OneYear
+&amp;gt;&amp;gt; Domain:Value 0019daf0:NotInit 11b42540:03395124 &amp;lt; &amp;lt;
+&lt;/code>&lt;/pre>
+&lt;p>输出的是CacheEntry的属性信息，里面最重要的是_value属性。我复制它的地址（03b2c644），再用!dumpobject命令查看：&lt;/p>
+&lt;pre>&lt;code>0:000&amp;gt; !do 03e160c8
+Name: System.Web.SessionState.InProcSessionState
+MethodTable: 14dbad5c
+EEClass: 14e43af8
+Size: 48(0x30) bytes
+(C:\WINDOWS\assembly\GAC_32\System.Web\2.0.0.0__b03f5f7f11d50a3a\System.Web.dll)
+Fields:
+MT Field Offset Type VT Attr Value Name
+1466c9d8 4001d89 4 ...ateItemCollection 0 instance 1a7f5438 _sessionItems
+1292672c 4001d8a 8 ...ObjectsCollection 0 instance 00000000 _staticObjects
+0fd3da00 4001d8b c System.Int32 0 instance 20 _timeout
+120261c8 4001d8c 18 System.Boolean 0 instance 0 _locked
+120219d0 4001d8d 1c System.DateTime 1 instance 03e160e4 _utcLockDate
+0fd3da00 4001d8e 10 System.Int32 0 instance 1 _lockCookie
+1202bf60 4001d8f 24 ...ReadWriteSpinLock 1 instance 03e160ec _spinLock
+0fd3da00 4001d90 14 System.Int32 0 instance 0 _flags
+&lt;/code>&lt;/pre>
+&lt;p>可以看到缓存的是一个InProcSessionState对象。&lt;/p>
+&lt;p>&lt;strong>参考文章：&lt;/strong>
+&lt;a class="link" href="http://blogs.msdn.com/b/johan/archive/2007/11/26/getting-started-with-windbg-part-ii.aspx" target="_blank" rel="noopener"
+>Getting started with windbg - part I&lt;/a>&lt;/p>
+&lt;p>&lt;a class="link" href="http://blogs.msdn.com/b/johan/archive/2007/11/26/getting-started-with-windbg-part-ii.aspx" target="_blank" rel="noopener"
+>Getting started with windbg - part II&lt;/a>&lt;/p></description></item><item><title>面向.NET开发人员的WinDbg入门教程</title><link>https://blog.xenori.com/2012/02/intro-to-windbg-for-dotnet-developers/</link><pubDate>Wed, 01 Feb 2012 08:28:43 +0000</pubDate><guid>https://blog.xenori.com/2012/02/intro-to-windbg-for-dotnet-developers/</guid><description>&lt;p>原文：&lt;a class="link" href="http://blogs.msdn.com/b/kaevans/archive/2011/04/11/intro-to-windbg-for-net-developers.aspx" target="_blank" rel="noopener"
+>http://blogs.msdn.com/b/kaevans/archive/2011/04/11/intro-to-windbg-for-net-developers.aspx
+&lt;/a> 翻译：bitxeno&lt;/p>
+&lt;p>当你的代码发布为产品后，无论是在其他人的电脑中运行，还是部署到服务器中，你通常不再能访问到它的程序文件，也不能观察到代码的当前运行情况和运行环境。当你的代码在新的环境运行时，有很多因素会影响到程序的运行情况，如服务器系统打了更新补丁，网络策略改变，防火墙规则限制，磁盘权限配置等等。当代码运行不正常时，你可能只能靠代码中各处输出的日志来判断运行情况。但只靠输出日志，你有时还是不能判断故障出现的原因。&lt;/p>
+&lt;p>在不浪费客户时间的同时做故障排除对你是个很大的挑战，因为不会有客户喜欢被一个搞技术的家伙不断问是点了那个按钮操作了哪些步骤导致程序出错的。boss也不会给你几天甚至几周的时间让你慢慢排除故障，你必须现在就知道到底发生了什么。&lt;/p>
+&lt;p>理想情况下，你应该能看到堆栈跟踪，能查看到当前的变量值，能调试代码。事实证明你可以做到这点。。。而且不需要附加到客户环境中！&lt;/p>
+&lt;p>&lt;strong>下载WinDbg&lt;/strong>
+&lt;a class="link" href="http://www.microsoft.com/download/en/details.aspx?displaylang=en&amp;amp;id=8279" target="_blank" rel="noopener"
+> 下载Debugging Tools for Windows&lt;/a>到你的本地开发机中，windbg是其中的一部分，如果你只需要windbg，在可以在“&lt;em>Common Utilities&lt;/em>”中选择“&lt;em>Debugging Tools for Windows&lt;/em>&amp;ldquo;进入安装。安装程序会根据你电脑的cpu类型安装对应的windbg，x86的电脑会安装x86版本，x64的cpu电脑就会安装x64版。如果你选择的是“&lt;em>Redistributable Packages&lt;/em>“，就会为你下载全部三个版本（x86,x64,Itanium）。&lt;/p>
+&lt;p>&lt;img src="http://ww3.sinaimg.cn/large/7ce4a9f6gw1e5q1emjvn9j20l00el41h.jpg"
+loading="lazy"
+alt="windbg tutorial"
+>&lt;/p>
+&lt;p>WinDbg默认会安装到c盘的“Program Files\Debugging Tools for Windows”文件夹下，建议你把安装目录复制到“d:\debug”，这样方便后面增加其他扩展组件。&lt;/p>
+&lt;p>安装好后，目录下的windbg.exe就是windbg程序&lt;/p>
+&lt;p>&lt;strong>安装PssCor2&lt;/strong>&lt;/p>
+&lt;p>****下一步是加载托管代码扩展组件PssCor2。默认时，WinDbg只能用于调试非托管代码程序 ，而加载.net使用的SOS.dll扩展组件后，WinDbg就能调试托管程序了。WinDbg调试.net程序的另一个选择是PssCor2，它是SOS.dll的超集，并提供了一些面对托管代码的额外功能，如查看托管线程，托管堆，CLR堆栈等等。&lt;/p>
+&lt;p>&lt;a class="link" href="http://www.microsoft.com/download/en/details.aspx?id=1073" target="_blank" rel="noopener"
+>下载PssCor2&lt;/a>并解压到“d:\debug”，以方便后面的调试使用。&lt;/p>
+&lt;p>&lt;img src="http://ww3.sinaimg.cn/large/7ce4a9f6gw1e5q1fetlpgj20k9096q42.jpg"
+loading="lazy"
+alt="windbg tutorial"
+>&lt;/p>
+&lt;p>&lt;strong>设定符号文件路径（Symbol Path）&lt;/strong>&lt;/p>
+&lt;p>****当你使用Visual Studio编译程序时，是否有留意到在bin/Debug文件夹下会有.pdb后缀的文件？这些文件包含有dll程序集的调试符号，pdb文件并不包含有执行代码，只是使调试工具能把代码执行指令翻译为正确的可识别字符。微软提供了包含大量pdb文件的公共服务器，地址如下：&lt;/p>
+&lt;p>&lt;a class="link" href="http://msdl.microsoft.com/download/symbols" target="_blank" rel="noopener"
+>http://msdl.microsoft.com/download/symbols&lt;/a>&lt;/p>
+&lt;p>在windbg中设定符号文件路径后，相关的pdb文件会自动从服务器下载下来并保存到本地。你首先需要指定一个pdb文件的保存路径，如“d:\debug\symbols”。&lt;/p>
+&lt;p>&lt;img src="http://ww4.sinaimg.cn/large/7ce4a9f6gw1e5q1g54ge9j20h207zta1.jpg"
+loading="lazy"
+alt="windbg tutorial"
+>
+打开windbg程序，选择“File-&amp;gt;Symbol File Path…“，把下面的内容复制进去保存。&lt;/p>
+&lt;pre>&lt;code>srv*d:\debug\symbols*http://msdl.microsoft.com/download/symbols
+&lt;/code>&lt;/pre>
+&lt;p>&lt;img src="http://ww3.sinaimg.cn/large/7ce4a9f6gw1e5q1gqvwzcj20fv05tdg6.jpg"
+loading="lazy"
+alt="windbg tutorial"
+>&lt;/p>
+&lt;p>&lt;strong>创建测试程序&lt;/strong>&lt;/p>
+&lt;p>我们先创建一个简单的命令行程序用于测试：&lt;/p>
+&lt;pre>&lt;code>using System;
+namespace Microsoft.PFE.Samples
+{
+public class Program
+{
+static void Main()
+{
+Console.WriteLine(&amp;quot;Enter a message:&amp;quot;);
+string input = Console.ReadLine();
+Data d = new Data
+{
+ID = 5,
+Message = input,
+CurrentDateTime = System.DateTime.Now
+};
+Console.WriteLine(&amp;quot;You entered: &amp;quot; + d);
+}
+}
+public class Data
+{
+public int ID {get; set;}
+public string Message {get; set;}
+public DateTime CurrentDateTime {get; set;}
+public override string ToString()
+{
+Console.ReadLine();
+return string.Format(&amp;quot;ID:{0} {1} at {2}&amp;quot;, ID, Message,
+CurrentDateTime.ToLongTimeString());
+}
+}
+}
+&lt;/code>&lt;/pre>
+&lt;p>因为PssCor2只能处理.Net 3.5以下的程序，所以在编译前需要先把程序的环境改为.Net 3.5。假如是调试.NET 4.0的程序，可以&lt;a class="link" href="http://www.microsoft.com/download/en/details.aspx?id=21255" target="_blank" rel="noopener"
+>下载PssCor4&lt;/a>。编译运行程序，输入一个字符串，看程序是否运行正常。&lt;/p>
+&lt;p>客户抱怨说不知道为什么程序需要按两次enter键。程序并不按我们的预期工作，我们必须找到具体的原因。作为一个简单的例子，我们能一眼看出代码中的ToString()方法中多了一次ReadLine()导致的，但我们这次试下用windbg找出问题所在。&lt;/p>
+&lt;p>运行程序，输入一个字符串，按一次enter，当出现第二次输入提示时，不要动！我们处于捕捉问题的关键点，我们需要做一个dump文件。&lt;/p>
+&lt;p>&lt;strong>创建dump文件&lt;/strong>&lt;/p>
+&lt;p>****在windows7和windows2008中，可以在任务管理器中直接创建dump文件。只需打开任务管理器，右键进程名并选择“Create Dump File”。&lt;/p>
+&lt;p>&lt;img src="http://ww1.sinaimg.cn/large/7ce4a9f6gw1e5q1h819trj20sg0cbn0n.jpg"
+loading="lazy"
+alt="windbg tutorial"
+>&lt;/p>
+&lt;p>dump文件创建成功后，我们会看到提示：&lt;/p>
+&lt;p>&lt;img src="http://ww1.sinaimg.cn/large/7ce4a9f6gw1e5q1ihkg7aj20sg0ca42h.jpg"
+loading="lazy"
+alt="windbg tutorial"
+>&lt;/p>
+&lt;p>dump文件是当前进程的内存快照，dump文件的大小会和进程使用的内存大小一样，为了减少体积，你可以使用压缩软件进行压缩。&lt;/p>
+&lt;p>还有另外的工具可以创建dump文件，如&lt;a class="link" href="http://technet.microsoft.com/en-us/sysinternals/bb896653.aspx" target="_blank" rel="noopener"
+>Process Explorer from SysInternals&lt;/a>，也只需要在任务管理中右键选择“Full Dump”。&lt;/p>
+&lt;p>&lt;img src="http://ww2.sinaimg.cn/large/7ce4a9f6gw1e5q1j0grajj20fq0anwgj.jpg"
+loading="lazy"
+alt="windbg tutorial"
+>&lt;/p>
+&lt;p>ADPlus和DebugDiag也可以创建dump文件。ADPlus是windbg安装目录下的一个命令行程序，你可以用下面的命令创建一个dump文件：&lt;/p>
+&lt;pre>&lt;code>Adplus -quiet -hang -p 4332 -o d:\debug
+&lt;/code>&lt;/pre>
+&lt;p>4332是进程id，任务管理器默认是不显示进程id的，要显示出来，需要在windows任务管理器选择“查看-&amp;gt;选择列”，勾选“PID（进程标识符）”。&lt;/p>
+&lt;p>&lt;strong>开始使用WinDbg&lt;/strong>&lt;/p>
+&lt;p>****现在我们有了程序dump文件，打开windbg程序，选择菜单“File-&amp;gt;Open Crash Dump”，并选择刚创建的dump文件，你会看到一些信息：&lt;/p>
+&lt;pre>&lt;code>Loading Dump File [D:\debug\program6.dmp]
+User Mini Dump File: Only registers, stack and portions of memory are available
+Symbol search path is: srv*d:\debug\symbols*http://msdl.microsoft.com/download/symbols
+Executable search path is:
+Windows 7 Version 7600 MP (8 procs) Free x64
+Product: WinNt, suite: SingleUserTS
+Machine Name:
+Debug session time: Sun Feb 6 10:43:57.000 2011 (GMT-6)
+System Uptime: not available
+Process Uptime: 0 days 1:05:48.000
+.........................
+ntdll!NtRequestWaitReplyPort+0xa:
+00000000`76d2ff7a c3 ret
+&lt;/code>&lt;/pre>
+&lt;p>在上面的文字中，你可以看到dump文件的路径，符号文件的查找路径等信息。而程序最下方有个输入框，你可以在上面输入命令。&lt;/p>
+&lt;p>&lt;img src="http://ww1.sinaimg.cn/large/7ce4a9f6gw1e5q1jkayjcj20sg0dtjul.jpg"
+loading="lazy"
+alt="windbg tutorial"
+>&lt;/p>
+&lt;p>&lt;strong>显示模块&lt;/strong>&lt;/p>
+&lt;p>让我们试下显示程序已加载了哪些模块。在窗口最下方的输入框中，输入“lm”命令。&lt;/p>
+&lt;pre>&lt;code>0:000&amp;gt; lm
+start end module name
+00000000`00120000 00000000`00128000 program (deferred)
+00000000`742b0000 00000000`74379000 msvcr80 (deferred)
+00000000`76ac0000 00000000`76bba000 user32 (deferred)
+00000000`76bc0000 00000000`76cdf000 kernel32 (pdb symbols) d:\debug\symbols\kernel32.pdb\D5E268B5DD1048A1BFB011C744DD3DFA2\kernel32.pdb
+00000000`76ce0000 00000000`76e8b000 ntdll (pdb symbols) d:\debug\symbols\ntdll.pdb\0F7FCF88442F4B0E9FB51DC4A754D9DE2\ntdll.pdb
+000007fe`f3fb0000 000007fe`f4134000 mscorjit (deferred)
+000007fe`f5030000 000007fe`f5f0b000 mscorlib_ni (deferred)
+000007fe`f7650000 000007fe`f7ffe000 mscorwks (deferred)
+000007fe`f8010000 000007fe`f80a0000 mscoreei (deferred)
+000007fe`f80a0000 000007fe`f810f000 mscoree (deferred)
+000007fe`fcb70000 000007fe`fcb7f000 CRYPTBASE (deferred)
+000007fe`fcc40000 000007fe`fcc4f000 profapi (deferred)
+000007fe`fcf20000 000007fe`fcf8b000 KERNELBASE (deferred)
+000007fe`fd0e0000 000007fe`fd2e2000 ole32 (deferred)
+000007fe`fd4d0000 000007fe`fd59a000 usp10 (deferred)
+000007fe`fd6f0000 000007fe`fe476000 shell32 (deferred)
+000007fe`fe480000 000007fe`fe4ae000 imm32 (deferred)
+000007fe`fe840000 000007fe`fe84e000 lpk (deferred)
+000007fe`fe9d0000 000007fe`feaab000 advapi32 (deferred)
+000007fe`feb50000 000007fe`fec7e000 rpcrt4 (deferred)
+000007fe`fec80000 000007fe`fecf1000 shlwapi (deferred)
+000007fe`fed00000 000007fe`fed67000 gdi32 (deferred)
+000007fe`fee10000 000007fe`fef19000 msctf (deferred)
+000007fe`fef20000 000007fe`fefbf000 msvcrt (deferred)
+000007fe`fefd0000 000007fe`fefef000 sechost (deferred)
+&lt;/code>&lt;/pre>
+&lt;p>在上面的模块列表中，你需要关注的是mscorwks是否存在，PssCor2只能用于.NET 3.5的程序，假如是.NET 4.0程序，就看不到mscorwks模块。&lt;/p>
+&lt;p>对于SharePoint开发人员，假如你正在调试程序特性如 receivers 和 event 处理为什么不触发，lm将是很好用的命令。通过上面的列表，你能知道有哪些模块没加载进来，可能是配置不正确导致的，这样能大大地减少你查找问题的范围。对于ASP.NET开发人员，会有助于查找HttpModule不触发的原因，可能是web.config配置不正确。&lt;/p>
+&lt;p>&lt;strong>加载PssCor2&lt;/strong>&lt;/p>
+&lt;p>要把PssCor2扩展组件加载入windbg，需使用下面的命令：&lt;/p>
+&lt;pre>&lt;code>.load d:\debug\psscor2\amd64\psscor2.dll
+&lt;/code>&lt;/pre>
+&lt;p>我的电脑是64位的，所以我加载了AMD64 版本的PssCor2.dll。加载的PssCor2版本必须和dump文件进程所在服务器的架构相一致，假如你是调试x86程序的dump文件，你就必须加载x86版本的PssCor2.dll。
+输入下面的命令，以确认PssCor2是否加载成功：&lt;/p>
+&lt;pre>&lt;code>!help
+&lt;/code>&lt;/pre>
+&lt;p>正确会输入下面的内容：&lt;/p>
+&lt;pre>&lt;code>0:000&amp;gt; .load d:\debug\psscor2\amd64\psscor2.dll
+0:000&amp;gt; !help
+-------------------------------------------------------------------------------
+PSSCOR is a debugger extension DLL designed to aid in the debugging of managed
+programs. Functions are listed by category, then roughly in order of
+importance. Shortcut names for popular functions are listed in parenthesis.
+Type &amp;quot;!help &amp;quot; for detailed info on that function.
+Object Inspection Examining code and stacks
+----------------------------- -----------------------------
+DumpObj (do) Threads
+DumpArray (da) CLRStack
+DumpStackObjects (dso) IP2MD
+DumpAllExceptions (dae) BPMD
+DumpHeap U
+DumpVC DumpStack
+GCRoot EEStack
+ObjSize GCInfo
+FinalizeQueue EHInfo
+PrintException (pe) COMState
+TraverseHeap
+DumpField (df)
+DumpDynamicAssemblies (dda)
+GCRef
+DumpColumnNames (dcn)
+DumpRequestQueues
+DumpUMService
+Examining CLR data structures Diagnostic Utilities
+----------------------------- -----------------------------
+DumpDomain VerifyHeap
+EEHeap DumpLog
+Name2EE FindAppDomain
+SyncBlk SaveModule
+DumpThreadConfig (dtc) SaveAllModules (sam)
+DumpMT GCHandles
+DumpClass GCHandleLeaks
+DumpMD VMMap
+Token2EE VMStat
+EEVersion ProcInfo
+DumpModule StopOnException (soe)
+ThreadPool MinidumpMode
+DumpHttpRuntime FindDebugTrue
+DumpIL FindDebugModules
+PrintDateTime Analysis
+DumpDataTables CLRUsage
+DumpAssembly CheckCurrentException (cce)
+RCWCleanupList CurrentExceptionName (cen)
+PrintIPAddress VerifyObj
+DumpHttpContext HeapStat
+ASPXPages GCWhere
+DumpASPNETCache (dac) ListNearObj (lno)
+DumpSig
+DumpMethodSig Other
+DumpRuntimeTypes -----------------------------
+ConvertVTDateToDate (cvtdd) FAQ
+ConvertTicksToDate (ctd)
+DumpRequestTable
+DumpHistoryTable
+DumpBuckets
+GetWorkItems
+DumpXmlDocument (dxd)
+DumpCollection (dc)
+Examining the GC history
+-----------------------------
+HistInit
+HistStats
+HistRoot
+HistObj
+HistObjFind
+HistClear
+&lt;/code>&lt;/pre>
+&lt;p>&lt;strong>mscordacwks.dll&lt;/strong>&lt;/p>
+&lt;p>我喜欢在服务器中创建程序的dump文件，然后把dump文件转移到自己的windows7开发机上进行调试。假如服务器是Windows Server 2008 R2的操作系统，当我在本地开发机使用psscor2时，很容易遇到下面的错误：&lt;/p>
+&lt;pre>&lt;code>CLRDLL: CLR DLL load disabled
+Failed to load data access DLL, 0x80004005
+Verify that 1) you have a recent build of the debugger (6.2.14 or newer)
+2) the file mscordacwks.dll that matches your version of mscorwks.dll is
+in the version directory
+3) or, if you are debugging a dump file, verify that the file
+mscordacwks___.dll is on your symbol path.
+4) you are debugging on the same architecture as the dump file.
+For example, an IA64 dump file must be debugged on an IA64
+machine.
+You can also run the debugger command .cordll to control the debugger's
+load of mscordacwks.dll. .cordll -ve -u -l will do a verbose reload.
+If that succeeds, the PSSCOR command should work on retry.
+If you are debugging a minidump, you need to make sure that your executable
+path is pointing to mscorwks.dll as well.
+&lt;/code>&lt;/pre>
+&lt;p>通过bing搜索发现一篇相关的博客文章&lt;a class="link" href="http://blogs.msdn.com/b/dougste/archive/2009/02/18/failed-to-load-data-access-dll-0x80004005-or-what-is-mscordacwks-dll.aspx" target="_blank" rel="noopener"
+>how to work around the mscordacwks issue&lt;/a>，文章指出需要把服务器的mscordacwks文件拷贝到windbg程序目录下。mscordacwks在我的Windows Server 2008 R2服务器上的版本是4952，所以我把服务器上的mscordacwks拷贝到windbg目录，并重命名为“mscordacwks_AMD64_AMD64_2.0.50727.4952.dll“。mscordacwks在服务器的路径是“”C:\WINDOWS\Microsoft.NET\Framework\v2.0.50727\mscordacwks.dll”，假如你不知道正确的重命名规则，你可以输入下面的命令，输出会提示需要加载的mscordacwks命名。&lt;/p>
+&lt;pre>&lt;code>0:000&amp;gt; .cordll -ve -u -l
+CLR DLL status: No load attempts
+0:000&amp;gt; !threads
+CLRDLL: C:\WINDOWS\Microsoft.NET\Framework\v2.0.50727\mscordacwks.dll:2.0.50727.3053 f:0
+doesn't match desired version 2.0.50727.3625 f:0
+CLRDLL: Unable to find mscordacwks_AMD64_AMD64_2.0.50727.4952.dll by mscorwks search
+CLRDLL: Unable to find 'mscordacwks_AMD64_AMD64_2.0.50727.4952.dll' on the path
+CLRDLL: Unable to get version info for 'd:\debug\symbols\mscorwks.dll\4E154C985a9000\mscordacwks_AMD64_AMD64_2.0.50727.4952.dll', Win32 error 0n87
+CLRDLL: ERROR: Unable to load DLL mscordacwks_AMD64_AMD64_2.0.50727.4952.dll, Win32 error 0n87
+Failed to load data access DLL, 0x80004005
+Verify that 1) you have a recent build of the debugger (6.2.14 or newer)
+2) the file mscordacwks.dll that matches your version of mscorwks.dll is
+in the version directory
+3) or, if you are debugging a dump file, verify that the file
+mscordacwks___.dll is on your symbol path.
+4) you are debugging on the same architecture as the dump file.
+For example, an IA64 dump file must be debugged on an IA64
+machine.
+You can also run the debugger command .cordll to control the debugger's
+load of mscordacwks.dll. .cordll -ve -u -l will do a verbose reload.
+If that succeeds, the PSSCOR command should work on retry.
+If you are debugging a minidump, you need to make sure that your executable
+path is pointing to mscorwks.dll as well.
+&lt;/code>&lt;/pre>
+&lt;p>重命名后，再次输入上面的命令，会显示加载成功提示。&lt;/p>
+&lt;pre>&lt;code>0:000&amp;gt; .cordll -ve -u -l
+CLR DLL status: Loaded DLL mscordacwks_AMD64_AMD64_2.0.50727.4952.dll
+&lt;/code>&lt;/pre>
+&lt;p>&lt;strong>检查CRL堆栈&lt;/strong>&lt;/p>
+&lt;p>要查看CLR堆栈内容，输入下面命令：&lt;/p>
+&lt;pre>&lt;code>!clrstack
+&lt;/code>&lt;/pre>
+&lt;p>输出如下：&lt;/p>
+&lt;pre>&lt;code>0:000&amp;gt; !clrstack
+OS Thread Id: 0xa48 (0)
+*** WARNING: Unable to verify checksum for mscorlib.ni.dll
+Child-SP RetAddr Call Site
+000000000012e910 000007fef5a910e9 DomainNeutralILStubClass.IL_STUB(Microsoft.Win32.SafeHandles.SafeFileHandle, Byte*, Int32, Int32 ByRef, IntPtr)
+000000000012ea30 000007fef5a91202 System.IO.__ConsoleStream.ReadFileNative(Microsoft.Win32.SafeHandles.SafeFileHandle, Byte[], Int32, Int32, Int32, Int32 ByRef)
+000000000012ea90 000007fef538065a System.IO.__ConsoleStream.Read(Byte[], Int32, Int32)
+000000000012eaf0 000007fef53a28ca System.IO.StreamReader.ReadBuffer()
+000000000012eb40 000007fef5a9435f System.IO.StreamReader.ReadLine()
+000000000012eb90 000007ff0017015b System.IO.TextReader+SyncTextReader.ReadLine()
+000000000012ebf0 000007fef791d502 Program.Main()
+&lt;/code>&lt;/pre>
+&lt;p>真棒！你现在可以看到堆栈的调用情况了。我们可以立即看到程序进入了Program.Main函数，调用Console.ReadLine并等待用户的输入。&lt;/p>
+&lt;p>&lt;strong>结论&lt;/strong>&lt;/p>
+&lt;p>本篇文章只是简单介绍windbg的使用，假如你想全局的了解windbg，并如何使用windbg做故障排除，可以看下Tess Ferrandez的视频教程“Debugging .NET Applications with WinDbg“。&lt;/p>
+&lt;p>&lt;strong>扩展阅读：&lt;/strong>&lt;/p>
+&lt;p>&lt;a class="link" href="http://technet.microsoft.com/en-us/sysinternals/bb896653.aspx" target="_blank" rel="noopener"
+>Process Explorer from SysInternals&lt;/a>&lt;/p>
+&lt;p>&lt;a class="link" href="http://www.microsoft.com/downloads/en/details.aspx?FamilyID=5c068e9f-ebfe-48a5-8b2f-0ad6ab454ad4" target="_blank" rel="noopener"
+>PssCor2 Debugging Extension&lt;/a>&lt;/p>
+&lt;p>&lt;a class="link" href="http://www.microsoft.com/whdc/DevTools/Debugging/default.mspx" target="_blank" rel="noopener"
+>Download the Debugging Tools for Windows&lt;/a>&lt;/p>
+&lt;p>&lt;a class="link" href="http://msdn.microsoft.com/en-us/library/bb190764.aspx" target="_blank" rel="noopener"
+>SOS.dll (SOS Debugging Extension)&lt;/a>&lt;/p>
+&lt;p>&lt;a class="link" href="http://blogs.msdn.com/b/dougste/archive/2009/02/18/failed-to-load-data-access-dll-0x80004005-or-what-is-mscordacwks-dll.aspx" target="_blank" rel="noopener"
+>“Failed to load data access DLL, 0x80004005” – OR – What is mscordacwks.dll?&lt;/a>&lt;/p>
+&lt;p>&lt;a class="link" href="http://www.microsoft.com/downloads/en/details.aspx?FamilyID=28bd5941-c458-46f1-b24d-f60151d875a3&amp;amp;displaylang=en" target="_blank" rel="noopener"
+>DebugDiag&lt;/a>&lt;/p>
+&lt;p>&lt;a class="link" href="http://blogs.msdn.com/b/johan/archive/2007/11/26/getting-started-with-windbg-part-ii.aspx" target="_blank" rel="noopener"
+>Getting started with windbg - part I&lt;/a>&lt;/p>
+&lt;p>&lt;a class="link" href="http://blogs.msdn.com/b/johan/archive/2007/11/26/getting-started-with-windbg-part-ii.aspx" target="_blank" rel="noopener"
+>Getting started with windbg - part II&lt;/a>&lt;/p></description></item></channel></rss>

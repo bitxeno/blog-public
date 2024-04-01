@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Gradle on bitxeno's notes</title><link>https://blog.xenori.com/tags/gradle/</link><description>Recent content in Gradle on bitxeno's notes</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Thu, 07 May 2020 11:27:10 +0800</lastBuildDate><atom:link href="https://blog.xenori.com/tags/gradle/index.xml" rel="self" type="application/rss+xml"/><item><title>各种开发相关的国内源</title><link>https://blog.xenori.com/2020/05/china-speedup-source-for-develop/</link><pubDate>Thu, 07 May 2020 11:27:10 +0800</pubDate><guid>https://blog.xenori.com/2020/05/china-speedup-source-for-develop/</guid><description>&lt;pre tabindex="0">&lt;code>阿里云统一官方镜像站：https://developer.aliyun.com/mirror/
+包含了所有开源的国内镜像源，如homebrew，npm，pip，centos等，差不多满足所有开发需求， 🐂🍻
+&lt;/code>&lt;/pre>&lt;h2 id="go-get-国内源">go get 国内源&lt;/h2>
+&lt;p>七牛：https://goproxy.cn&lt;/p>
+&lt;p>官方全球加速CDN：https://goproxy.io/&lt;/p>
+&lt;p>第三方：https://gocenter.io&lt;/p>
+&lt;h2 id="pip-国内源">pip 国内源&lt;/h2>
+&lt;p>清华：https://pypi.tuna.tsinghua.edu.cn/simple&lt;/p>
+&lt;p>阿里云：http://mirrors.aliyun.com/pypi/simple/&lt;/p>
+&lt;p>中国科技大学 &lt;a class="link" href="https://pypi.mirrors.ustc.edu.cn/simple/" target="_blank" rel="noopener"
+>https://pypi.mirrors.ustc.edu.cn/simple/&lt;/a>&lt;/p>
+&lt;p>华中理工大学：http://pypi.hustunique.com/&lt;/p>
+&lt;p>山东理工大学：http://pypi.sdutlinux.org/&lt;/p>
+&lt;p>豆瓣：http://pypi.douban.com/simple/&lt;/p>
+&lt;h3 id="使用方法">使用方法&lt;/h3>
+&lt;p>临时使用：&lt;/p>
+&lt;pre tabindex="0">&lt;code>pip install pyspider -i https://pypi.tuna.tsinghua.edu.cn/simple
+&lt;/code>&lt;/pre>&lt;p>永久修改，一劳永逸：&lt;/p>
+&lt;p>Linux下，修改 ~/.pip/pip.conf (没有就创建一个文件夹及文件。文件夹要加“.”，表示是隐藏文件夹)&lt;/p>
+&lt;p>内容如下：&lt;/p>
+&lt;pre tabindex="0">&lt;code>[global]
+index-url = https://pypi.tuna.tsinghua.edu.cn/simple
+[install]
+trusted-host=mirrors.aliyun.com
+&lt;/code>&lt;/pre>&lt;h2 id="gradle国内源">gradle国内源&lt;/h2>
+&lt;p>阿里：http://maven.aliyun.com/nexus/content/groups/public&lt;/p>
+&lt;h3 id="使用方法-1">使用方法&lt;/h3>
+&lt;p>配置只在当前项目生效：
+在 build.gradle 文件内修改/添加 repositories 配置&lt;/p>
+&lt;pre tabindex="0">&lt;code>repositories {
+maven {
+url &amp;#34;http://maven.aliyun.com/nexus/content/groups/public&amp;#34;
+}
+}
+&lt;/code>&lt;/pre>&lt;p>配置全局生效：
+找到 (用户家目录)/.gradle/init.gradle 文件，如果找不到 init.gradle 文件，自己新建一个修改/添加 init.gradle 文件内的 repositories 配置&lt;/p>
+&lt;pre tabindex="0">&lt;code>allprojects {
+repositories {
+maven {
+url &amp;#34;http://maven.aliyun.com/nexus/content/groups/public&amp;#34;
+}
+}
+}
+&lt;/code>&lt;/pre></description></item></channel></rss>

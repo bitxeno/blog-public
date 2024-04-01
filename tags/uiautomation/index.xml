@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>UIAutomation on bitxeno's notes</title><link>https://blog.xenori.com/tags/uiautomation/</link><description>Recent content in UIAutomation on bitxeno's notes</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Thu, 13 May 2021 15:43:11 +0800</lastBuildDate><atom:link href="https://blog.xenori.com/tags/uiautomation/index.xml" rel="self" type="application/rss+xml"/><item><title>Windows下获取鼠标当前选中文字</title><link>https://blog.xenori.com/2021/05/get-selected-text-in-windows/</link><pubDate>Thu, 13 May 2021 15:43:11 +0800</pubDate><guid>https://blog.xenori.com/2021/05/get-selected-text-in-windows/</guid><description>&lt;img src="https://blog.xenori.com/2021/05/get-selected-text-in-windows/cover.png" alt="Featured image of post Windows下获取鼠标当前选中文字" />&lt;p>Mac下的PopClip是我很喜欢的应用，一直想在Windows下找个替代的，但一直没找到，就准备自己简单实现一个。但研究后发现，Windows下是没有统一的API接口来获取当前用户选中文字的。商业化的&lt;a class="link" href="https://www.textcapture.com/gb/getword.htm" target="_blank" rel="noopener"
+>GetWord&lt;/a>组件可以实现，效果不错，但是这组件是不能免费在非商业应用中使用的。&lt;/p>
+&lt;p>经过一番网络查找后，发现有几个方案可以获取到，但都有优缺点，都不完美，需要把几种方案结合起来使用才能获取大部分情景下的选中文字。下面记录下这几种不同的实现方案：&lt;/p>
+&lt;h2 id="microsoft-ui-automation">Microsoft UI Automation&lt;/h2>
+&lt;p>&lt;a class="link" href="https://docs.microsoft.com/zh-cn/dotnet/framework/ui-automation/" target="_blank" rel="noopener"
+>Microsoft UI Automation&lt;/a>是UI的自动化测试框架，提供对windows用户界面（UI）相关信息的编程访问。它提供的&lt;a class="link" href="https://docs.microsoft.com/en-us/windows/win32/api/uiautomationclient/nn-uiautomationclient-iuiautomationtextpattern" target="_blank" rel="noopener"
+>IUIAutomationTextPattern&lt;/a>接口，可以用来获取文本控件的选中内容，获取示例（C#）：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-c#" data-lang="c#">&lt;span class="line">&lt;span class="cl">&lt;span class="kt">var&lt;/span> &lt;span class="n">el&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="n">AutomationElement&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">FocusedElement&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="kt">object&lt;/span> &lt;span class="n">pattern&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">if&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="n">el&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">TryGetCurrentPattern&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">TextPattern&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">Pattern&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="k">out&lt;/span> &lt;span class="n">pattern&lt;/span>&lt;span class="p">))&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="kt">var&lt;/span> &lt;span class="n">selectRanges&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="p">((&lt;/span>&lt;span class="n">TextPattern&lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="n">pattern&lt;/span>&lt;span class="p">).&lt;/span>&lt;span class="n">GetSelection&lt;/span>&lt;span class="p">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">foreach&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="kt">var&lt;/span> &lt;span class="n">rng&lt;/span> &lt;span class="k">in&lt;/span> &lt;span class="n">selectRanges&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">Console&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">WriteLine&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">rng&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">GetText&lt;/span>&lt;span class="p">(-&lt;/span>&lt;span class="m">1&lt;/span>&lt;span class="p">));&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
+&lt;div class="notices success" >&lt;blockquote>&lt;p>优点：官方支持的接口，edge、chrome等浏览器内容都能获取到&lt;/p>
+&lt;/blockquote>&lt;/div>
+&lt;div class="notices " >&lt;blockquote>&lt;p>缺点：很多应用不支持这接口，或支持得不好，测试发现有些使用.Net组件能获取的，但自己用Go+Win32就没法正确获取&lt;/p>
+&lt;/blockquote>&lt;/div>
+&lt;h2 id="em_getsel--wm_gettext-message">EM_GETSEL &amp;amp; WM_GETTEXT message&lt;/h2>
+&lt;p>向windows窗口发送&lt;a class="link" href="https://docs.microsoft.com/en-us/windows/win32/controls/em-getsel" target="_blank" rel="noopener"
+>EM_GETSEL&lt;/a>消息，可以获取到编辑控件当前选中文本的起始和结束索引位置，结合&lt;a class="link" href="https://docs.microsoft.com/en-us/windows/win32/winmsg/wm-gettext" target="_blank" rel="noopener"
+>WM_GETTEXT&lt;/a>获取编辑控件当前文本内容，就能计算出选中的文字，获取示例（Go）：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-go" data-lang="go">&lt;span class="line">&lt;span class="cl">&lt;span class="kd">func&lt;/span> &lt;span class="nf">getSelection&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="kt">string&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="kt">error&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1">// attach to other windows thread
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="kd">var&lt;/span> &lt;span class="nx">processId&lt;/span> &lt;span class="kt">uint32&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="kd">var&lt;/span> &lt;span class="nx">attach&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="kc">false&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">forgroundWnd&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="nx">win&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">GetForegroundWindow&lt;/span>&lt;span class="p">()&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">targetThreadId&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="nf">GetWindowThreadProcessId&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">forgroundWnd&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="o">&amp;amp;&lt;/span>&lt;span class="nx">processId&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">currentThreadId&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="nf">GetCurrentThreadId&lt;/span>&lt;span class="p">()&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="nx">targetThreadId&lt;/span> &lt;span class="o">!=&lt;/span> &lt;span class="nx">currentThreadId&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">attach&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="nf">AttachThreadInput&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">currentThreadId&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">targetThreadId&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="kc">true&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="nx">attach&lt;/span> &lt;span class="o">==&lt;/span> &lt;span class="mi">0&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="s">&amp;#34;&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">fmt&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">Errorf&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;AttachThreadInput failed&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">focusWnd&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="nx">win&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">GetFocus&lt;/span>&lt;span class="p">()&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1">//Get total text length
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="nx">textlength&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="nb">uint32&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">win&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">SendMessage&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">focusWnd&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">win&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">WM_GETTEXTLENGTH&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="mi">0&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="mi">0&lt;/span>&lt;span class="p">))&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1">//Have any text at all?
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="k">if&lt;/span> &lt;span class="nx">textlength&lt;/span> &lt;span class="p">&amp;gt;&lt;/span> &lt;span class="mi">0&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">textlength&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="nx">textlength&lt;/span> &lt;span class="o">+&lt;/span> &lt;span class="mi">1&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1">//Get selection
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="nx">selstart&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="mi">0&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">selend&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="mi">0&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">win&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">SendMessage&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">focusWnd&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">win&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">EM_GETSEL&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nb">uintptr&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">unsafe&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">Pointer&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="o">&amp;amp;&lt;/span>&lt;span class="nx">selstart&lt;/span>&lt;span class="p">)),&lt;/span> &lt;span class="nb">uintptr&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">unsafe&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">Pointer&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="o">&amp;amp;&lt;/span>&lt;span class="nx">selend&lt;/span>&lt;span class="p">)))&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">sb&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="nb">make&lt;/span>&lt;span class="p">([]&lt;/span>&lt;span class="kt">uint16&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">textlength&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">win&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">SendMessage&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">focusWnd&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">win&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">WM_GETTEXT&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nb">uintptr&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">textlength&lt;/span>&lt;span class="p">),&lt;/span> &lt;span class="nb">uintptr&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">unsafe&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">Pointer&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="o">&amp;amp;&lt;/span>&lt;span class="nx">sb&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="mi">0&lt;/span>&lt;span class="p">])))&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1">//Slice out selection
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="nx">value&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="nx">syscall&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">UTF16ToString&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">sb&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">length&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="nb">len&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">value&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="nx">length&lt;/span> &lt;span class="p">&amp;gt;&lt;/span> &lt;span class="mi">0&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="o">&amp;amp;&amp;amp;&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="nx">selend&lt;/span>&lt;span class="o">-&lt;/span>&lt;span class="nx">selstart&lt;/span> &lt;span class="p">&amp;gt;&lt;/span> &lt;span class="mi">0&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="o">&amp;amp;&amp;amp;&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="nx">selstart&lt;/span> &lt;span class="p">&amp;lt;&lt;/span> &lt;span class="nx">length&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="o">&amp;amp;&amp;amp;&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="nx">selend&lt;/span> &lt;span class="o">&amp;lt;=&lt;/span> &lt;span class="nx">length&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="nx">attach&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nf">AttachThreadInput&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">currentThreadId&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">targetThreadId&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="kc">false&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="nx">value&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="nx">selstart&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="nx">selend&lt;/span>&lt;span class="p">],&lt;/span> &lt;span class="kc">nil&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="nx">attach&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nf">AttachThreadInput&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">currentThreadId&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">targetThreadId&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="kc">false&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1">//Failed :(
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="k">return&lt;/span> &lt;span class="s">&amp;#34;&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">fmt&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">Errorf&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;get selected failed&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
+&lt;div class="notices success" >&lt;blockquote>&lt;p>优点：支持旧的winform、win32应用&lt;/p>
+&lt;/blockquote>&lt;/div>
+&lt;div class="notices " >&lt;blockquote>&lt;p>缺点：新的WPF、UWP应用不支持&lt;/p>
+&lt;/blockquote>&lt;/div>
+&lt;h2 id="hook-textout-api">Hook TextOut API&lt;/h2>
+&lt;p>部分windows应用或游戏是通过底层GDI++的&lt;a class="link" href="https://docs.microsoft.com/en-us/windows/win32/api/wingdi/nf-wingdi-textoutw" target="_blank" rel="noopener"
+>TextOutW&lt;/a>或&lt;a class="link" href="https://docs.microsoft.com/en-us/windows/win32/api/wingdi/nf-wingdi-exttextoutw" target="_blank" rel="noopener"
+>ExtTextOutW&lt;/a>接口渲染文字的，我们可以通过HOOK技术，把这些接口替换为我们自己的接口，调用&lt;a class="link" href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-invalidaterect" target="_blank" rel="noopener"
+>InvalidateRect&lt;/a>让应用重绘下鼠标划过的区域，这样应用再调用ExTextOutW接口渲染时，就能拿到相应的文字了。具体原理可以参考这篇论文：&lt;a class="link" href="https://scialert.net/fulltext/?doi=itj.2013.1668.1672#1147370_ja" target="_blank" rel="noopener"
+>Principle of Capturing Word from Screen and Its Implement Methods&lt;/a>，相关示例项目可参考：&lt;/p>
+&lt;ul>
+&lt;li>&lt;a class="link" href="https://github.com/Artikash/Textractor" target="_blank" rel="noopener"
+>Textractor&lt;/a>&lt;/li>
+&lt;li>&lt;a class="link" href="https://github.com/williammortl/Prochook64/" target="_blank" rel="noopener"
+>Prochook64&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;div class="notices success" >&lt;blockquote>&lt;p>优点：支持获取旧游戏的文本&lt;/p>
+&lt;/blockquote>&lt;/div>
+&lt;div class="notices " >&lt;blockquote>&lt;p>缺点：实现难度大，现在大多数应用都是通过TrueType字体文件渲染的，只能拿到&lt;code>GLYPH_INDEX&lt;/code>，拿不到最原始的文字。&lt;/p>
+&lt;/blockquote>&lt;/div>
+&lt;h2 id="ocr">OCR&lt;/h2>
+&lt;p>截图鼠标划过的区域，再通过OCR出来文字，很多词典软件的鼠标取词通过这方式实现&lt;/p>
+&lt;div class="notices success" >&lt;blockquote>&lt;p>优点：任何windows应用都支持&lt;/p>
+&lt;/blockquote>&lt;/div>
+&lt;div class="notices " >&lt;blockquote>&lt;p>缺点：OCR处理慢，混合多语言文字准确度不高&lt;/p>
+&lt;/blockquote>&lt;/div>
+&lt;h2 id="clipboard">Clipboard&lt;/h2>
+&lt;p>通过模拟复制命令，把选中文字先复制到剪贴板，再从剪贴板取出来。使用示例（Go）：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-go" data-lang="go">&lt;span class="line">&lt;span class="cl">&lt;span class="kd">func&lt;/span> &lt;span class="nf">getSelectionByClipboard&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="kt">string&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="kt">error&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">hwnd&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="nx">win&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">GetForegroundWindow&lt;/span>&lt;span class="p">()&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">winText&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="nb">make&lt;/span>&lt;span class="p">([]&lt;/span>&lt;span class="kt">uint16&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="mi">1000&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nf">GetWindowText&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">hwnd&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="o">&amp;amp;&lt;/span>&lt;span class="nx">winText&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="mi">0&lt;/span>&lt;span class="p">],&lt;/span> &lt;span class="nb">uint32&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nb">len&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">winText&lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="o">-&lt;/span>&lt;span class="mi">1&lt;/span>&lt;span class="p">))&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">windowName&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="nx">syscall&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">UTF16ToString&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">winText&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1">// save old clipboard content
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="nx">oldClipboardText&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">_&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="nf">GetClipboardText&lt;/span>&lt;span class="p">()&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1">// current sequentNumber
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="nx">oldSeqNumber&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">_&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="nf">GetClipboardSequenceNumber&lt;/span>&lt;span class="p">()&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1">// send ctrl+c copy event
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="k">if&lt;/span> &lt;span class="nx">strings&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">Contains&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">windowName&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="s">&amp;#34;Internet Explore&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="o">||&lt;/span> &lt;span class="nx">strings&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">Contains&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">windowName&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="s">&amp;#34;Microsoft Edge&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1">// Internet Explore ignore ctrl+c click event
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="nx">win&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">PostMessage&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">hwnd&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">win&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">WM_COMMAND&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="mh">0x0001000f&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="mi">0&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span> &lt;span class="k">else&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1">// send selected to clipboard
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="nf">SendCopy&lt;/span>&lt;span class="p">()&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">clipboardChange&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="o">&amp;lt;-&lt;/span>&lt;span class="nf">waitForClipboardChange&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">oldSeqNumber&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="nx">clipboardChange&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">text&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">_&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="nf">GetClipboardText&lt;/span>&lt;span class="p">()&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1">// restore old clipborad state
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="nf">UpdateClipboardText&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">oldClipboardText&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="nx">text&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="kc">nil&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1">//Failed :(
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="k">return&lt;/span> &lt;span class="s">&amp;#34;&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">fmt&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">Errorf&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;get selected failed&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="kd">func&lt;/span> &lt;span class="nf">waitForClipboardChange&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">oldSeqNumber&lt;/span> &lt;span class="kt">uint32&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="kd">chan&lt;/span> &lt;span class="kt">bool&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">waitChangeCh&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="nb">make&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="kd">chan&lt;/span> &lt;span class="kt">bool&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">timeout&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="mi">200&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">runTime&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="mi">0&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">changeCheckTimer&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="nx">time&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">NewTimer&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">10&lt;/span> &lt;span class="o">*&lt;/span> &lt;span class="nx">time&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">Microsecond&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">go&lt;/span> &lt;span class="kd">func&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">for&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="o">&amp;lt;-&lt;/span>&lt;span class="nx">changeCheckTimer&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">C&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">seqNumber&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">_&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="nf">GetClipboardSequenceNumber&lt;/span>&lt;span class="p">()&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="nx">seqNumber&lt;/span> &lt;span class="o">!=&lt;/span> &lt;span class="nx">oldSeqNumber&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">waitChangeCh&lt;/span> &lt;span class="o">&amp;lt;-&lt;/span> &lt;span class="kc">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">runTime&lt;/span> &lt;span class="o">+=&lt;/span> &lt;span class="mi">10&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="nx">runTime&lt;/span> &lt;span class="p">&amp;gt;&lt;/span> &lt;span class="nx">timeout&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">waitChangeCh&lt;/span> &lt;span class="o">&amp;lt;-&lt;/span> &lt;span class="kc">false&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">changeCheckTimer&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">Reset&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">10&lt;/span> &lt;span class="o">*&lt;/span> &lt;span class="nx">time&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">Microsecond&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}()&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="nx">waitChangeCh&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>
+&lt;div class="notices success" >&lt;blockquote>&lt;p>优点：支持复制的应用都可以支持，如excel，word等&lt;/p>
+&lt;/blockquote>&lt;/div>
+&lt;div class="notices " >&lt;blockquote>&lt;p>缺点：污染系统剪贴板，当用户有使用剪贴板历史软件时，会看到所有选中的文字&lt;/p>
+&lt;/blockquote>&lt;/div></description></item></channel></rss>

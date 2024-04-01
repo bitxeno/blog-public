@@ -1,0 +1,248 @@
+<!doctype html><html lang=zh-cn dir=ltr><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><meta name=description content='原文：http://blogs.msdn.com/b/kaevans/archive/2011/04/11/intro-to-windbg-for-net-developers.aspx 翻译：bitxeno
+当你的代码发布为产品后，无论是在其他人的电脑中运行，还是部署到服务器中，你通常不再能访问到它的程序文件，也不能观察到代码的当前运行情况和运行环境。当你的代码在新的环境运行时，有很多因素会影响到程序的运行情况，如服务器系统打了更新补丁，网络策略改变，防火墙规则限制，磁盘权限配置等等。当代码运行不正常时，你可能只能靠代码中各处输出的日志来判断运行情况。但只靠输出日志，你有时还是不能判断故障出现的原因。
+在不浪费客户时间的同时做故障排除对你是个很大的挑战，因为不会有客户喜欢被一个搞技术的家伙不断问是点了那个按钮操作了哪些步骤导致程序出错的。boss也不会给你几天甚至几周的时间让你慢慢排除故障，你必须现在就知道到底发生了什么。
+理想情况下，你应该能看到堆栈跟踪，能查看到当前的变量值，能调试代码。事实证明你可以做到这点。。。而且不需要附加到客户环境中！
+'><title>面向.NET开发人员的WinDbg入门教程</title>
+<link rel=canonical href=https://blog.xenori.com/2012/02/intro-to-windbg-for-dotnet-developers/><link rel=stylesheet href=/scss/style.min.450926226e724574a6b936335ea06111f8aeb253d932c86cb2cc807341cd2889.css><meta property='og:title' content='面向.NET开发人员的WinDbg入门教程'><meta property='og:description' content='原文：http://blogs.msdn.com/b/kaevans/archive/2011/04/11/intro-to-windbg-for-net-developers.aspx 翻译：bitxeno
+当你的代码发布为产品后，无论是在其他人的电脑中运行，还是部署到服务器中，你通常不再能访问到它的程序文件，也不能观察到代码的当前运行情况和运行环境。当你的代码在新的环境运行时，有很多因素会影响到程序的运行情况，如服务器系统打了更新补丁，网络策略改变，防火墙规则限制，磁盘权限配置等等。当代码运行不正常时，你可能只能靠代码中各处输出的日志来判断运行情况。但只靠输出日志，你有时还是不能判断故障出现的原因。
+在不浪费客户时间的同时做故障排除对你是个很大的挑战，因为不会有客户喜欢被一个搞技术的家伙不断问是点了那个按钮操作了哪些步骤导致程序出错的。boss也不会给你几天甚至几周的时间让你慢慢排除故障，你必须现在就知道到底发生了什么。
+理想情况下，你应该能看到堆栈跟踪，能查看到当前的变量值，能调试代码。事实证明你可以做到这点。。。而且不需要附加到客户环境中！
+'><meta property='og:url' content='https://blog.xenori.com/2012/02/intro-to-windbg-for-dotnet-developers/'><meta property='og:site_name' content="bitxeno's notes"><meta property='og:type' content='article'><meta property='article:section' content='Post'><meta property='article:tag' content='WinDbg'><meta property='article:published_time' content='2012-02-01T08:28:43+00:00'><meta property='article:modified_time' content='2012-02-01T08:28:43+00:00'><meta name=twitter:title content="面向.NET开发人员的WinDbg入门教程"><meta name=twitter:description content="原文：http://blogs.msdn.com/b/kaevans/archive/2011/04/11/intro-to-windbg-for-net-developers.aspx 翻译：bitxeno
+当你的代码发布为产品后，无论是在其他人的电脑中运行，还是部署到服务器中，你通常不再能访问到它的程序文件，也不能观察到代码的当前运行情况和运行环境。当你的代码在新的环境运行时，有很多因素会影响到程序的运行情况，如服务器系统打了更新补丁，网络策略改变，防火墙规则限制，磁盘权限配置等等。当代码运行不正常时，你可能只能靠代码中各处输出的日志来判断运行情况。但只靠输出日志，你有时还是不能判断故障出现的原因。
+在不浪费客户时间的同时做故障排除对你是个很大的挑战，因为不会有客户喜欢被一个搞技术的家伙不断问是点了那个按钮操作了哪些步骤导致程序出错的。boss也不会给你几天甚至几周的时间让你慢慢排除故障，你必须现在就知道到底发生了什么。
+理想情况下，你应该能看到堆栈跟踪，能查看到当前的变量值，能调试代码。事实证明你可以做到这点。。。而且不需要附加到客户环境中！
+"><link rel="shortcut icon" href=/favicon.ico><meta name=referrer content="no-referrer"><link href=/index.xml rel=alternate type=application/rss+xml title="bitxeno's notes"><style>.article-page article .article-content img{max-width:720px!important;max-height:720px!important;object-fit:contain;width:100%}.article-summary-more{margin-left:5px;padding:1px 5px;border-radius:5px;border:var(--card-text-color-secondary)solid 1px;color:var(--card-text-color-secondary);font-size:.8em}.article-content code{background-color:rgba(27,31,35,5%);margin:0 2px}div.hugo-encrypt-encryption-notice{margin:1.5em 0;padding:0 var(--content-padding)}.hugo-encryptor-tips{margin-top:1.5rem;color:#797979;font-style:italic}.hugo-encrypt-form .hugo-encrypt-input{padding:4px 0;border:1px solid #f596aa;border-radius:1rem;outline:none;line-height:1.25;text-align:center;color:#4a4a4a;-webkit-appearance:none}.hugo-encrypt-form .hugo-encrypt-button{margin-left:1rem;padding:4px 16px;background-color:#fafafa;border:1px solid #fff;border-radius:1rem;box-shadow:0 1px 2px rgba(0,0,0,.3);outline:none;line-height:1.25;text-align:center;color:#e16b8c;transition:all ease-out .3s}.hugo-encrypt-form .hugo-encrypt-button:hover{background-color:#e16b8c;border-color:#e16b8c;color:#fafafa;cursor:pointer}.hugo-encrypt-input-response{margin-left:1rem;color:#f08080}div.notices.warning>blockquote{border-left:var(--blockquote-border-size)solid #f0b37e;background:#fff2db}div.notices.success>blockquote{border-left:var(--blockquote-border-size)solid rgba(92,184,92,.8);background:#e6f9e6}div.notices>blockquote{border-left:var(--blockquote-border-size)solid #6ab0de;background:#e7f2fa}div.notices.error>blockquote{border-left:var(--blockquote-border-size)solid rgba(217,83,79,.8);background:#fae2e2}</style></head><body class=article-page><script>(function(){const e="StackColorScheme";localStorage.getItem(e)||localStorage.setItem(e,"auto")})()</script><script>(function(){const t="StackColorScheme",e=localStorage.getItem(t),n=window.matchMedia("(prefers-color-scheme: dark)").matches===!0;e=="dark"||e==="auto"&&n?document.documentElement.dataset.scheme="dark":document.documentElement.dataset.scheme="light"})()</script><div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky"><button class="hamburger hamburger--spin" type=button id=toggle-menu aria-label=切换菜单>
+<span class=hamburger-box><span class=hamburger-inner></span></span></button><header><figure class=site-avatar><a href=/><img src=/img/avatar_hu3ef0a0a31328f79e0f83bf1637b02207_76647_300x0_resize_box_3.png width=300 height=281 class=site-logo loading=lazy alt=Avatar>
+</a><span class=emoji>🍥</span></figure><div class=site-meta><h1 class=site-name><a href=/>bitxeno's notes</a></h1><h2 class=site-description>simple thinking, simple life.</h2></div></header><ol class=menu id=main-menu><li><a href=/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><polyline points="5 12 3 12 12 3 21 12 19 12"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/><path d="M9 21v-6a2 2 0 012-2h2a2 2 0 012 2v6"/></svg>
+<span>首页</span></a></li><li><a href=/archives/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><rect x="3" y="4" width="18" height="4" rx="2"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+<span>归档</span></a></li><li><a href=/search/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg>
+<span>搜索</span></a></li><li><a href=/star/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-star" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 17.75l-6.172 3.245 1.179-6.873-5-4.867 6.9-1 3.086-6.253 3.086 6.253 6.9 1-5 4.867 1.179 6.873z"/></svg>
+<span>推荐</span></a></li><li><a href=/abouts/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg>
+<span>关于</span></a></li><li><a href=/index.xml><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-rss" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="5" cy="19" r="1"/><path d="M4 4a16 16 0 0116 16"/><path d="M4 11a9 9 0 019 9"/></svg>
+<span>订阅</span></a></li><div class=menu-bottom-section><li id=i18n-switch><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 5h7"/><path d="M9 3v2c0 4.418-2.239 8-5 8"/><path d="M5 9c-.003 2.144 2.952 3.908 6.7 4"/><path d="M12 20l4-9 4 9"/><path d="M19.1 18h-6.2"/></svg>
+<select name=language onchange="window.location.href=this.selectedOptions[0].value"><option value=https://blog.xenori.com/ selected></option></select></li><li id=dark-mode-toggle><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="8" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="16" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<span>暗色模式</span></li></div></ol></aside><main class="main full-width"><article class=main-article><header class=article-header><div class=article-details><header class=article-category><a href=/categories/%E6%8A%80%E6%9C%AF/>技术</a></header><div class=article-title-wrapper><h2 class=article-title><a href=/2012/02/intro-to-windbg-for-dotnet-developers/>面向.NET开发人员的WinDbg入门教程</a></h2></div><footer class=article-time><div><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11.795 21H5a2 2 0 01-2-2V7a2 2 0 012-2h12a2 2 0 012 2v4"/><circle cx="18" cy="18" r="4"/><path d="M15 3v4"/><path d="M7 3v4"/><path d="M3 11h16"/><path d="M18 16.496V18l1 1"/></svg>
+<time class=article-time--published>2012年02月01号</time></div><div><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+<time class=article-time--reading>阅读时长: 9 分钟</time></div></footer></div></header><section class=article-content><p>原文：<a class=link href=http://blogs.msdn.com/b/kaevans/archive/2011/04/11/intro-to-windbg-for-net-developers.aspx target=_blank rel=noopener>http://blogs.msdn.com/b/kaevans/archive/2011/04/11/intro-to-windbg-for-net-developers.aspx
+</a> 翻译：bitxeno</p><p>当你的代码发布为产品后，无论是在其他人的电脑中运行，还是部署到服务器中，你通常不再能访问到它的程序文件，也不能观察到代码的当前运行情况和运行环境。当你的代码在新的环境运行时，有很多因素会影响到程序的运行情况，如服务器系统打了更新补丁，网络策略改变，防火墙规则限制，磁盘权限配置等等。当代码运行不正常时，你可能只能靠代码中各处输出的日志来判断运行情况。但只靠输出日志，你有时还是不能判断故障出现的原因。</p><p>在不浪费客户时间的同时做故障排除对你是个很大的挑战，因为不会有客户喜欢被一个搞技术的家伙不断问是点了那个按钮操作了哪些步骤导致程序出错的。boss也不会给你几天甚至几周的时间让你慢慢排除故障，你必须现在就知道到底发生了什么。</p><p>理想情况下，你应该能看到堆栈跟踪，能查看到当前的变量值，能调试代码。事实证明你可以做到这点。。。而且不需要附加到客户环境中！</p><p><strong>下载WinDbg</strong>
+<a class=link href="http://www.microsoft.com/download/en/details.aspx?displaylang=en&amp;id=8279" target=_blank rel=noopener>下载Debugging Tools for Windows</a>到你的本地开发机中，windbg是其中的一部分，如果你只需要windbg，在可以在“<em>Common Utilities</em>”中选择“<em>Debugging Tools for Windows</em>&ldquo;进入安装。安装程序会根据你电脑的cpu类型安装对应的windbg，x86的电脑会安装x86版本，x64的cpu电脑就会安装x64版。如果你选择的是“<em>Redistributable Packages</em>“，就会为你下载全部三个版本（x86,x64,Itanium）。</p><p><img src=http://ww3.sinaimg.cn/large/7ce4a9f6gw1e5q1emjvn9j20l00el41h.jpg loading=lazy alt="windbg tutorial"></p><p>WinDbg默认会安装到c盘的“Program Files\Debugging Tools for Windows”文件夹下，建议你把安装目录复制到“d:\debug”，这样方便后面增加其他扩展组件。</p><p>安装好后，目录下的windbg.exe就是windbg程序</p><p><strong>安装PssCor2</strong></p><p>****下一步是加载托管代码扩展组件PssCor2。默认时，WinDbg只能用于调试非托管代码程序 ，而加载.net使用的SOS.dll扩展组件后，WinDbg就能调试托管程序了。WinDbg调试.net程序的另一个选择是PssCor2，它是SOS.dll的超集，并提供了一些面对托管代码的额外功能，如查看托管线程，托管堆，CLR堆栈等等。</p><p><a class=link href="http://www.microsoft.com/download/en/details.aspx?id=1073" target=_blank rel=noopener>下载PssCor2</a>并解压到“d:\debug”，以方便后面的调试使用。</p><p><img src=http://ww3.sinaimg.cn/large/7ce4a9f6gw1e5q1fetlpgj20k9096q42.jpg loading=lazy alt="windbg tutorial"></p><p><strong>设定符号文件路径（Symbol Path）</strong></p><p>****当你使用Visual Studio编译程序时，是否有留意到在bin/Debug文件夹下会有.pdb后缀的文件？这些文件包含有dll程序集的调试符号，pdb文件并不包含有执行代码，只是使调试工具能把代码执行指令翻译为正确的可识别字符。微软提供了包含大量pdb文件的公共服务器，地址如下：</p><p><a class=link href=http://msdl.microsoft.com/download/symbols target=_blank rel=noopener>http://msdl.microsoft.com/download/symbols</a></p><p>在windbg中设定符号文件路径后，相关的pdb文件会自动从服务器下载下来并保存到本地。你首先需要指定一个pdb文件的保存路径，如“d:\debug\symbols”。</p><p><img src=http://ww4.sinaimg.cn/large/7ce4a9f6gw1e5q1g54ge9j20h207zta1.jpg loading=lazy alt="windbg tutorial">
+打开windbg程序，选择“File->Symbol File Path…“，把下面的内容复制进去保存。</p><pre><code>srv*d:\debug\symbols*http://msdl.microsoft.com/download/symbols
+</code></pre><p><img src=http://ww3.sinaimg.cn/large/7ce4a9f6gw1e5q1gqvwzcj20fv05tdg6.jpg loading=lazy alt="windbg tutorial"></p><p><strong>创建测试程序</strong></p><p>我们先创建一个简单的命令行程序用于测试：</p><pre><code>using System;
+
+namespace Microsoft.PFE.Samples
+{
+    public class Program
+    {
+        static void Main()
+        {
+            Console.WriteLine(&quot;Enter a message:&quot;);
+        string input = Console.ReadLine();
+            Data d = new Data
+            {
+                ID = 5,
+                Message = input,
+                CurrentDateTime = System.DateTime.Now
+            };
+            Console.WriteLine(&quot;You entered: &quot; + d);
+        }
+    }
+
+    public class Data
+    {
+        public int ID {get; set;}
+        public string Message {get; set;}
+        public DateTime CurrentDateTime {get; set;}
+
+        public override string ToString()
+        {
+            Console.ReadLine();
+            return string.Format(&quot;ID:{0} {1} at {2}&quot;, ID, Message,
+
+CurrentDateTime.ToLongTimeString());
+        }
+    }
+}
+</code></pre><p>因为PssCor2只能处理.Net 3.5以下的程序，所以在编译前需要先把程序的环境改为.Net 3.5。假如是调试.NET 4.0的程序，可以<a class=link href="http://www.microsoft.com/download/en/details.aspx?id=21255" target=_blank rel=noopener>下载PssCor4</a>。编译运行程序，输入一个字符串，看程序是否运行正常。</p><p>客户抱怨说不知道为什么程序需要按两次enter键。程序并不按我们的预期工作，我们必须找到具体的原因。作为一个简单的例子，我们能一眼看出代码中的ToString()方法中多了一次ReadLine()导致的，但我们这次试下用windbg找出问题所在。</p><p>运行程序，输入一个字符串，按一次enter，当出现第二次输入提示时，不要动！我们处于捕捉问题的关键点，我们需要做一个dump文件。</p><p><strong>创建dump文件</strong></p><p>****在windows7和windows2008中，可以在任务管理器中直接创建dump文件。只需打开任务管理器，右键进程名并选择“Create Dump File”。</p><p><img src=http://ww1.sinaimg.cn/large/7ce4a9f6gw1e5q1h819trj20sg0cbn0n.jpg loading=lazy alt="windbg tutorial"></p><p>dump文件创建成功后，我们会看到提示：</p><p><img src=http://ww1.sinaimg.cn/large/7ce4a9f6gw1e5q1ihkg7aj20sg0ca42h.jpg loading=lazy alt="windbg tutorial"></p><p>dump文件是当前进程的内存快照，dump文件的大小会和进程使用的内存大小一样，为了减少体积，你可以使用压缩软件进行压缩。</p><p>还有另外的工具可以创建dump文件，如<a class=link href=http://technet.microsoft.com/en-us/sysinternals/bb896653.aspx target=_blank rel=noopener>Process Explorer from SysInternals</a>，也只需要在任务管理中右键选择“Full Dump”。</p><p><img src=http://ww2.sinaimg.cn/large/7ce4a9f6gw1e5q1j0grajj20fq0anwgj.jpg loading=lazy alt="windbg tutorial"></p><p>ADPlus和DebugDiag也可以创建dump文件。ADPlus是windbg安装目录下的一个命令行程序，你可以用下面的命令创建一个dump文件：</p><pre><code>Adplus -quiet -hang -p 4332 -o d:\debug
+</code></pre><p>4332是进程id，任务管理器默认是不显示进程id的，要显示出来，需要在windows任务管理器选择“查看->选择列”，勾选“PID（进程标识符）”。</p><p><strong>开始使用WinDbg</strong></p><p>****现在我们有了程序dump文件，打开windbg程序，选择菜单“File->Open Crash Dump”，并选择刚创建的dump文件，你会看到一些信息：</p><pre><code>Loading Dump File [D:\debug\program6.dmp]
+User Mini Dump File: Only registers, stack and portions of memory are available
+
+Symbol search path is: srv*d:\debug\symbols*http://msdl.microsoft.com/download/symbols
+Executable search path is:
+Windows 7 Version 7600 MP (8 procs) Free x64
+Product: WinNt, suite: SingleUserTS
+Machine Name:
+Debug session time: Sun Feb  6 10:43:57.000 2011 (GMT-6)
+System Uptime: not available
+Process Uptime: 0 days 1:05:48.000
+.........................
+ntdll!NtRequestWaitReplyPort+0xa:
+00000000`76d2ff7a c3              ret
+</code></pre><p>在上面的文字中，你可以看到dump文件的路径，符号文件的查找路径等信息。而程序最下方有个输入框，你可以在上面输入命令。</p><p><img src=http://ww1.sinaimg.cn/large/7ce4a9f6gw1e5q1jkayjcj20sg0dtjul.jpg loading=lazy alt="windbg tutorial"></p><p><strong>显示模块</strong></p><p>让我们试下显示程序已加载了哪些模块。在窗口最下方的输入框中，输入“lm”命令。</p><pre><code>0:000&gt; lm
+start             end                 module name
+00000000`00120000 00000000`00128000   program    (deferred)
+00000000`742b0000 00000000`74379000   msvcr80    (deferred)
+00000000`76ac0000 00000000`76bba000   user32     (deferred)
+00000000`76bc0000 00000000`76cdf000   kernel32   (pdb symbols)          d:\debug\symbols\kernel32.pdb\D5E268B5DD1048A1BFB011C744DD3DFA2\kernel32.pdb
+00000000`76ce0000 00000000`76e8b000   ntdll      (pdb symbols)          d:\debug\symbols\ntdll.pdb\0F7FCF88442F4B0E9FB51DC4A754D9DE2\ntdll.pdb
+000007fe`f3fb0000 000007fe`f4134000   mscorjit   (deferred)
+000007fe`f5030000 000007fe`f5f0b000   mscorlib_ni   (deferred)
+000007fe`f7650000 000007fe`f7ffe000   mscorwks   (deferred)
+000007fe`f8010000 000007fe`f80a0000   mscoreei   (deferred)
+000007fe`f80a0000 000007fe`f810f000   mscoree    (deferred)
+000007fe`fcb70000 000007fe`fcb7f000   CRYPTBASE   (deferred)
+000007fe`fcc40000 000007fe`fcc4f000   profapi    (deferred)
+000007fe`fcf20000 000007fe`fcf8b000   KERNELBASE   (deferred)
+000007fe`fd0e0000 000007fe`fd2e2000   ole32      (deferred)
+000007fe`fd4d0000 000007fe`fd59a000   usp10      (deferred)
+000007fe`fd6f0000 000007fe`fe476000   shell32    (deferred)
+000007fe`fe480000 000007fe`fe4ae000   imm32      (deferred)
+000007fe`fe840000 000007fe`fe84e000   lpk        (deferred)
+000007fe`fe9d0000 000007fe`feaab000   advapi32   (deferred)
+000007fe`feb50000 000007fe`fec7e000   rpcrt4     (deferred)
+000007fe`fec80000 000007fe`fecf1000   shlwapi    (deferred)
+000007fe`fed00000 000007fe`fed67000   gdi32      (deferred)
+000007fe`fee10000 000007fe`fef19000   msctf      (deferred)
+000007fe`fef20000 000007fe`fefbf000   msvcrt     (deferred)
+000007fe`fefd0000 000007fe`fefef000   sechost    (deferred)
+</code></pre><p>在上面的模块列表中，你需要关注的是mscorwks是否存在，PssCor2只能用于.NET 3.5的程序，假如是.NET 4.0程序，就看不到mscorwks模块。</p><p>对于SharePoint开发人员，假如你正在调试程序特性如 receivers 和 event 处理为什么不触发，lm将是很好用的命令。通过上面的列表，你能知道有哪些模块没加载进来，可能是配置不正确导致的，这样能大大地减少你查找问题的范围。对于ASP.NET开发人员，会有助于查找HttpModule不触发的原因，可能是web.config配置不正确。</p><p><strong>加载PssCor2</strong></p><p>要把PssCor2扩展组件加载入windbg，需使用下面的命令：</p><pre><code>.load d:\debug\psscor2\amd64\psscor2.dll
+</code></pre><p>我的电脑是64位的，所以我加载了AMD64 版本的PssCor2.dll。加载的PssCor2版本必须和dump文件进程所在服务器的架构相一致，假如你是调试x86程序的dump文件，你就必须加载x86版本的PssCor2.dll。
+输入下面的命令，以确认PssCor2是否加载成功：</p><pre><code>!help
+</code></pre><p>正确会输入下面的内容：</p><pre><code>0:000&gt; .load d:\debug\psscor2\amd64\psscor2.dll
+0:000&gt; !help
+-------------------------------------------------------------------------------
+PSSCOR is a debugger extension DLL designed to aid in the debugging of managed
+programs. Functions are listed by category, then roughly in order of
+importance. Shortcut names for popular functions are listed in parenthesis.
+Type &quot;!help &quot; for detailed info on that function.
+
+Object Inspection                  Examining code and stacks
+-----------------------------      -----------------------------
+DumpObj (do)                       Threads
+DumpArray (da)                     CLRStack
+DumpStackObjects (dso)             IP2MD
+DumpAllExceptions (dae)            BPMD
+DumpHeap                           U
+DumpVC                             DumpStack
+GCRoot                             EEStack
+ObjSize                            GCInfo
+FinalizeQueue                      EHInfo
+PrintException (pe)                COMState
+TraverseHeap
+DumpField (df)
+DumpDynamicAssemblies (dda)
+GCRef
+DumpColumnNames (dcn)
+DumpRequestQueues
+DumpUMService
+
+Examining CLR data structures      Diagnostic Utilities
+-----------------------------      -----------------------------
+DumpDomain                         VerifyHeap
+EEHeap                             DumpLog
+Name2EE                            FindAppDomain
+SyncBlk                            SaveModule
+DumpThreadConfig (dtc)             SaveAllModules (sam)
+DumpMT                             GCHandles
+DumpClass                          GCHandleLeaks
+DumpMD                             VMMap
+Token2EE                           VMStat
+EEVersion                          ProcInfo
+DumpModule                         StopOnException (soe)
+ThreadPool                         MinidumpMode
+DumpHttpRuntime                    FindDebugTrue
+DumpIL                             FindDebugModules
+PrintDateTime                      Analysis
+DumpDataTables                     CLRUsage
+DumpAssembly                       CheckCurrentException (cce)
+RCWCleanupList                     CurrentExceptionName (cen)
+PrintIPAddress                     VerifyObj
+DumpHttpContext                    HeapStat
+ASPXPages                          GCWhere
+DumpASPNETCache (dac)              ListNearObj (lno)
+DumpSig
+DumpMethodSig                      Other
+DumpRuntimeTypes                   -----------------------------
+ConvertVTDateToDate (cvtdd)        FAQ
+ConvertTicksToDate (ctd)
+DumpRequestTable
+DumpHistoryTable
+DumpBuckets
+GetWorkItems
+DumpXmlDocument (dxd)
+DumpCollection (dc)
+
+Examining the GC history
+-----------------------------
+HistInit
+HistStats
+HistRoot
+HistObj
+HistObjFind
+HistClear
+</code></pre><p><strong>mscordacwks.dll</strong></p><p>我喜欢在服务器中创建程序的dump文件，然后把dump文件转移到自己的windows7开发机上进行调试。假如服务器是Windows Server 2008 R2的操作系统，当我在本地开发机使用psscor2时，很容易遇到下面的错误：</p><pre><code>CLRDLL: CLR DLL load disabled
+Failed to load data access DLL, 0x80004005
+Verify that 1) you have a recent build of the debugger (6.2.14 or newer)
+            2) the file mscordacwks.dll that matches your version of mscorwks.dll is
+                in the version directory
+            3) or, if you are debugging a dump file, verify that the file
+                mscordacwks___.dll is on your symbol path.
+            4) you are debugging on the same architecture as the dump file.
+                For example, an IA64 dump file must be debugged on an IA64
+                machine.
+
+You can also run the debugger command .cordll to control the debugger's
+load of mscordacwks.dll.  .cordll -ve -u -l will do a verbose reload.
+If that succeeds, the PSSCOR command should work on retry.
+
+If you are debugging a minidump, you need to make sure that your executable
+path is pointing to mscorwks.dll as well.
+</code></pre><p>通过bing搜索发现一篇相关的博客文章<a class=link href=http://blogs.msdn.com/b/dougste/archive/2009/02/18/failed-to-load-data-access-dll-0x80004005-or-what-is-mscordacwks-dll.aspx target=_blank rel=noopener>how to work around the mscordacwks issue</a>，文章指出需要把服务器的mscordacwks文件拷贝到windbg程序目录下。mscordacwks在我的Windows Server 2008 R2服务器上的版本是4952，所以我把服务器上的mscordacwks拷贝到windbg目录，并重命名为“mscordacwks_AMD64_AMD64_2.0.50727.4952.dll“。mscordacwks在服务器的路径是“”C:\WINDOWS\Microsoft.NET\Framework\v2.0.50727\mscordacwks.dll”，假如你不知道正确的重命名规则，你可以输入下面的命令，输出会提示需要加载的mscordacwks命名。</p><pre><code>0:000&gt; .cordll -ve -u -l
+CLR DLL status: No load attempts
+0:000&gt; !threads
+CLRDLL: C:\WINDOWS\Microsoft.NET\Framework\v2.0.50727\mscordacwks.dll:2.0.50727.3053 f:0
+doesn't match desired version 2.0.50727.3625 f:0
+CLRDLL: Unable to find mscordacwks_AMD64_AMD64_2.0.50727.4952.dll by mscorwks search
+CLRDLL: Unable to find 'mscordacwks_AMD64_AMD64_2.0.50727.4952.dll' on the path
+CLRDLL: Unable to get version info for 'd:\debug\symbols\mscorwks.dll\4E154C985a9000\mscordacwks_AMD64_AMD64_2.0.50727.4952.dll', Win32 error 0n87
+CLRDLL: ERROR: Unable to load DLL mscordacwks_AMD64_AMD64_2.0.50727.4952.dll, Win32 error 0n87
+Failed to load data access DLL, 0x80004005
+Verify that 1) you have a recent build of the debugger (6.2.14 or newer)
+            2) the file mscordacwks.dll that matches your version of mscorwks.dll is
+                in the version directory
+            3) or, if you are debugging a dump file, verify that the file
+                mscordacwks___.dll is on your symbol path.
+            4) you are debugging on the same architecture as the dump file.
+                For example, an IA64 dump file must be debugged on an IA64
+                machine.
+
+You can also run the debugger command .cordll to control the debugger's
+load of mscordacwks.dll.  .cordll -ve -u -l will do a verbose reload.
+If that succeeds, the PSSCOR command should work on retry.
+
+If you are debugging a minidump, you need to make sure that your executable
+path is pointing to mscorwks.dll as well.
+</code></pre><p>重命名后，再次输入上面的命令，会显示加载成功提示。</p><pre><code>0:000&gt; .cordll -ve -u -l
+CLR DLL status: Loaded DLL mscordacwks_AMD64_AMD64_2.0.50727.4952.dll
+</code></pre><p><strong>检查CRL堆栈</strong></p><p>要查看CLR堆栈内容，输入下面命令：</p><pre><code>!clrstack
+</code></pre><p>输出如下：</p><pre><code>0:000&gt; !clrstack
+OS Thread Id: 0xa48 (0)
+*** WARNING: Unable to verify checksum for mscorlib.ni.dll
+Child-SP         RetAddr          Call Site
+000000000012e910 000007fef5a910e9 DomainNeutralILStubClass.IL_STUB(Microsoft.Win32.SafeHandles.SafeFileHandle, Byte*, Int32, Int32 ByRef, IntPtr)
+000000000012ea30 000007fef5a91202 System.IO.__ConsoleStream.ReadFileNative(Microsoft.Win32.SafeHandles.SafeFileHandle, Byte[], Int32, Int32, Int32, Int32 ByRef)
+000000000012ea90 000007fef538065a System.IO.__ConsoleStream.Read(Byte[], Int32, Int32)
+000000000012eaf0 000007fef53a28ca System.IO.StreamReader.ReadBuffer()
+000000000012eb40 000007fef5a9435f System.IO.StreamReader.ReadLine()
+000000000012eb90 000007ff0017015b System.IO.TextReader+SyncTextReader.ReadLine()
+000000000012ebf0 000007fef791d502 Program.Main()
+</code></pre><p>真棒！你现在可以看到堆栈的调用情况了。我们可以立即看到程序进入了Program.Main函数，调用Console.ReadLine并等待用户的输入。</p><p><strong>结论</strong></p><p>本篇文章只是简单介绍windbg的使用，假如你想全局的了解windbg，并如何使用windbg做故障排除，可以看下Tess Ferrandez的视频教程“Debugging .NET Applications with WinDbg“。</p><p><strong>扩展阅读：</strong></p><p><a class=link href=http://technet.microsoft.com/en-us/sysinternals/bb896653.aspx target=_blank rel=noopener>Process Explorer from SysInternals</a></p><p><a class=link href="http://www.microsoft.com/downloads/en/details.aspx?FamilyID=5c068e9f-ebfe-48a5-8b2f-0ad6ab454ad4" target=_blank rel=noopener>PssCor2 Debugging Extension</a></p><p><a class=link href=http://www.microsoft.com/whdc/DevTools/Debugging/default.mspx target=_blank rel=noopener>Download the Debugging Tools for Windows</a></p><p><a class=link href=http://msdn.microsoft.com/en-us/library/bb190764.aspx target=_blank rel=noopener>SOS.dll (SOS Debugging Extension)</a></p><p><a class=link href=http://blogs.msdn.com/b/dougste/archive/2009/02/18/failed-to-load-data-access-dll-0x80004005-or-what-is-mscordacwks-dll.aspx target=_blank rel=noopener>“Failed to load data access DLL, 0x80004005” – OR – What is mscordacwks.dll?</a></p><p><a class=link href="http://www.microsoft.com/downloads/en/details.aspx?FamilyID=28bd5941-c458-46f1-b24d-f60151d875a3&amp;displaylang=en" target=_blank rel=noopener>DebugDiag</a></p><p><a class=link href=http://blogs.msdn.com/b/johan/archive/2007/11/26/getting-started-with-windbg-part-ii.aspx target=_blank rel=noopener>Getting started with windbg - part I</a></p><p><a class=link href=http://blogs.msdn.com/b/johan/archive/2007/11/26/getting-started-with-windbg-part-ii.aspx target=_blank rel=noopener>Getting started with windbg - part II</a></p></section><footer class=article-footer><section class=article-tags><a href=/tags/windbg/>WinDbg</a></section><section class=article-copyright><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><path d="M14.5 9a3.5 4 0 100 6"/></svg>
+<span>Licensed under CC BY-NC-SA 4.0</span></section><section class=article-lastmod><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+<span>最后更新于 2012年02月01号 08:28 UTC</span></section></footer></article><aside class=related-contents--wrapper><h2 class=section-title>相关文章</h2><div class=related-contents><div class="flex article-list--tile"><article><a href=/2012/04/windbg-tutorial/><div class=article-details><h2 class=article-title>WinDbg入门</h2></div></a></article><article><a href=/2012/02/windbg-useful-commands/><div class=article-details><h2 class=article-title>WinDbg常用命令</h2></div></a></article><article class=has-image><a href=/2024/02/github-download-enhance-speed/><div class=article-image><img src=/2024/02/github-download-enhance-speed/cover.907d6794ed4df001931ba88a291d4e34_hu97c93a104dd71fdb6ecb2b1c8317cee1_61791_250x150_fill_box_smart1_3.png width=250 height=150 loading=lazy alt="Featured image of post github 下载加速" data-key=github-download-enhance-speed data-hash="md5-kH1nlO1N8AGTG6iKKR1ONA=="></div><div class=article-details><h2 class=article-title>github 下载加速</h2></div></a></article><article class=has-image><a href=/2023/05/how-to-capture-unix-domain-socket-on-mac/><div class=article-image><img src=/2023/05/how-to-capture-unix-domain-socket-on-mac/cover.2483343cfa511ede213bce287baa46fb_huc84318aa5eda95760760b181358c47b2_188996_250x150_fill_box_smart1_3.png width=250 height=150 loading=lazy alt="Featured image of post Mac系统下如何抓包unix套接字（Unix Domain Socket）" data-key=how-to-capture-unix-domain-socket-on-mac data-hash="md5-JIM0PPpRHt4hO84oe6pG+w=="></div><div class=article-details><h2 class=article-title>Mac系统下如何抓包unix套接字（Unix Domain Socket）</h2></div></a></article><article class=has-image><a href=/2023/05/capture-android-https-network-packet-with-wsa/><div class=article-image><img src=/2023/05/capture-android-https-network-packet-with-wsa/cover.7e035e875449af2eebb6327c5d9fdb1a_hu9ac3ef1c7349a5b40b6d5d299feb838d_16021_250x150_fill_q75_box_smart1.jpeg width=250 height=150 loading=lazy alt="Featured image of post 通过 WSA 抓取 android 的 https 网络请求包" data-key=capture-android-https-network-packet-with-wsa data-hash="md5-fgNeh1RJry7rtjJ8XZ/bGg=="></div><div class=article-details><h2 class=article-title>通过 WSA 抓取 android 的 https 网络请求包</h2></div></a></article></div></div></aside><script src=https://giscus.app/client.js data-repo=bitxeno/blog-public data-repo-id=R_kgDOLoFOYw data-category=Announcements data-category-id=DIC_kwDOLoFOY84CeXb1 data-mapping=pathname data-reactions-enabled=1 data-emit-metadata=0 data-theme=noborder_light data-lang=zh-CN crossorigin=anonymous async></script><script>function setGiscusTheme(e){let t=document.querySelector("iframe.giscus-frame");t&&t.contentWindow.postMessage({giscus:{setConfig:{theme:e}}},"https://giscus.app")}(function(){addEventListener("message",t=>{if(event.origin!=="https://giscus.app")return;e()}),window.addEventListener("onColorSchemeChange",e);function e(){setGiscusTheme(document.documentElement.dataset.scheme==="light"?"noborder_light":"noborder_gray")}})()</script><footer class=site-footer><section class=copyright>&copy;
+2021 -
+2024 bitxeno's notes</section><section class=powerby>Built with <a href=https://gohugo.io/ target=_blank rel=noopener>Hugo</a><br>主题 <b><a href=https://github.com/CaiJimmy/hugo-theme-stack target=_blank rel=noopener data-version=3.11.0>Stack</a></b> 由 <a href=https://jimmycai.com target=_blank rel=noopener>Jimmy</a> 设计</section></footer><div class=pswp tabindex=-1 role=dialog aria-hidden=true><div class=pswp__bg></div><div class=pswp__scroll-wrap><div class=pswp__container><div class=pswp__item></div><div class=pswp__item></div><div class=pswp__item></div></div><div class="pswp__ui pswp__ui--hidden"><div class=pswp__top-bar><div class=pswp__counter></div><button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+<button class="pswp__button pswp__button--share" title=Share></button>
+<button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+<button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button><div class=pswp__preloader><div class=pswp__preloader__icn><div class=pswp__preloader__cut><div class=pswp__preloader__donut></div></div></div></div></div><div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap"><div class=pswp__share-tooltip></div></div><button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+</button>
+<button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)"></button><div class=pswp__caption><div class=pswp__caption__center></div></div></div></div></div><script src=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo=" crossorigin=anonymous defer></script><script src=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU=" crossorigin=anonymous defer></script><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.css integrity="sha256-c0uckgykQ9v5k+IqViZOZKc47Jn7KQil4/MP3ySA3F8=" crossorigin=anonymous><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.css integrity="sha256-SBLU4vv6CA6lHsZ1XyTdhyjJxCjPif/TRkjnsyGAGnE=" crossorigin=anonymous></main></div><script src=https://cdn.jsdelivr.net/npm/node-vibrant@3.1.5/dist/vibrant.min.js integrity="sha256-5NovOZc4iwiAWTYIFiIM7DxKUXKWvpVEuMEPLzcm5/g=" crossorigin=anonymous></script><script type=text/javascript src=/ts/main.js defer></script><script>(function(){const e=document.createElement("link");e.href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap",e.type="text/css",e.rel="stylesheet",document.head.appendChild(e)})()</script></body></html>

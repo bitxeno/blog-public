@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>SqlServer on bitxeno's notes</title><link>https://blog.xenori.com/tags/sqlserver/</link><description>Recent content in SqlServer on bitxeno's notes</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Sat, 17 Mar 2012 09:33:03 +0000</lastBuildDate><atom:link href="https://blog.xenori.com/tags/sqlserver/index.xml" rel="self" type="application/rss+xml"/><item><title>如何查看哪些进程和服务器正在使用数据库</title><link>https://blog.xenori.com/2012/03/find-who-connect-to-database/</link><pubDate>Sat, 17 Mar 2012 09:33:03 +0000</pubDate><guid>https://blog.xenori.com/2012/03/find-who-connect-to-database/</guid><description>&lt;p>工作中有时会碰到需要迁移数据库的时候，如更换机房，更换新服务器等。迁移数据库最重要是要确保正在运行的程序不会因为漏更改连接字符串而导致程序报错。但有时维护的项目可能老旧，没有相关维护文档，还有一些使用该数据库的windows服务也可能遍布在其他服务器上，这时我们该如何找到所有正在使用该数据库的服务呢？&lt;/p>
+&lt;p>下面以windows服务器和Sql Server数据库为例，数据库服务器的ip是192.168.6.189，linux平台的思路差不多，只是命令有变化。&lt;/p>
+&lt;h3 id="1查看sql-server进程id">1、查看Sql Server进程ID&lt;/h3>
+&lt;p>打开任务管理器，点击“&lt;strong>查看&lt;/strong>-&amp;gt;&lt;strong>选择列&lt;/strong>”，勾选“&lt;strong>PID(进程标识符)&lt;/strong>”
+&lt;img src="http://ww1.sinaimg.cn/large/7ce4a9f6gw1e5q1p9zo5yj20b70bkabs.jpg"
+loading="lazy"
+alt="sql server"
+>
+&lt;img src="http://ww4.sinaimg.cn/large/7ce4a9f6gw1e5q1pyu9epj205k07ywf2.jpg"
+loading="lazy"
+alt="sql server"
+>&lt;/p>
+&lt;p>进程名称为“&lt;strong>sqlservr.exe&lt;/strong>”的PID就是Sql Server的进程ID，当前是&lt;strong>1800&lt;/strong>。&lt;/p>
+&lt;h3 id="2查看当前连接sql-server的服务器列表">2、查看当前连接Sql Server的服务器列表&lt;/h3>
+&lt;p>打开命令行，输入下面的命令：&lt;/p>
+&lt;pre>&lt;code>netstat -ano|find &amp;quot;1800&amp;quot;
+&lt;/code>&lt;/pre>
+&lt;p>结果如下：&lt;/p>
+&lt;pre>&lt;code>C:\Documents and Settings&amp;gt;netstat -ano|find &amp;quot;1800&amp;quot;
+TCP 0.0.0.0:3758 0.0.0.0:0 LISTENING 1800
+TCP 0.0.0.0:5025 0.0.0.0:0 LISTENING 1800
+TCP 127.0.0.1:1434 0.0.0.0:0 LISTENING 1800
+TCP 192.168.6.189:3758 192.168.6.76:2685 ESTABLISHED 1800
+TCP 192.168.6.189:3758 192.168.6.76:2725 ESTABLISHED 1800
+&lt;/code>&lt;/pre>
+&lt;p>该命令会打印出所有连接到1800进程的服务器列表，可以看到&lt;strong>192.168.6.76&lt;/strong>这台服务器正在连接到Sql Server。&lt;/p>
+&lt;h3 id="3查看连接到数据库服务器的进程">3、查看连接到数据库服务器的进程&lt;/h3>
+&lt;p>进入服务器192.168.6.76，打开命令行，输入下面的命令：&lt;/p>
+&lt;pre>&lt;code>netstat -ano |find &amp;quot;6.189&amp;quot;
+&lt;/code>&lt;/pre>
+&lt;p>6.189是数据库服务器的ip，find命令用来查找带有&amp;quot;6.189&amp;quot;字符串的行。输出如下：&lt;/p>
+&lt;pre>&lt;code>d:\webroot&amp;gt;netstat -ano |find &amp;quot;6.189&amp;quot;
+TCP 192.168.6.76:2685 192.168.6.189:3758 ESTABLISHED 8520
+TCP 192.168.6.76:2725 192.168.6.189:3758 ESTABLISHED 8520
+&lt;/code>&lt;/pre>
+&lt;p>结果最右边的就是正连接到数据库服务器的进程ID，当前是&lt;strong>8520&lt;/strong>.现在已经找到进程了^0^，你只需打开任务管理器，看下该进程ID对应是进程是什么，就能准确定位了。&lt;/p>
+&lt;h3 id="4查看iis进程对应的站点">4、查看IIS进程对应的站点&lt;/h3>
+&lt;p>有时我们找到使用数据库的进程了，但是像IIS这种程序，因为所有站点的进程名都相同，所以无法准备定位了。
+&lt;img src="http://ww3.sinaimg.cn/large/7ce4a9f6gw1e5q1qewrroj206s08iaal.jpg"
+loading="lazy"
+alt="sql server"
+>
+有什么方法可以找到w3wp.exe对应的站点名呢？可以使用iisapp命令：&lt;/p>
+&lt;pre>&lt;code>d:\webroot&amp;gt;iisapp -a
+W3WP.exe PID: 6584 AppPoolId: test1.com
+W3WP.exe PID: 16304 AppPoolId: Special
+W3WP.exe PID: 8520 AppPoolId: test2.com
+W3WP.exe PID: 3164 AppPoolId: test3.com
+&lt;/code>&lt;/pre>
+&lt;p>iisapp命令会输出W3WP进程对应的应用程序池名，通过应用程序池名我们就能准备定位站点：）&lt;/p></description></item></channel></rss>

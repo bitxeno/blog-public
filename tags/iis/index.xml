@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>IIS on bitxeno's notes</title><link>https://blog.xenori.com/tags/iis/</link><description>Recent content in IIS on bitxeno's notes</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Sat, 03 Mar 2012 17:00:18 +0000</lastBuildDate><atom:link href="https://blog.xenori.com/tags/iis/index.xml" rel="self" type="application/rss+xml"/><item><title>了解IIS的主机名(Host Headers)配置项</title><link>https://blog.xenori.com/2012/03/understanding-iis-host-headers/</link><pubDate>Sat, 03 Mar 2012 17:00:18 +0000</pubDate><guid>https://blog.xenori.com/2012/03/understanding-iis-host-headers/</guid><description>&lt;p>IIS可以在一台服务器上配置多个web站点，每个站点通过ip地址、端口(port)和主机名(host)结合的标识符(ServerBindings Metabase)进行区分。标识字符串的格式如下：&lt;/p>
+&lt;pre>&lt;code>IP:Port:Hostname
+&lt;/code>&lt;/pre>
+&lt;p>上面的IP和Hostname是可选项，假如设定站点时不指定，表示匹配所有。&lt;/p>
+&lt;h3 id="主机名host-headers是http消息的一部分">主机名(Host Headers)是HTTP消息的一部分&lt;/h3>
+&lt;p>浏览器和web服务器之间是通过http协议通信的。http发送的请求头部(headers)部分包含有很多信息，如Content-Length, Referer, &lt;strong>Host&lt;/strong>等等。&lt;/p>
+&lt;h3 id="浏览器如何和web服务器通信">浏览器如何和web服务器通信&lt;/h3>
+&lt;p>互联网上的两台主机之间是通过TCP/IP协议进行通信的，通信建立连接时需要指定ip和端口号(port)。当我们在浏览器中输入一个网站的域名，并按回车后，浏览器默认会使用http协议和80端口发出请求。&lt;/p>
+&lt;p>&lt;img src="http://ww4.sinaimg.cn/large/7ce4a9f6gw1e5q1ogexavj20dw01i74b.jpg"
+loading="lazy"
+alt="client to server"
+>&lt;/p>
+&lt;p>浏览器首先需要把域名解析为对应的ip地址。域名解析可以使用dns服务器或本地的host文件。&lt;/p>
+&lt;p>当域名解析为ip地址后，浏览器会和web服务器建立连接，并发出网页访问请求信息。请求信息的头部一般像下面这样：&lt;/p>
+&lt;pre>&lt;code>GET /index.htm HTTP/1.1
+Host: www.ilopia.com
+&lt;/code>&lt;/pre>
+&lt;p>IIS接收到请求后，会检查请求是否带有host信息(请求中也可能不带有host信息，如使用ip直接访问)。IIS发现有host后，会查找是否有匹配该host的站点，如果有匹配的站点，就会把请求路由给它进行处理。&lt;/p>
+&lt;p>最后一步是IIS响应处理请求。&lt;/p>
+&lt;h3 id="iis如何分发请求到指定web站点">IIS如何分发请求到指定web站点&lt;/h3>
+&lt;p>IIS分发请求到指定站点的规则如下：&lt;/p>
+&lt;ol>
+&lt;li>
+&lt;p>1、是否存在准确匹配 IP:Port:Hostname标识字符串的站点，存在即分发请求，没有进行下一步匹配&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>2、是否存在监听所有IP地址(站点设定时不指定)，并且Port和Hostname都匹配的站点，存在即分发请求，没有进行下一步匹配&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>3、是否存在端口Port匹配，而IP和Hostname都未指定的站点，存在即分发请求，没有浏览器会提示没法连接到服务器&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;h3 id="参考资料">参考资料&lt;/h3>
+&lt;p>&lt;a class="link" href="http://www.microsoft.com/technet/prodtechnol/WindowsServer2003/Library/IIS/0ed054d1-ca3a-495f-bad4-3a251e5a07a3.mspx?mfr=true" target="_blank" rel="noopener"
+>ServerBindings Metabase Property (IIS 6.0)&lt;/a>
+&lt;a class="link" href="http://www.it-notebook.org/iis/article/understanding_host_headers.htm" target="_blank" rel="noopener"
+>Understanding Host Headers in IIS&lt;/a>
+&lt;a class="link" href="http://www.it-notebook.org/iis/article/iis_multiple_websites.htm" target="_blank" rel="noopener"
+>Using Host Headers to host multiple websites on IIS 6.0&lt;/a>&lt;/p></description></item></channel></rss>

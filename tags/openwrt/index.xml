@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Openwrt on bitxeno's notes</title><link>https://blog.xenori.com/tags/openwrt/</link><description>Recent content in Openwrt on bitxeno's notes</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Mon, 22 Nov 2021 14:40:11 +0800</lastBuildDate><atom:link href="https://blog.xenori.com/tags/openwrt/index.xml" rel="self" type="application/rss+xml"/><item><title>dash实时转换hls流媒体播放</title><link>https://blog.xenori.com/2021/11/dash-to-hls/</link><pubDate>Mon, 22 Nov 2021 14:40:11 +0800</pubDate><guid>https://blog.xenori.com/2021/11/dash-to-hls/</guid><description>&lt;img src="https://blog.xenori.com/2021/11/dash-to-hls/cover.jpeg" alt="Featured image of post dash实时转换hls流媒体播放" />&lt;p>本文主要是探讨下b站的音视频流分离dash格式实时转为hls流媒体，以方便在旧的播放器上播放。&lt;/p>
+&lt;h2 id="什么是dash">什么是DASH&lt;/h2>
+&lt;p>dash是基于HTTP的动态自适应流（英語：Dynamic Adaptive Streaming over HTTP，也称MPEG-DASH）的简称。现在b站最新的视频都是返回这种格式，并且是音视频分离的。b站dash实践可以参考这篇ppt: &lt;a class="link" href="https://www.w3.org/2019/03/23-chinese-web-jianqiang-bilibili.pdf" target="_blank" rel="noopener"
+>MPEG-DASH在bilibili的应用与实践&lt;/a>&lt;/p>
+&lt;h2 id="转换hls的实现方式">转换HLS的实现方式&lt;/h2>
+&lt;p>b站dash音视频分别为单独的两个链接，不同的码率和编码对应不同的链接，下面只是使用其中一个音视频链接来举例。实现方式如下：&lt;/p>
+&lt;ol>
+&lt;li>提供生成m3u8文件的http服务，m3u8视频块根据时长(duration)切分为5秒为一片，m3u8格式如下：
+&lt;pre tabindex="0">&lt;code> #EXTM3U
+#EXT-X-VERSION:3
+#EXT-X-MEDIA-SEQUENCE:0
+#EXT-X-ALLOW-CACHE:YES
+#EXT-X-TARGETDURATION:5
+#EXT-X-PLAYLIST-TYPE:VOD
+#EXTINF: 5.000000,
+http://xxx/api/hls/segments/1
+#EXTINF: 5.000000,
+http://xxx/api/hls/segments/2
+....
+&lt;/code>&lt;/pre>拿不到总的时长的话，可以通过&lt;code>ffprobe&lt;/code>命令获取：
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">ffprobe -v quiet -print_format json -show_format &lt;span class="s2">&amp;#34;http://xxx/video.m4s&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>http服务的响应头&lt;code>content-type&lt;/code>需设为&lt;code>application/vnd.apple.mpegurl&lt;/code>&lt;/li>
+&lt;li>提供切片下载的http服务，如上面m3u8文件中的&lt;code>http://xxx/api/hls/segments/1&lt;/code>，切片可以通过ffmpeg进行音视合并和切分，命令如下：
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># 切分从视频第(-ss)5.00秒开始，时长(-t)5.00秒&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># -ss和-initial_offset数值需要根据当前切片递增&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">ffmpeg -timelimit &lt;span class="m">45&lt;/span> -ss 5.00 -i http://xxx/video.m4s -ss 5.00 -i http://xxx/audio.m4s -t 5.00 -c:v libx264 -preset veryfast -c:a copy -force_key_frames &lt;span class="s2">&amp;#34;expr:gte(t,n_forced*5.000)&amp;#34;&lt;/span> -f ssegment -segment_time 5.00 -initial_offset 5.00 pipe:out%03d.ts
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># 同时合并字幕xxx.srt&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">ffmpeg -timelimit &lt;span class="m">45&lt;/span> -ss 5.00 -copyts -i http://xxx/video.m4s -ss 5.00 -i http://xxx/audio.m4s -t 5.00 -vf &lt;span class="nv">subtitles&lt;/span>&lt;span class="o">=&lt;/span>xxx.srt -c:v libx264 -preset veryfast -c:a copy -force_key_frames &lt;span class="s2">&amp;#34;expr:gte(t,n_forced*5.000)&amp;#34;&lt;/span> -f ssegment -segment_time 5.00 -initial_offset 5.00 -ss 5.00 pipe:out%03d.ts
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>本命令是把重新编码后的视频数据输出到控制台，需要http服务把输出数据实时写入到响应中，这样播放器就能实时下载播放了&lt;/li>
+&lt;/ol>
+&lt;h2 id="会遇到的问题">会遇到的问题&lt;/h2>
+&lt;p>ffmpeg切片时音频使用了&lt;code>copy&lt;/code>命令，但视频却使用&lt;code>libx264&lt;/code>重新编码，导致转码很慢，而且cpu占用居高不下，为什么视频不也用&lt;code>copy&lt;/code>模式，避免重新转码？&lt;/p>
+&lt;p>这是因为ffmpeg视频copy模式切片时只能根据关键帧切分，这样会导致每个切片可能会多几帧，播放时出现画面重复播放和声画不同步，具体问题可参考：&lt;a class="link" href="https://www.jianshu.com/p/f7d83fdec111" target="_blank" rel="noopener"
+>https://www.jianshu.com/p/f7d83fdec111&lt;/a>&lt;/p>
+&lt;p>切片重新编码是避免不了了，如何可以提高转码速度，降低cpu占用？&lt;/p>
+&lt;p>——视频编码硬件加速！&lt;/p>
+&lt;h2 id="ffmpeg硬件加速">ffmpeg硬件加速&lt;/h2>
+&lt;p>视频编码硬件加速主要有如下几种：&lt;/p>
+&lt;ul>
+&lt;li>VAAPI：intel集显支持，是openwrt中最常见和使用的&lt;/li>
+&lt;li>QSV：intel集显支持，可在&lt;a class="link" href="https://ark.intel.com/content/www/cn/zh/ark/products/78867/intel-celeron-processor-j1900-2m-cache-up-to-2-42-ghz.html" target="_blank" rel="noopener"
+>intel产品规格页&lt;/a>搜索自己的cpu，看下有没支持&lt;code>Quick Sync Video&lt;/code>&lt;/li>
+&lt;li>NVENC：nvidia显卡支持，openwrt中一般没独立显卡，很少使用到&lt;/li>
+&lt;/ul>
+&lt;p>这里只介绍最常用的vaapi方式，ffmpeg编码时使用vaapi硬件加速切片命令如下：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># 开启vaapi硬件加速编码&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">ffmpeg -vaapi_device /dev/dri/renderD128 -timelimit &lt;span class="m">45&lt;/span> -ss 5.00 -i http://xxx/video.m4s -ss 5.00 -i http://xxx/audio.m4s -t 5.00 -vf &lt;span class="s1">&amp;#39;format=nv12,hwupload&amp;#39;&lt;/span> -c:v h264_vaapi -c:a copy -force_key_frames &lt;span class="s2">&amp;#34;expr:gte(t,n_forced*5.000)&amp;#34;&lt;/span> -f ssegment -segment_time 5.00 -initial_offset 5.00 pipe:out%03d.ts
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># 同时合并字幕xxx.srt&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">ffmpeg -vaapi_device /dev/dri/renderD128 -timelimit &lt;span class="m">45&lt;/span> -ss 5.00 -copyts -i http://xxx/video.m4s -ss 5.00 -i http://xxx/audio.m4s -t 5.00 -vf &lt;span class="s1">&amp;#39;subtitles=xxx.srt,format=nv12,hwupload&amp;#39;&lt;/span> -c:v h264_vaapi -c:a copy -force_key_frames &lt;span class="s2">&amp;#34;expr:gte(t,n_forced*5.000)&amp;#34;&lt;/span> -f ssegment -segment_time 5.00 -initial_offset 5.00 -ss 5.00 pipe:out%03d.ts
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;code>-vaapi_device /dev/dri/renderD128&lt;/code>，&lt;code>-vf 'format=nv12,hwupload'&lt;/code>和&lt;code>-c:v h264_vaapi&lt;/code>这三个参数是必须的&lt;/p>
+&lt;h2 id="如何在docker中使用硬件加速">如何在docker中使用硬件加速&lt;/h2>
+&lt;p>假如hls流服务是部署在docker中使用的，打开硬件加速可以使用已经安装了vaapi支持的镜像。&lt;a class="link" href="https://hub.docker.com/r/jrottenberg/ffmpeg" target="_blank" rel="noopener"
+>jrottenberg/ffmpeg&lt;/a>有生成好的支持vaapi的docker镜像，镜像名称带有&lt;code>vaapi&lt;/code>标签，可自行搜索需要的ffmpeg版本使用&lt;/p>
+&lt;p>docker启动时，需要使用&lt;code>--device&lt;/code>参数绑定显卡设备：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">docker run --device /dev/dri:/dev/dri jrottenberg/ffmpeg:vaapi
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在openwrt中使用的话中，可在docker配置页&lt;code>device&lt;/code>栏绑定显卡设备&lt;/p>
+&lt;p>&lt;img src="https://blog.xenori.com/2021/11/dash-to-hls/1.jpg"
+width="1104"
+height="210"
+srcset="https://blog.xenori.com/2021/11/dash-to-hls/1_hu3cc7554004a4f82bf46186159a47e918_23956_480x0_resize_q75_box.jpg 480w, https://blog.xenori.com/2021/11/dash-to-hls/1_hu3cc7554004a4f82bf46186159a47e918_23956_1024x0_resize_q75_box.jpg 1024w"
+loading="lazy"
+alt="图片"
+class="gallery-image"
+data-flex-grow="525"
+data-flex-basis="1261px"
+>&lt;/p>
+&lt;h2 id="参考资料">参考资料&lt;/h2>
+&lt;ul>
+&lt;li>FFMPEG参数说明：&lt;a class="link" href="https://ffmpeg.org/ffmpeg-all.html#Format-Options" target="_blank" rel="noopener"
+>https://ffmpeg.org/ffmpeg-all.html#Format-Options&lt;/a>&lt;/li>
+&lt;li>DASH协议直播应用：&lt;a class="link" href="https://cloud.tencent.com/developer/article/1895146" target="_blank" rel="noopener"
+>https://cloud.tencent.com/developer/article/1895146&lt;/a>&lt;/li>
+&lt;/ul></description></item><item><title>自建Bitwarden通过cloudflare实现https访问</title><link>https://blog.xenori.com/2021/10/bitwarden-tls-with-cloudflare/</link><pubDate>Wed, 20 Oct 2021 22:16:11 +0800</pubDate><guid>https://blog.xenori.com/2021/10/bitwarden-tls-with-cloudflare/</guid><description>&lt;img src="https://blog.xenori.com/2021/10/bitwarden-tls-with-cloudflare/cover.png" alt="Featured image of post 自建Bitwarden通过cloudflare实现https访问" />&lt;div class="notices warning" >&lt;blockquote>&lt;p>本文的方案只针对局域网内使用bitwarden的情况。实现原理是使用ACME DNS验证方式验证域名所有权。&lt;/p>
+&lt;/blockquote>&lt;/div>
+&lt;p>手机app连接自建bitwarden服务时，需要接口必须是https的，经过比较，决定使用cloudflare代理来实现，这样不用考虑https证书的更新问题。&lt;/p>
+&lt;h2 id="创建bitwarden域dns记录">创建bitwarden域DNS记录&lt;/h2>
+&lt;p>在Cloudflare的DNS面板中创建一条bitwarden服务域的DNS记录，并关闭代理功能，ipv4地址填写openwrt路由地址：&lt;/p>
+&lt;p>&lt;img src="https://blog.xenori.com/2021/10/bitwarden-tls-with-cloudflare/1.jpg"
+width="2040"
+height="304"
+srcset="https://blog.xenori.com/2021/10/bitwarden-tls-with-cloudflare/1_hu3cc7554004a4f82bf46186159a47e918_51397_480x0_resize_q75_box.jpg 480w, https://blog.xenori.com/2021/10/bitwarden-tls-with-cloudflare/1_hu3cc7554004a4f82bf46186159a47e918_51397_1024x0_resize_q75_box.jpg 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="671"
+data-flex-basis="1610px"
+>&lt;/p>
+&lt;h2 id="创建-api-令牌">创建 API 令牌&lt;/h2>
+&lt;p>在Cloudflare的&lt;code>概述&lt;/code>面板中，点击右下角的&lt;code>获取您的 API 令牌&lt;/code>，进入创建令牌页。点击&lt;code>创建令牌&lt;/code>，并选择使用模板&lt;code>编辑区域DNS&lt;/code>：&lt;/p>
+&lt;p>&lt;img src="https://blog.xenori.com/2021/10/bitwarden-tls-with-cloudflare/2.jpg"
+width="1554"
+height="978"
+srcset="https://blog.xenori.com/2021/10/bitwarden-tls-with-cloudflare/2_hu3cc7554004a4f82bf46186159a47e918_164182_480x0_resize_q75_box.jpg 480w, https://blog.xenori.com/2021/10/bitwarden-tls-with-cloudflare/2_hu3cc7554004a4f82bf46186159a47e918_164182_1024x0_resize_q75_box.jpg 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="158"
+data-flex-basis="381px"
+>&lt;/p>
+&lt;p>按照下面图片所示创建访问权限，&lt;code>区域资源&lt;/code>中可限定为刚刚的DNS域，也可指定为帐号下的所有域：&lt;/p>
+&lt;p>&lt;img src="https://blog.xenori.com/2021/10/bitwarden-tls-with-cloudflare/3.jpg"
+width="1852"
+height="702"
+srcset="https://blog.xenori.com/2021/10/bitwarden-tls-with-cloudflare/3_hu3cc7554004a4f82bf46186159a47e918_129456_480x0_resize_q75_box.jpg 480w, https://blog.xenori.com/2021/10/bitwarden-tls-with-cloudflare/3_hu3cc7554004a4f82bf46186159a47e918_129456_1024x0_resize_q75_box.jpg 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="263"
+data-flex-basis="633px"
+>&lt;/p>
+&lt;p>一直点击下一步直到完成，复制出api token，并保存好，下面步骤会用到。&lt;/p>
+&lt;h2 id="下载安装caddy">下载安装caddy&lt;/h2>
+&lt;p>进入&lt;a class="link" href="https://caddyserver.com/download" target="_blank" rel="noopener"
+>caddy下载页&lt;/a>，下载对应版本，需要选上&lt;code>caddy-dns/cloudflare&lt;/code>模块。caddy如何安装，可以参考我之前的文章——&lt;a class="link" href="https://blog.xenori.com/2021/08/openwrt-caddy-replace-uhttpd/" >openwrt管理后台使用caddy代替uhttpd&lt;/a>&lt;/p>
+&lt;p>&lt;img src="https://blog.xenori.com/2021/10/bitwarden-tls-with-cloudflare/4.jpg"
+width="2770"
+height="946"
+srcset="https://blog.xenori.com/2021/10/bitwarden-tls-with-cloudflare/4_hu3cc7554004a4f82bf46186159a47e918_274587_480x0_resize_q75_box.jpg 480w, https://blog.xenori.com/2021/10/bitwarden-tls-with-cloudflare/4_hu3cc7554004a4f82bf46186159a47e918_274587_1024x0_resize_q75_box.jpg 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="292"
+data-flex-basis="702px"
+>&lt;/p>
+&lt;h2 id="配置caddy">配置caddy&lt;/h2>
+&lt;p>打开caddy配置文件，增加下面的配置：&lt;/p>
+&lt;pre tabindex="0">&lt;code>bwrs.xxx.com {
+tls {
+dns cloudflare &amp;lt;my_api_token&amp;gt;
+}
+reverse_proxy localhost:8143
+}
+&lt;/code>&lt;/pre>&lt;p>&lt;code>bwrs.xxx.com&lt;/code>请改为cloudflare的注册域，&lt;code>&amp;lt;my_api_token&amp;gt;&lt;/code>替换为刚申请的api令牌，反向代理端口&lt;code>8143&lt;/code>是bitwarden的服务端口，请按自己的情况替换。&lt;/p>
+&lt;p>修改后，重启caddy使配置生效。&lt;/p>
+&lt;h2 id="openwrt添加本地dns解释记录">openwrt添加本地DNS解释记录&lt;/h2>
+&lt;p>进入openwrt后台，点击&lt;code>网络&lt;/code> -&amp;gt; &lt;code>DHCP/DNS&lt;/code>，在&lt;code>自定义挟持域名&lt;/code>栏添加以下DNS记录：&lt;/p>
+&lt;p>&lt;img src="https://blog.xenori.com/2021/10/bitwarden-tls-with-cloudflare/5.jpg"
+width="2254"
+height="182"
+srcset="https://blog.xenori.com/2021/10/bitwarden-tls-with-cloudflare/5_hu3cc7554004a4f82bf46186159a47e918_39707_480x0_resize_q75_box.jpg 480w, https://blog.xenori.com/2021/10/bitwarden-tls-with-cloudflare/5_hu3cc7554004a4f82bf46186159a47e918_39707_1024x0_resize_q75_box.jpg 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="1238"
+data-flex-basis="2972px"
+>&lt;/p>
+&lt;p>地址请填写openwrt路由地址，到这里就全部配置完成了。&lt;/p>
+&lt;h2 id="测试是否生效">测试是否生效&lt;/h2>
+&lt;p>通过curl请求bitwarden服务看有没内容返回&lt;/p>
+&lt;pre tabindex="0">&lt;code>curl https://bwrs.xxx.com
+&lt;/code>&lt;/pre></description></item><item><title>openwrt管理后台使用caddy代替uhttpd</title><link>https://blog.xenori.com/2021/08/openwrt-caddy-replace-uhttpd/</link><pubDate>Wed, 11 Aug 2021 07:58:11 +0800</pubDate><guid>https://blog.xenori.com/2021/08/openwrt-caddy-replace-uhttpd/</guid><description>&lt;img src="https://blog.xenori.com/2021/08/openwrt-caddy-replace-uhttpd/cover.jpeg" alt="Featured image of post openwrt管理后台使用caddy代替uhttpd" />&lt;p>openwrt管理后台默认是使用uhttpd提供服务的。一段时间体验下来发现uhttpd有时会没响应，查不到具体原因，只能重启才会恢复正常。为了稳定性和强大的反向代理功能，决定在软路由上使用caddy代替uhttpd。&lt;/p>
+&lt;h2 id="暂停uhttpd服务">暂停uhttpd服务&lt;/h2>
+&lt;p>uhttpd服务占用了80端口，需要先暂停。使用ssh登录openwrt，执行下面命令暂停uhttpd服务：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">/etc/init.d/uhttpd stop
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">/etc/init.d/uhttpd disable
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="下载caddy">下载caddy&lt;/h2>
+&lt;p>访问&lt;a class="link" href="https://caddyserver.com/download" target="_blank" rel="noopener"
+>caddy官网&lt;/a>下载最新版本的caddy，intel cpu需要下载&lt;code>Linux amd64&lt;/code>版本，额外功能模块选上&lt;code>aksdb/caddy-cgi/v2&lt;/code>。
+&lt;img src="https://blog.xenori.com/2021/08/openwrt-caddy-replace-uhttpd/1.jpg"
+width="2732"
+height="648"
+srcset="https://blog.xenori.com/2021/08/openwrt-caddy-replace-uhttpd/1_hu3cc7554004a4f82bf46186159a47e918_161268_480x0_resize_q75_box.jpg 480w, https://blog.xenori.com/2021/08/openwrt-caddy-replace-uhttpd/1_hu3cc7554004a4f82bf46186159a47e918_161268_1024x0_resize_q75_box.jpg 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="421"
+data-flex-basis="1011px"
+>&lt;/p>
+&lt;p>下载后放到&lt;code>/usr/bin&lt;/code>目录下，并重命名为&lt;code>caddy&lt;/code>，并给予执行权限：&lt;/p>
+&lt;pre tabindex="0">&lt;code>wget &amp;#34;https://caddyserver.com/api/download\?os\=linux\&amp;amp;arch\=amd64\&amp;amp;p\=github.com%2Faksdb%2Fcaddy-cgi%2Fv2\&amp;amp;idempotency\=32032912354333&amp;#34; -o /usr/bin/caddy
+chmod +x /usr/bin/caddy
+&lt;/code>&lt;/pre>&lt;h2 id="配置caddy">配置caddy&lt;/h2>
+&lt;p>增加下面的配置，并放到&lt;code>/etc/caddy/Caddyfile&lt;/code>文件中：&lt;/p>
+&lt;pre tabindex="0">&lt;code>{
+order cgi before respond
+}
+:80 {
+@notcgi {
+not path /cgi-bin/*
+not path /
+}
+redir / /cgi-bin/luci
+file_server @notcgi {
+root /www
+}
+cgi /cgi-bin/luci* /www/cgi-bin/luci {
+script_name /cgi-bin/luci
+# 下面这句很重要，要不然部分服务控制台会工作不正常
+unbuffered_output
+}
+}
+&lt;/code>&lt;/pre>&lt;h2 id="增加启动脚本">增加启动脚本&lt;/h2>
+&lt;p>增加自启动脚本，并保存到&lt;code>/etc/init.d/caddy&lt;/code>中：&lt;/p>
+&lt;pre tabindex="0">&lt;code>#!/bin/sh /etc/rc.common
+START=99
+SERVICE_USE_PID=1
+SERVICE_WRITE_PID=1
+SERVICE_DAEMONIZE=1
+start() {
+service_start /usr/bin/caddy run --config /etc/caddy/Caddyfile
+}
+stop() {
+service_stop /usr/bin/caddy
+}
+&lt;/code>&lt;/pre>&lt;p>给予执行权限：&lt;/p>
+&lt;pre tabindex="0">&lt;code>chmod +x /etc/init.d/caddy
+&lt;/code>&lt;/pre>&lt;h2 id="运行">运行&lt;/h2>
+&lt;p>执行下面脚本运行caddy服务，并加入到自启动中：&lt;/p>
+&lt;pre tabindex="0">&lt;code>/etc/init.d/caddy enable
+/etc/init.d/caddy start
+&lt;/code>&lt;/pre>&lt;p>成功启动后，就可以正常访问后台了：）&lt;/p></description></item></channel></rss>

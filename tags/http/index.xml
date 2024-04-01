@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Http on bitxeno's notes</title><link>https://blog.xenori.com/tags/http/</link><description>Recent content in Http on bitxeno's notes</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Thu, 02 Apr 2015 00:21:00 +0000</lastBuildDate><atom:link href="https://blog.xenori.com/tags/http/index.xml" rel="self" type="application/rss+xml"/><item><title>解决cookie冲突导致的登录循环重定向</title><link>https://blog.xenori.com/2015/04/loop-redirect-cause-by-cookie-conflict/</link><pubDate>Thu, 02 Apr 2015 00:21:00 +0000</pubDate><guid>https://blog.xenori.com/2015/04/loop-redirect-cause-by-cookie-conflict/</guid><description>&lt;p>近排开发的一个后台系统（域名：admin.test.test.com）在接入公司统一SSO时，遇到了cookie冲突引起的登录循环重定向的bug。&lt;/p>
+&lt;p>公司有一个统一的SSO登录页面，我们开发的系统是跳转到该页面实现登录验证的。有用户反映登录不了，浏览器提示循环重定向了，查看用户浏览器发现有两个相同名称的session cookie：&lt;/p>
+&lt;pre tabindex="0">&lt;code>PHPSESSID=token1; path=/; expired=/; domain=.test.com
+PHPSESSID=token2; path=/; expired=/; domain=.test.test.com
+&lt;/code>&lt;/pre>&lt;p>显然这两个cookie的domain因为都是admin.test.test.com的根域名，使浏览器都发送到php后台系统了。第一个是后台系统（admin.test.test.com）写入的，是正确的session id，而第二个是由未知系统写入的。测试打印**$_COOKIE[&amp;lsquo;PHPSESSID&amp;rsquo;]**发现输出是：&lt;/p>
+&lt;pre tabindex="0">&lt;code>token2
+&lt;/code>&lt;/pre>&lt;p>很明显php读取到了错误的session id，所以导致系统读取不到保存在session中的登录信息，而误判用户为未登录，之后再把用户跳转回SSO登录页面，跳转回SSO系统后，SSO系统知道用户已登录过，再跳转回系统。。。这样就一直循环下去了=。=&lt;/p>
+&lt;p>为什么PHP会读取到错误的session id呢？打印全局变量**$_SERVER[&amp;lsquo;HTTP_COOKIES&amp;rsquo;]**出来查看：&lt;/p>
+&lt;pre tabindex="0">&lt;code>PHPSESSID=token2;PHPSESSID=token1
+&lt;/code>&lt;/pre>&lt;p>发现PHP是能接收到两个同名COOKIE的，但只取了第一个当真正的session id！！&lt;br>
+查看php源码，在文件php_variables.c的220行，有注释出php对同名cookie的处理规则：&lt;/p>
+&lt;blockquote>
+&lt;p>&lt;a class="link" href="https://github.com/php/php-src/blob/e10e151e9b92313a7085272c85bebf6c82017fce/main/php_variables.c" target="_blank" rel="noopener"
+>https://github.com/php/php-src/blob/e10e151e9b92313a7085272c85bebf6c82017fce/main/php_variables.c&lt;/a> #220&lt;/p>
+&lt;/blockquote>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-c" data-lang="c">&lt;span class="line">&lt;span class="cl"> &lt;span class="cm">/*
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cm"> * According to rfc2965, more specific paths are listed above the less specific ones.
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cm"> * If we encounter a duplicate cookie name, we should skip it, since it is not possible
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cm"> * to have the same (plain text) cookie name for the same path and we should not overwrite
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cm"> * more specific cookies with the less specific ones.
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cm"> */&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="nf">Z_TYPE&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nf">PG&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">http_globals&lt;/span>&lt;span class="p">)[&lt;/span>&lt;span class="n">TRACK_VARS_COOKIE&lt;/span>&lt;span class="p">])&lt;/span> &lt;span class="o">!=&lt;/span> &lt;span class="n">IS_UNDEF&lt;/span> &lt;span class="o">&amp;amp;&amp;amp;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">symtable1&lt;/span> &lt;span class="o">==&lt;/span> &lt;span class="nf">Z_ARRVAL&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nf">PG&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">http_globals&lt;/span>&lt;span class="p">)[&lt;/span>&lt;span class="n">TRACK_VARS_COOKIE&lt;/span>&lt;span class="p">])&lt;/span> &lt;span class="o">&amp;amp;&amp;amp;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nf">zend_symtable_str_exists&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">symtable1&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">index&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">index_len&lt;/span>&lt;span class="p">))&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nf">zval_ptr_dtor&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="o">&amp;amp;&lt;/span>&lt;span class="n">gpc_element&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span> &lt;span class="k">else&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">gpc_element_p&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="nf">zend_symtable_str_update_ind&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">symtable1&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">index&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">index_len&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="o">&amp;amp;&lt;/span>&lt;span class="n">gpc_element&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>意思是当php遇到相同名称的cookie时，只会保留**$_SERVER[&amp;lsquo;HTTP_COOKIES&amp;rsquo;]**中的第一个cookie，而余下同名的会忽略跳过。&lt;/p>
+&lt;p>很明显，只要浏览器传cookie给php时，把token1的session id放在最前面，这样就能正确判断登录成功了！
+那么浏览器传递cookie顺序是如何的呢？参考&lt;a class="link" href="http://www.rfc-editor.org/rfc/rfc6265.txt" target="_blank" rel="noopener"
+>RFC6265 HTTP State Management Mechanism&lt;/a>，可以发现：&lt;/p>
+&lt;pre tabindex="0">&lt;code>4.2.2
+In particular,if the Cookie header contains two cookies with the same name (e.g.,
+that were set with different Path or Domain attributes), servers
+SHOULD NOT rely upon the order in which these cookies appear in the
+header.
+5.3. Storage Model
+2. The user agent SHOULD sort the cookie-list in the following
+order:
+* Cookies with longer paths are listed before cookies with
+shorter paths.
+* Among cookies that have equal-length path fields, cookies with
+earlier creation-times are listed before cookies with later
+creation-times.
+NOTE: Not all user agents sort the cookie-list in this order, but
+this order reflects common practice when this document was
+written, and, historically, there have been servers that
+(erroneously) depended on this order.
+&lt;/code>&lt;/pre>&lt;p>大概意思就是：&lt;/p>
+&lt;ol>
+&lt;li>path越长的说明匹配越精确，顺序越靠前&lt;/li>
+&lt;li>假如path相同，cookie创建时间越早的，顺序越靠前&lt;/li>
+&lt;li>顺序与domain没关系&lt;br>
+RFC同时也说明并不是所有的浏览器都遵守这个，并且服务器也不应该依赖于cookie出现的顺序。&lt;/li>
+&lt;/ol>
+&lt;p>最后通过更改保存的session id名称来避免冲突解决问题，不过倒让我加深了cookie的了解。&lt;/p></description></item><item><title>了解IIS的主机名(Host Headers)配置项</title><link>https://blog.xenori.com/2012/03/understanding-iis-host-headers/</link><pubDate>Sat, 03 Mar 2012 17:00:18 +0000</pubDate><guid>https://blog.xenori.com/2012/03/understanding-iis-host-headers/</guid><description>&lt;p>IIS可以在一台服务器上配置多个web站点，每个站点通过ip地址、端口(port)和主机名(host)结合的标识符(ServerBindings Metabase)进行区分。标识字符串的格式如下：&lt;/p>
+&lt;pre>&lt;code>IP:Port:Hostname
+&lt;/code>&lt;/pre>
+&lt;p>上面的IP和Hostname是可选项，假如设定站点时不指定，表示匹配所有。&lt;/p>
+&lt;h3 id="主机名host-headers是http消息的一部分">主机名(Host Headers)是HTTP消息的一部分&lt;/h3>
+&lt;p>浏览器和web服务器之间是通过http协议通信的。http发送的请求头部(headers)部分包含有很多信息，如Content-Length, Referer, &lt;strong>Host&lt;/strong>等等。&lt;/p>
+&lt;h3 id="浏览器如何和web服务器通信">浏览器如何和web服务器通信&lt;/h3>
+&lt;p>互联网上的两台主机之间是通过TCP/IP协议进行通信的，通信建立连接时需要指定ip和端口号(port)。当我们在浏览器中输入一个网站的域名，并按回车后，浏览器默认会使用http协议和80端口发出请求。&lt;/p>
+&lt;p>&lt;img src="http://ww4.sinaimg.cn/large/7ce4a9f6gw1e5q1ogexavj20dw01i74b.jpg"
+loading="lazy"
+alt="client to server"
+>&lt;/p>
+&lt;p>浏览器首先需要把域名解析为对应的ip地址。域名解析可以使用dns服务器或本地的host文件。&lt;/p>
+&lt;p>当域名解析为ip地址后，浏览器会和web服务器建立连接，并发出网页访问请求信息。请求信息的头部一般像下面这样：&lt;/p>
+&lt;pre>&lt;code>GET /index.htm HTTP/1.1
+Host: www.ilopia.com
+&lt;/code>&lt;/pre>
+&lt;p>IIS接收到请求后，会检查请求是否带有host信息(请求中也可能不带有host信息，如使用ip直接访问)。IIS发现有host后，会查找是否有匹配该host的站点，如果有匹配的站点，就会把请求路由给它进行处理。&lt;/p>
+&lt;p>最后一步是IIS响应处理请求。&lt;/p>
+&lt;h3 id="iis如何分发请求到指定web站点">IIS如何分发请求到指定web站点&lt;/h3>
+&lt;p>IIS分发请求到指定站点的规则如下：&lt;/p>
+&lt;ol>
+&lt;li>
+&lt;p>1、是否存在准确匹配 IP:Port:Hostname标识字符串的站点，存在即分发请求，没有进行下一步匹配&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>2、是否存在监听所有IP地址(站点设定时不指定)，并且Port和Hostname都匹配的站点，存在即分发请求，没有进行下一步匹配&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>3、是否存在端口Port匹配，而IP和Hostname都未指定的站点，存在即分发请求，没有浏览器会提示没法连接到服务器&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;h3 id="参考资料">参考资料&lt;/h3>
+&lt;p>&lt;a class="link" href="http://www.microsoft.com/technet/prodtechnol/WindowsServer2003/Library/IIS/0ed054d1-ca3a-495f-bad4-3a251e5a07a3.mspx?mfr=true" target="_blank" rel="noopener"
+>ServerBindings Metabase Property (IIS 6.0)&lt;/a>
+&lt;a class="link" href="http://www.it-notebook.org/iis/article/understanding_host_headers.htm" target="_blank" rel="noopener"
+>Understanding Host Headers in IIS&lt;/a>
+&lt;a class="link" href="http://www.it-notebook.org/iis/article/iis_multiple_websites.htm" target="_blank" rel="noopener"
+>Using Host Headers to host multiple websites on IIS 6.0&lt;/a>&lt;/p></description></item></channel></rss>

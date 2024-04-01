@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Github on bitxeno's notes</title><link>https://blog.xenori.com/tags/github/</link><description>Recent content in Github on bitxeno's notes</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Thu, 29 Feb 2024 12:16:42 +0800</lastBuildDate><atom:link href="https://blog.xenori.com/tags/github/index.xml" rel="self" type="application/rss+xml"/><item><title>github 下载加速</title><link>https://blog.xenori.com/2024/02/github-download-enhance-speed/</link><pubDate>Thu, 29 Feb 2024 12:16:42 +0800</pubDate><guid>https://blog.xenori.com/2024/02/github-download-enhance-speed/</guid><description>&lt;img src="https://blog.xenori.com/2024/02/github-download-enhance-speed/cover.png" alt="Featured image of post github 下载加速" />&lt;h2 id="使用-ghproxy-加速">使用 ghproxy 加速&lt;/h2>
+&lt;p>官网：&lt;a class="link" href="https://mirror.ghproxy.com" target="_blank" rel="noopener"
+>https://mirror.ghproxy.com&lt;/a>&lt;/p>
+&lt;h3 id="加速方法">加速方法：&lt;/h3>
+&lt;p>在链接前面添加：https://mirror.ghproxy.com/，如：&lt;/p>
+&lt;pre tabindex="0">&lt;code>https://mirror.ghproxy.com/https://github.com/user/repo/releases/download/version/file
+&lt;/code>&lt;/pre>
+&lt;div class="notices warning" >&lt;blockquote>&lt;p>限制：ghproxy 域名可能会被墙，导致需要更换域名&lt;/p>
+&lt;/blockquote>&lt;/div>
+&lt;h2 id="使用-jsdelivr-加速">使用 jsdelivr 加速&lt;/h2>
+&lt;p>官网：&lt;a class="link" href="https://github.com/jsdelivr/jsdelivr?tab=readme-ov-file#github" target="_blank" rel="noopener"
+>https://github.com/jsdelivr/jsdelivr?tab=readme-ov-file#github&lt;/a>&lt;/p>
+&lt;h3 id="加速方法-1">加速方法：&lt;/h3>
+&lt;p>使用 &lt;a class="link" href="https://cdn.jsdelivr.net/gh" target="_blank" rel="noopener"
+>https://cdn.jsdelivr.net/gh&lt;/a> 替换 &lt;a class="link" href="https://github.com" target="_blank" rel="noopener"
+>https://github.com&lt;/a> 域名，如：&lt;/p>
+&lt;pre tabindex="0">&lt;code>https://cdn.jsdelivr.net/gh/user/repo@version/file
+&lt;/code>&lt;/pre>&lt;p>&lt;code>@version&lt;/code> 可以是 tag 或 commit，省略也可以，如：&lt;/p>
+&lt;pre tabindex="0">&lt;code>https://cdn.jsdelivr.net/gh/user/repo/file
+&lt;/code>&lt;/pre>
+&lt;div class="notices warning" >&lt;blockquote>&lt;p>限制：只支持 git 仓库文件，不支持 release 发布的文件&lt;/p>
+&lt;/blockquote>&lt;/div></description></item></channel></rss>

@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Caddy on bitxeno's notes</title><link>https://blog.xenori.com/tags/caddy/</link><description>Recent content in Caddy on bitxeno's notes</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Wed, 20 Apr 2022 11:58:08 +0800</lastBuildDate><atom:link href="https://blog.xenori.com/tags/caddy/index.xml" rel="self" type="application/rss+xml"/><item><title>caddy使用教程</title><link>https://blog.xenori.com/2022/04/caddy-usage/</link><pubDate>Wed, 20 Apr 2022 11:58:08 +0800</pubDate><guid>https://blog.xenori.com/2022/04/caddy-usage/</guid><description>&lt;img src="https://blog.xenori.com/2022/04/caddy-usage/cover.jpeg" alt="Featured image of post caddy使用教程" />&lt;h2 id="安装caddy">安装caddy&lt;/h2>
+&lt;p>Mac:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">brew install caddy
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Windows:&lt;/p>
+&lt;p>到官网直接下载：&lt;a class="link" href="https://caddyserver.com/download" target="_blank" rel="noopener"
+>https://caddyserver.com/download&lt;/a>&lt;/p>
+&lt;h2 id="快速启动支持https的开发服务器">快速启动支持https的开发服务器&lt;/h2>
+&lt;h3 id="安装证书">安装证书&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">caddy trust
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="启动简单文件服务器">启动简单文件服务器&lt;/h3>
+&lt;p>进入文件目录，执行如下命令：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">caddy file-server
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="启动开发服务器">启动开发服务器&lt;/h3>
+&lt;p>进入项目根目录，执行如下命令：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">cat &lt;span class="s">&amp;lt;&amp;lt;EOF &amp;gt; Caddyfile
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">www.example.com {
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s"> try_files {path} /index.html
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s"> file_server
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s"> tls internal
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">}
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s">EOF&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">caddy run
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>自建Bitwarden通过cloudflare实现https访问</title><link>https://blog.xenori.com/2021/10/bitwarden-tls-with-cloudflare/</link><pubDate>Wed, 20 Oct 2021 22:16:11 +0800</pubDate><guid>https://blog.xenori.com/2021/10/bitwarden-tls-with-cloudflare/</guid><description>&lt;img src="https://blog.xenori.com/2021/10/bitwarden-tls-with-cloudflare/cover.png" alt="Featured image of post 自建Bitwarden通过cloudflare实现https访问" />&lt;div class="notices warning" >&lt;blockquote>&lt;p>本文的方案只针对局域网内使用bitwarden的情况。实现原理是使用ACME DNS验证方式验证域名所有权。&lt;/p>
+&lt;/blockquote>&lt;/div>
+&lt;p>手机app连接自建bitwarden服务时，需要接口必须是https的，经过比较，决定使用cloudflare代理来实现，这样不用考虑https证书的更新问题。&lt;/p>
+&lt;h2 id="创建bitwarden域dns记录">创建bitwarden域DNS记录&lt;/h2>
+&lt;p>在Cloudflare的DNS面板中创建一条bitwarden服务域的DNS记录，并关闭代理功能，ipv4地址填写openwrt路由地址：&lt;/p>
+&lt;p>&lt;img src="https://blog.xenori.com/2021/10/bitwarden-tls-with-cloudflare/1.jpg"
+width="2040"
+height="304"
+srcset="https://blog.xenori.com/2021/10/bitwarden-tls-with-cloudflare/1_hu3cc7554004a4f82bf46186159a47e918_51397_480x0_resize_q75_box.jpg 480w, https://blog.xenori.com/2021/10/bitwarden-tls-with-cloudflare/1_hu3cc7554004a4f82bf46186159a47e918_51397_1024x0_resize_q75_box.jpg 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="671"
+data-flex-basis="1610px"
+>&lt;/p>
+&lt;h2 id="创建-api-令牌">创建 API 令牌&lt;/h2>
+&lt;p>在Cloudflare的&lt;code>概述&lt;/code>面板中，点击右下角的&lt;code>获取您的 API 令牌&lt;/code>，进入创建令牌页。点击&lt;code>创建令牌&lt;/code>，并选择使用模板&lt;code>编辑区域DNS&lt;/code>：&lt;/p>
+&lt;p>&lt;img src="https://blog.xenori.com/2021/10/bitwarden-tls-with-cloudflare/2.jpg"
+width="1554"
+height="978"
+srcset="https://blog.xenori.com/2021/10/bitwarden-tls-with-cloudflare/2_hu3cc7554004a4f82bf46186159a47e918_164182_480x0_resize_q75_box.jpg 480w, https://blog.xenori.com/2021/10/bitwarden-tls-with-cloudflare/2_hu3cc7554004a4f82bf46186159a47e918_164182_1024x0_resize_q75_box.jpg 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="158"
+data-flex-basis="381px"
+>&lt;/p>
+&lt;p>按照下面图片所示创建访问权限，&lt;code>区域资源&lt;/code>中可限定为刚刚的DNS域，也可指定为帐号下的所有域：&lt;/p>
+&lt;p>&lt;img src="https://blog.xenori.com/2021/10/bitwarden-tls-with-cloudflare/3.jpg"
+width="1852"
+height="702"
+srcset="https://blog.xenori.com/2021/10/bitwarden-tls-with-cloudflare/3_hu3cc7554004a4f82bf46186159a47e918_129456_480x0_resize_q75_box.jpg 480w, https://blog.xenori.com/2021/10/bitwarden-tls-with-cloudflare/3_hu3cc7554004a4f82bf46186159a47e918_129456_1024x0_resize_q75_box.jpg 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="263"
+data-flex-basis="633px"
+>&lt;/p>
+&lt;p>一直点击下一步直到完成，复制出api token，并保存好，下面步骤会用到。&lt;/p>
+&lt;h2 id="下载安装caddy">下载安装caddy&lt;/h2>
+&lt;p>进入&lt;a class="link" href="https://caddyserver.com/download" target="_blank" rel="noopener"
+>caddy下载页&lt;/a>，下载对应版本，需要选上&lt;code>caddy-dns/cloudflare&lt;/code>模块。caddy如何安装，可以参考我之前的文章——&lt;a class="link" href="https://blog.xenori.com/2021/08/openwrt-caddy-replace-uhttpd/" >openwrt管理后台使用caddy代替uhttpd&lt;/a>&lt;/p>
+&lt;p>&lt;img src="https://blog.xenori.com/2021/10/bitwarden-tls-with-cloudflare/4.jpg"
+width="2770"
+height="946"
+srcset="https://blog.xenori.com/2021/10/bitwarden-tls-with-cloudflare/4_hu3cc7554004a4f82bf46186159a47e918_274587_480x0_resize_q75_box.jpg 480w, https://blog.xenori.com/2021/10/bitwarden-tls-with-cloudflare/4_hu3cc7554004a4f82bf46186159a47e918_274587_1024x0_resize_q75_box.jpg 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="292"
+data-flex-basis="702px"
+>&lt;/p>
+&lt;h2 id="配置caddy">配置caddy&lt;/h2>
+&lt;p>打开caddy配置文件，增加下面的配置：&lt;/p>
+&lt;pre tabindex="0">&lt;code>bwrs.xxx.com {
+tls {
+dns cloudflare &amp;lt;my_api_token&amp;gt;
+}
+reverse_proxy localhost:8143
+}
+&lt;/code>&lt;/pre>&lt;p>&lt;code>bwrs.xxx.com&lt;/code>请改为cloudflare的注册域，&lt;code>&amp;lt;my_api_token&amp;gt;&lt;/code>替换为刚申请的api令牌，反向代理端口&lt;code>8143&lt;/code>是bitwarden的服务端口，请按自己的情况替换。&lt;/p>
+&lt;p>修改后，重启caddy使配置生效。&lt;/p>
+&lt;h2 id="openwrt添加本地dns解释记录">openwrt添加本地DNS解释记录&lt;/h2>
+&lt;p>进入openwrt后台，点击&lt;code>网络&lt;/code> -&amp;gt; &lt;code>DHCP/DNS&lt;/code>，在&lt;code>自定义挟持域名&lt;/code>栏添加以下DNS记录：&lt;/p>
+&lt;p>&lt;img src="https://blog.xenori.com/2021/10/bitwarden-tls-with-cloudflare/5.jpg"
+width="2254"
+height="182"
+srcset="https://blog.xenori.com/2021/10/bitwarden-tls-with-cloudflare/5_hu3cc7554004a4f82bf46186159a47e918_39707_480x0_resize_q75_box.jpg 480w, https://blog.xenori.com/2021/10/bitwarden-tls-with-cloudflare/5_hu3cc7554004a4f82bf46186159a47e918_39707_1024x0_resize_q75_box.jpg 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="1238"
+data-flex-basis="2972px"
+>&lt;/p>
+&lt;p>地址请填写openwrt路由地址，到这里就全部配置完成了。&lt;/p>
+&lt;h2 id="测试是否生效">测试是否生效&lt;/h2>
+&lt;p>通过curl请求bitwarden服务看有没内容返回&lt;/p>
+&lt;pre tabindex="0">&lt;code>curl https://bwrs.xxx.com
+&lt;/code>&lt;/pre></description></item><item><title>openwrt管理后台使用caddy代替uhttpd</title><link>https://blog.xenori.com/2021/08/openwrt-caddy-replace-uhttpd/</link><pubDate>Wed, 11 Aug 2021 07:58:11 +0800</pubDate><guid>https://blog.xenori.com/2021/08/openwrt-caddy-replace-uhttpd/</guid><description>&lt;img src="https://blog.xenori.com/2021/08/openwrt-caddy-replace-uhttpd/cover.jpeg" alt="Featured image of post openwrt管理后台使用caddy代替uhttpd" />&lt;p>openwrt管理后台默认是使用uhttpd提供服务的。一段时间体验下来发现uhttpd有时会没响应，查不到具体原因，只能重启才会恢复正常。为了稳定性和强大的反向代理功能，决定在软路由上使用caddy代替uhttpd。&lt;/p>
+&lt;h2 id="暂停uhttpd服务">暂停uhttpd服务&lt;/h2>
+&lt;p>uhttpd服务占用了80端口，需要先暂停。使用ssh登录openwrt，执行下面命令暂停uhttpd服务：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">/etc/init.d/uhttpd stop
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">/etc/init.d/uhttpd disable
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="下载caddy">下载caddy&lt;/h2>
+&lt;p>访问&lt;a class="link" href="https://caddyserver.com/download" target="_blank" rel="noopener"
+>caddy官网&lt;/a>下载最新版本的caddy，intel cpu需要下载&lt;code>Linux amd64&lt;/code>版本，额外功能模块选上&lt;code>aksdb/caddy-cgi/v2&lt;/code>。
+&lt;img src="https://blog.xenori.com/2021/08/openwrt-caddy-replace-uhttpd/1.jpg"
+width="2732"
+height="648"
+srcset="https://blog.xenori.com/2021/08/openwrt-caddy-replace-uhttpd/1_hu3cc7554004a4f82bf46186159a47e918_161268_480x0_resize_q75_box.jpg 480w, https://blog.xenori.com/2021/08/openwrt-caddy-replace-uhttpd/1_hu3cc7554004a4f82bf46186159a47e918_161268_1024x0_resize_q75_box.jpg 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="421"
+data-flex-basis="1011px"
+>&lt;/p>
+&lt;p>下载后放到&lt;code>/usr/bin&lt;/code>目录下，并重命名为&lt;code>caddy&lt;/code>，并给予执行权限：&lt;/p>
+&lt;pre tabindex="0">&lt;code>wget &amp;#34;https://caddyserver.com/api/download\?os\=linux\&amp;amp;arch\=amd64\&amp;amp;p\=github.com%2Faksdb%2Fcaddy-cgi%2Fv2\&amp;amp;idempotency\=32032912354333&amp;#34; -o /usr/bin/caddy
+chmod +x /usr/bin/caddy
+&lt;/code>&lt;/pre>&lt;h2 id="配置caddy">配置caddy&lt;/h2>
+&lt;p>增加下面的配置，并放到&lt;code>/etc/caddy/Caddyfile&lt;/code>文件中：&lt;/p>
+&lt;pre tabindex="0">&lt;code>{
+order cgi before respond
+}
+:80 {
+@notcgi {
+not path /cgi-bin/*
+not path /
+}
+redir / /cgi-bin/luci
+file_server @notcgi {
+root /www
+}
+cgi /cgi-bin/luci* /www/cgi-bin/luci {
+script_name /cgi-bin/luci
+# 下面这句很重要，要不然部分服务控制台会工作不正常
+unbuffered_output
+}
+}
+&lt;/code>&lt;/pre>&lt;h2 id="增加启动脚本">增加启动脚本&lt;/h2>
+&lt;p>增加自启动脚本，并保存到&lt;code>/etc/init.d/caddy&lt;/code>中：&lt;/p>
+&lt;pre tabindex="0">&lt;code>#!/bin/sh /etc/rc.common
+START=99
+SERVICE_USE_PID=1
+SERVICE_WRITE_PID=1
+SERVICE_DAEMONIZE=1
+start() {
+service_start /usr/bin/caddy run --config /etc/caddy/Caddyfile
+}
+stop() {
+service_stop /usr/bin/caddy
+}
+&lt;/code>&lt;/pre>&lt;p>给予执行权限：&lt;/p>
+&lt;pre tabindex="0">&lt;code>chmod +x /etc/init.d/caddy
+&lt;/code>&lt;/pre>&lt;h2 id="运行">运行&lt;/h2>
+&lt;p>执行下面脚本运行caddy服务，并加入到自启动中：&lt;/p>
+&lt;pre tabindex="0">&lt;code>/etc/init.d/caddy enable
+/etc/init.d/caddy start
+&lt;/code>&lt;/pre>&lt;p>成功启动后，就可以正常访问后台了：）&lt;/p></description></item></channel></rss>

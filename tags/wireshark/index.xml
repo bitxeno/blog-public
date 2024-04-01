@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Wireshark on bitxeno's notes</title><link>https://blog.xenori.com/tags/wireshark/</link><description>Recent content in Wireshark on bitxeno's notes</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Wed, 10 Aug 2022 11:58:08 +0800</lastBuildDate><atom:link href="https://blog.xenori.com/tags/wireshark/index.xml" rel="self" type="application/rss+xml"/><item><title>wireshark常用抓包分析命令</title><link>https://blog.xenori.com/2022/08/wireshark-commands/</link><pubDate>Wed, 10 Aug 2022 11:58:08 +0800</pubDate><guid>https://blog.xenori.com/2022/08/wireshark-commands/</guid><description>&lt;img src="https://blog.xenori.com/2022/08/wireshark-commands/cover.png" alt="Featured image of post wireshark常用抓包分析命令" />&lt;h2 id="服务器抓包">服务器抓包&lt;/h2>
+&lt;h3 id="mac示例">Mac示例&lt;/h3>
+&lt;p>&lt;code>192.168.1.1&lt;/code>是服务器ip，&lt;code>192.168.2.1&lt;/code>是Mac ip，本命令在Mac终端执行&lt;/p>
+&lt;pre tabindex="0">&lt;code>ssh root@192.168.1.1 &amp;#39;tcpdump -i br-lan host 192.168.2.1 -s 0 -l -w -&amp;#39; | /Applications/Wireshark.app/Contents/MacOS/Wireshark -k -i -
+&lt;/code>&lt;/pre>&lt;h3 id="windows示例">Windows示例&lt;/h3>
+&lt;pre tabindex="0">&lt;code>&lt;/code>&lt;/pre>&lt;h2 id="请求过滤">请求过滤&lt;/h2>
+&lt;h3 id="查看http的get请求">查看http的GET请求&lt;/h3>
+&lt;pre tabindex="0">&lt;code>http.request.method == &amp;#34;GET&amp;#34;
+&lt;/code>&lt;/pre>&lt;h3 id="查看http所有成功的请求">查看http所有成功的请求&lt;/h3>
+&lt;pre tabindex="0">&lt;code>http.response.code == 200
+&lt;/code>&lt;/pre></description></item></channel></rss>

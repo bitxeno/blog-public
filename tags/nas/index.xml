@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Nas on bitxeno's notes</title><link>https://blog.xenori.com/tags/nas/</link><description>Recent content in Nas on bitxeno's notes</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Tue, 27 Sep 2022 11:58:08 +0800</lastBuildDate><atom:link href="https://blog.xenori.com/tags/nas/index.xml" rel="self" type="application/rss+xml"/><item><title>jellyfin使用指南</title><link>https://blog.xenori.com/2022/09/jellyfin-practice/</link><pubDate>Tue, 27 Sep 2022 11:58:08 +0800</pubDate><guid>https://blog.xenori.com/2022/09/jellyfin-practice/</guid><description>&lt;img src="https://blog.xenori.com/2022/09/jellyfin-practice/cover.png" alt="Featured image of post jellyfin使用指南" />&lt;h2 id="媒体文件命名规范">媒体文件命名规范&lt;/h2>
+&lt;h3 id="电影">电影&lt;/h3>
+&lt;p>参考：https://jellyfin.org/docs/general/server/media/movies/&lt;/p>
+&lt;pre tabindex="0">&lt;code>Movies
+├── Best_Movie_Ever (2019)
+│ ├── Best_Movie_Ever (2019) - 1080P.mp4
+│ ├── Best_Movie_Ever (2019) - 720P.mp4
+│ └── Best_Movie_Ever (2019) - Directors Cut.mp4
+└── Movie (2021) [imdbid-tt12801262]
+├── Movie (2021) [imdbid-tt12801262] - 2160p.mp4
+├── Movie (2021) [imdbid-tt12801262] - 1080p.mp4
+└── Movie (2021) [imdbid-tt12801262] - Directors Cut.mp4
+&lt;/code>&lt;/pre>&lt;h3 id="电视剧">电视剧&lt;/h3>
+&lt;p>参考：https://jellyfin.org/docs/general/server/media/shows&lt;/p>
+&lt;pre tabindex="0">&lt;code>Shows
+└── Series Name (2010)
+├── Season 01
+│ ├── Series Name S01E01.mkv
+│ ├── Series Name S01E02.mkv
+│ ├── featurettes
+│ │ └── Some Featurette.mkv
+│ └── interviews
+│ └── Interview with the Director.mp4
+├── Season 02
+│ ├── Series Name S02E01.mkv
+│ ├── Series Name S02E02.mkv
+│ └── behind the scenes
+│ └── Behind the Scenes.mp4
+└── extras
+└── Fantastic Extra.mkv
+&lt;/code>&lt;/pre>&lt;h2 id="解决我的媒体封面图中文变方块">解决我的媒体封面图中文变方块&lt;/h2>
+&lt;p>先进入docker shell，安装中文支持字体&lt;/p>
+&lt;pre tabindex="0">&lt;code>apt update
+apt install fonts-noto-cjk
+&lt;/code>&lt;/pre>&lt;p>安装后先删除旧的封面图，然后选择右下角菜单的&lt;strong>刷新元数据&lt;/strong>，这样会再次生成新的封面。&lt;/p>
+&lt;h2 id="解决元数据没自动获取">解决元数据没自动获取&lt;/h2>
+&lt;p>假如nas的影片很多，inotify的监控文件数会到达上限，就会出现这情况。可以在docker的host端，执行命令增大监控文件数：&lt;/p>
+&lt;pre tabindex="0">&lt;code>sysctl -w fs.inotify.max_user_watches=1048576
+&lt;/code>&lt;/pre>&lt;p>然后重启下jellyfin就可以了&lt;/p>
+&lt;h2 id="最新添加的剧集不在首页显示">最新添加的剧集不在首页显示&lt;/h2>
+&lt;p>默认是按视频文件创建时间排序的，假如视频文件创建日期太旧就会这样，可到控制台&lt;code>媒体库 -&amp;gt; 显示&lt;/code>中，把选项&lt;code>新内容加入的日期&lt;/code>改为使用扫描日期&lt;/p>
+&lt;h2 id="首页最新的电视剧栏只显示几个">首页最新的电视剧栏只显示几个&lt;/h2>
+&lt;p>这是jellyfin查找最新电视剧是居于最新剧集来查询导致的，默认只查找前80个剧集，假如最近添加的电视剧的剧集数比较多，就会挤掉其他电视剧导致没法在首页显示。只能等jellyfin修改查询机制修复。&lt;a class="link" href="https://github.com/jellyfin/jellyfin/issues/1880" target="_blank" rel="noopener"
+>issue#1880&lt;/a>&lt;/p>
+&lt;h2 id="匹配的元数据不正确怎解决">匹配的元数据不正确怎解决？&lt;/h2>
+&lt;p>可以使用右上角的&lt;code>识别&lt;/code>功能重新匹配，假如重新匹配也不正确，可以手工修改元数据，如集号等，再使用&lt;code>刷新元数据 -&amp;gt; 搜索缺少的元数据&lt;/code>匹配缺少的元数据。&lt;/p></description></item></channel></rss>

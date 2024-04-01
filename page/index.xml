@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Pages on bitxeno's notes</title><link>https://blog.xenori.com/page/</link><description>Recent content in Pages on bitxeno's notes</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Mon, 05 Jul 2021 17:20:08 +0800</lastBuildDate><atom:link href="https://blog.xenori.com/page/index.xml" rel="self" type="application/rss+xml"/><item><title>推荐</title><link>https://blog.xenori.com/star/</link><pubDate>Mon, 05 Jul 2021 17:20:08 +0800</pubDate><guid>https://blog.xenori.com/star/</guid><description>&lt;h1 id="windows应用">Windows应用&lt;/h1>
+&lt;p>&lt;a class="link" href="https://github.com/MarcAnt01/Fluent-Screen-Recorder" target="_blank" rel="noopener"
+>&lt;strong>Fluent Screen Recorder&lt;/strong>&lt;/a>&lt;/p>
+&lt;blockquote>
+&lt;p>简单的fluent design风格录屏应用&lt;/p>
+&lt;/blockquote>
+&lt;p>&lt;a class="link" href="https://github.com/zhongyang219/TrafficMonitor" target="_blank" rel="noopener"
+>&lt;strong>TrafficMonitor&lt;/strong>&lt;/a>&lt;/p>
+&lt;blockquote>
+&lt;p>Traffic Monitor是一款用于Windows平台的网速监控悬浮窗软件，可以显示当前网速、CPU及内存利用率，支持嵌入到任务栏显示，支持更换皮肤、历史流量统计等功能。&lt;/p>
+&lt;/blockquote>
+&lt;p>&lt;a class="link" href="https://github.com/QL-Win/QuickLook" target="_blank" rel="noopener"
+>&lt;strong>QuickLook&lt;/strong>&lt;/a>&lt;/p>
+&lt;blockquote>
+&lt;p>可以像 macOS 通过一样空格键快速预览文件内容，支持 word、excel、markdown 和图片等&lt;/p>
+&lt;/blockquote>
+&lt;p>&lt;a class="link" href="https://github.com/karpach/remote-shutdown-pc" target="_blank" rel="noopener"
+>&lt;strong>Remote Shutdown Manager&lt;/strong>&lt;/a>&lt;/p>
+&lt;blockquote>
+&lt;p>局域网通过 http 接口远程关机服务&lt;/p>
+&lt;/blockquote>
+&lt;p>&lt;a class="link" href="https://github.com/ShareX/ShareX" target="_blank" rel="noopener"
+>&lt;strong>ShareX&lt;/strong>&lt;/a>&lt;/p>
+&lt;blockquote>
+&lt;p>开源截图工具，还能自动上传图床&lt;/p>
+&lt;/blockquote>
+&lt;p>&lt;a class="link" href="https://github.com/d2phap/ImageGlass" target="_blank" rel="noopener"
+>&lt;strong>ImageGlass&lt;/strong>&lt;/a>&lt;/p>
+&lt;blockquote>
+&lt;p>小巧的类似acdsee的看图工具&lt;/p>
+&lt;/blockquote>
+&lt;h1 id="mac-应用">Mac 应用&lt;/h1>
+&lt;p>&lt;a class="link" href="https://github.com/lwouis/alt-tab-macos" target="_blank" rel="noopener"
+>&lt;strong>AltTab&lt;/strong>&lt;/a>&lt;/p>
+&lt;blockquote>
+&lt;p>Windows 系统有一个 alt-tab 组合键切换桌面的功能，这个开源软件将这个组合键移植到 MacOS 电脑。&lt;/p>
+&lt;/blockquote>
+&lt;p>&lt;a class="link" href="https://kyome.io/runcat/index.html?lang=en" target="_blank" rel="noopener"
+>&lt;strong>runcat&lt;/strong>&lt;/a>&lt;/p>
+&lt;blockquote>
+&lt;p>有趣的生活在菜单栏的猫咪，会随着cpu使用率而越跑越快，也能设置显示cpu/内存/硬盘等系统信息&lt;/p>
+&lt;/blockquote>
+&lt;p>&lt;a class="link" href="https://github.com/pqrs-org/Karabiner-Elements" target="_blank" rel="noopener"
+>&lt;strong>Karabiner-Elements&lt;/strong>&lt;/a>&lt;/p>
+&lt;blockquote>
+&lt;p>强大的键盘映射工具&lt;/p>
+&lt;/blockquote>
+&lt;p>&lt;a class="link" href="https://github.com/keycastr/keycastr/releases" target="_blank" rel="noopener"
+>&lt;strong>KeyCastr&lt;/strong>&lt;/a>&lt;/p>
+&lt;blockquote>
+&lt;p>屏显当前按下的键&lt;/p>
+&lt;/blockquote>
+&lt;p>&lt;a class="link" href="https://zipzapmac.com/Go2Shell" target="_blank" rel="noopener"
+>&lt;strong>Go2Shell&lt;/strong>&lt;/a>&lt;/p>
+&lt;blockquote>
+&lt;p>在 Finder 中使用当前目录打开终端&lt;/p>
+&lt;/blockquote>
+&lt;p>&lt;a class="link" href="https://www.mediaatelier.com/CheatSheet/" target="_blank" rel="noopener"
+>&lt;strong>CheatSheet&lt;/strong>&lt;/a>&lt;/p>
+&lt;blockquote>
+&lt;p>通过按住⌘键快速显示当前应用的所有可用快捷键&lt;/p>
+&lt;/blockquote>
+&lt;p>&lt;a class="link" href="https://github.com/davidwernhart/AlDente" target="_blank" rel="noopener"
+>&lt;strong>AlDente&lt;/strong>&lt;/a>&lt;/p>
+&lt;blockquote>
+&lt;p>限制电池最大充电百分比，如设为 80%，就是充到 80%后，改为用电源直接供电，有效保护电池寿命。适合 MacBook 一直插电使用党。&lt;/p>
+&lt;/blockquote>
+&lt;p>&lt;a class="link" href="https://github.com/matryer/xbar" target="_blank" rel="noopener"
+>&lt;strong>xbar&lt;/strong>&lt;/a>&lt;/p>
+&lt;blockquote>
+&lt;p>可以把任意的脚本和程序结果输出到状态栏中&lt;/p>
+&lt;/blockquote>
+&lt;p>&lt;a class="link" href="https://www.better365.cn/bab2.html" target="_blank" rel="noopener"
+>&lt;strong>Better And Better&lt;/strong>&lt;/a>&lt;/p>
+&lt;blockquote>
+&lt;p>Better And Better 支持触控板、鼠标绘图手势，通过绘图即可触发对应动作。通过触控板、鼠标绘制字母“B”即可打开Better365官网，当然，你还可以选择其他预设、脚本、快捷键自定义设置执行动作&lt;/p>
+&lt;/blockquote>
+&lt;p>&lt;a class="link" href="https://github.com/listen1/listen1_desktop" target="_blank" rel="noopener"
+>&lt;strong>Listen 1 音乐播放器&lt;/strong>&lt;/a>&lt;/p>
+&lt;blockquote>
+&lt;p>Listen 1 可以搜索和播放来自多个主流音乐网站（网易云音乐/QQ音乐咪咕音乐等）的歌曲，让你的曲库更全面。并支持收藏功能，方便的创建自己的歌单。&lt;/p>
+&lt;/blockquote>
+&lt;p>&lt;a class="link" href="https://github.com/dwarvesf/hidden" target="_blank" rel="noopener"
+>&lt;strong>Hidden Bar&lt;/strong>&lt;/a>&lt;/p>
+&lt;blockquote>
+&lt;p>Hidden Bar可以让你隐藏 macOS 菜单栏不常用的应用图标，&lt;/p>
+&lt;/blockquote>
+&lt;p>&lt;a class="link" href="https://github.com/fitztrev/shuttle" target="_blank" rel="noopener"
+>&lt;strong>shuttle&lt;/strong>&lt;/a>&lt;/p>
+&lt;blockquote>
+&lt;p>简单的状态栏ssh快捷方式&lt;/p>
+&lt;/blockquote>
+&lt;p>&lt;a class="link" href="https://github.com/ntfstool/ntfstool" target="_blank" rel="noopener"
+>&lt;strong>NTFS Tool&lt;/strong>&lt;/a>&lt;/p>
+&lt;blockquote>
+&lt;p>为MAC提供NTFS读写支持的一款免费软件&lt;/p>
+&lt;/blockquote></description></item><item><title>归档</title><link>https://blog.xenori.com/archives/</link><pubDate>Tue, 28 May 2019 00:00:00 +0000</pubDate><guid>https://blog.xenori.com/archives/</guid><description/></item><item><title>关于</title><link>https://blog.xenori.com/abouts/</link><pubDate>Fri, 24 Dec 2010 00:20:08 +0800</pubDate><guid>https://blog.xenori.com/abouts/</guid><description>&lt;p>IT migrant worker.&lt;/p></description></item><item><title>项目</title><link>https://blog.xenori.com/%E9%A1%B9%E7%9B%AE/</link><pubDate>Fri, 24 Dec 2010 00:20:08 +0800</pubDate><guid>https://blog.xenori.com/%E9%A1%B9%E7%9B%AE/</guid><description>&lt;h1 id="施工中">施工中。。。&lt;/h1></description></item><item><title>搜索</title><link>https://blog.xenori.com/search/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://blog.xenori.com/search/</guid><description/></item></channel></rss>

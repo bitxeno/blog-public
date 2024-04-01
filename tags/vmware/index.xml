@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Vmware on bitxeno's notes</title><link>https://blog.xenori.com/tags/vmware/</link><description>Recent content in Vmware on bitxeno's notes</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Sun, 19 Feb 2012 08:07:01 +0000</lastBuildDate><atom:link href="https://blog.xenori.com/tags/vmware/index.xml" rel="self" type="application/rss+xml"/><item><title>如何在ubuntu server 10.04中安装vmware tools</title><link>https://blog.xenori.com/2012/02/how-to-install-vmware-tools-in-ubuntu-server/</link><pubDate>Sun, 19 Feb 2012 08:07:01 +0000</pubDate><guid>https://blog.xenori.com/2012/02/how-to-install-vmware-tools-in-ubuntu-server/</guid><description>&lt;p>本人的ubuntu server版本是10.04.4，安装在免费的vmware player 4.0中。
+安装vmware-tools需要gcc和对应的linux-headers进行编译，需先执行下面两个命令进行安装：&lt;/p>
+&lt;pre>&lt;code>sudo apt-get gcc
+sudo apt-get install build-essential linux-headers-$(uname -r)
+&lt;/code>&lt;/pre>
+&lt;p>安装后，点击vmware player菜单“Virtual Machine-&amp;gt;Install VMware Tools”，画面下方会出现黄色的VMware Tools安装提示框。
+1、把安装光盘绑定到一个文件夹：&lt;/p>
+&lt;pre>&lt;code>mkdir /mnt/cdrom
+sudo mount /dev/cdrom /mnt/cdrom
+&lt;/code>&lt;/pre>
+&lt;p>2、解压安装文件到临时目录/tmp：&lt;/p>
+&lt;pre>&lt;code>cd /tmp
+tar zxpf /mnt/cdrom/VMwareTools-8.0.0-&amp;lt;xxxx&amp;gt;.tar.gz
+&amp;lt;/xxxx&amp;gt;
+&lt;/code>&lt;/pre>
+&lt;p>3、执行安装：&lt;/p>
+&lt;pre>&lt;code>cd vmware-tools-distrib
+sudo ./vmware-install.pl
+&lt;/code>&lt;/pre>
+&lt;p>4、之后按照安装提示，一直按Enter键确认就可以了。
+5、安装后执行reboot重启：&lt;/p>
+&lt;pre>&lt;code>sudo reboot
+&lt;/code>&lt;/pre>
+&lt;p>参考资料：
+&lt;a class="link" href="http://ubuntu-tutorials.com/2007/10/02/how-to-install-vmware-tools-on-ubuntu-guests/" target="_blank" rel="noopener"
+>http://www.vmware.com/support/ws55/doc/ws_newguest_tools_linux.html#wp1127177&lt;/a>
+&lt;a class="link" href="http://ubuntuforums.org/showthread.php?t=1561822" target="_blank" rel="noopener"
+>http://ubuntuforums.org/showthread.php?t=1561822&lt;/a>
+&lt;a class="link" href="http://ubuntu-tutorials.com/2007/10/02/how-to-install-vmware-tools-on-ubuntu-guests/" target="_blank" rel="noopener"
+>http://ubuntu-tutorials.com/2007/10/02/how-to-install-vmware-tools-on-ubuntu-guests/&lt;/a>&lt;/p></description></item></channel></rss>

@@ -1,0 +1,920 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>日常 on bitxeno's notes</title><link>https://blog.xenori.com/categories/%E6%97%A5%E5%B8%B8/</link><description>Recent content in 日常 on bitxeno's notes</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Tue, 24 Jan 2023 11:10:08 +0800</lastBuildDate><atom:link href="https://blog.xenori.com/categories/%E6%97%A5%E5%B8%B8/index.xml" rel="self" type="application/rss+xml"/><item><title>2022年度总结</title><link>https://blog.xenori.com/2023/01/the-summary-of-2022/</link><pubDate>Tue, 24 Jan 2023 11:10:08 +0800</pubDate><guid>https://blog.xenori.com/2023/01/the-summary-of-2022/</guid><description>&lt;img src="https://blog.xenori.com/2023/01/the-summary-of-2022/cover.jpg" alt="Featured image of post 2022年度总结" />&lt;hugo-encrypt>
+&lt;div class="hugo-encrypt-encryption-notice">
+&lt;p class="hugo-encryptor-tips">文章的部分内容被密码保护：&lt;/p>
+&lt;noscript>&lt;span id="hugo-encrypt-enable-js">Javascript needs to be enabled to decrypt content&lt;/span>&lt;/noscript>
+&lt;div class='hugo-encrypt-form'>
+&lt;input
+class="hugo-encrypt-input"
+id="hugo-encrypt-password"
+placeholder='请输入密码'
+/>
+&lt;input
+class="hugo-encrypt-button"
+type="button"
+value='点击验证'
+id="button" onclick="hugoDecrypt(document.getElementById('hugo-encrypt-password').value,'input')"
+/>
+&lt;span class="hugo-encrypt-input-response">&lt;/span>
+&lt;/div>
+&lt;/div>
+&lt;cipher-text data-password='xenori@#$123' style="display:none;">
+&lt;p>2022对很多人来说都是艰难的一年，各地疫情频发，封控层层加码，各种令人气愤的事件不断发生。自上海3月封城疫情后，广州也慢慢进入需要48小时核酸阴性证明的生活。今年因为疫情关系，图书馆很少去了，出门次数也很少，基本都是在家里搞tvOS开发和nas。&lt;/p>
+&lt;p>今年开发的三个tvOS应用基本成型，还在考虑是否向苹果交保护费上架App Store或开源。。。对这三个app我是基本满意的，虽然还达不到产品的程度。&lt;/p>
+&lt;p>今年还是拖延症严重，没有找工作，简历还没投出一份。。。还是想2023年找到一份正式工作，并把做app等做副业，现在年龄太大了，继续打工的机会基本没了，还是要靠自己。&lt;/p>
+&lt;/cipher-text>
+&lt;style type="text/css">div#hugo-encrypt-sha1sum {display: none;}&lt;/style>
+&lt;script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/core.js">&lt;/script>
+&lt;script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/sha1.js">&lt;/script>
+&lt;script>
+const storageKey = location.pathname + "password";
+const userStorage = localStorage ;
+function str2buf(str) {
+return new TextEncoder("utf-8").encode(str);
+}
+function buf2str(buffer) {
+return new TextDecoder("utf-8").decode(buffer);
+}
+function hex2buf(hexStr) {
+return new Uint8Array(hexStr.match(/.{2}/g).map(h => parseInt(h, 16)));
+}
+function deriveKey(passphrase, salt) {
+salt = salt || crypto.getRandomValues(new Uint8Array(8));
+return crypto.subtle
+.importKey("raw", str2buf(passphrase), "PBKDF2", false, ["deriveKey"])
+.then(key =>
+crypto.subtle.deriveKey(
+{ name: "PBKDF2", salt, iterations: 1000, hash: "SHA-256" },
+key,
+{ name: "AES-GCM", length: 256 },
+false,
+["encrypt", "decrypt"],
+),
+)
+.then(key => [key, salt]);
+}
+function decrypt(passphrase, saltIvCipherHex) {
+const [salt, iv, data] = saltIvCipherHex.split("-").map(hex2buf);
+return deriveKey(passphrase, salt)
+.then(([key]) => crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, data))
+.then(v => buf2str(new Uint8Array(v)));
+}
+function removeNotice() {
+var notices = document.getElementsByClassName("hugo-encrypt-encryption-notice");
+for (let i = 0; i &lt; notices.length; i++) {
+notices[i].remove();
+}
+}
+const hugoDecrypt = function(password, type) {
+for (const cipher of ciphers) {
+decrypt(password, cipher.innerText).then(function(decrypted_text) {
+let hash = CryptoJS.SHA1(decrypted_text.replace(/\r?\n?[^\r\n]*$/, ""));
+let sha1_sum = CryptoJS.enc.Hex.stringify(hash);
+if ( decrypted_text.includes(sha1_sum) ) {
+removeNotice();
+decrypted_text = decrypted_text.replace(/&lt;div.*?hugo-encrypt-sha1sum.*?>.*?&lt;\/div>/ig, '');
+cipher.parentNode.outerHTML = decrypted_text;
+userStorage.setItem(storageKey, password);
+console.log("Decryption successful. Storing password in Storage.");
+}
+}).catch(function(error) {
+if (type === "input") {
+cipher.parentNode.querySelector('.hugo-encrypt-input-response').innerHTML = "密码错误";
+console.log('密码错误', error);
+} else if (type === "storage") {
+userStorage.removeItem(location.pathname + "password");
+console.log("Password changed. Clearing userStorage.", error);
+}
+});
+}
+};
+&lt;/script>
+&lt;script>
+window.onload = () => {
+ciphers = Array.from(document.querySelectorAll("cipher-text"));
+if (userStorage.getItem(storageKey)) {
+console.log("Found storageKey in userStorage. Attemtping decryption");
+hugoDecrypt(userStorage.getItem(storageKey), "storage");
+}
+};
+&lt;/script>
+&lt;/hugo-encrypt>
+&lt;p>2022年年度选择如下：&lt;/p>
+&lt;h2 id="年度游戏">年度游戏：&lt;/h2>
+&lt;ul>
+&lt;li>艾尔登法环&lt;/li>
+&lt;/ul>
+&lt;blockquote>
+&lt;p>很久没这么投入玩一款游戏了，上次还是荒野之息，200+小时，为了结局通了3遍，精美的画面氛围，广阔高自由度的地图，有时间的都推荐玩一下&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="年度动画">年度动画：&lt;/h2>
+&lt;ul>
+&lt;li>&lt;a class="link" href="https://movie.douban.com/subject/35118256/" target="_blank" rel="noopener"
+>赛博朋克：边缘行者&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;blockquote>
+&lt;p>靠动画把游戏的人气再次拉起，前期luci太美了😘&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="年度音乐">年度音乐：&lt;/h2>
+&lt;ul>
+&lt;li>&lt;a class="link" href="https://music.163.com/song?id=1990743306&amp;amp;userid=1850664" target="_blank" rel="noopener"
+>I Really Want to Stay At Your House&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;blockquote>
+&lt;p>游戏《赛博朋克2077》中的一首开车电台歌曲，之前玩了几百小时都没听到过，靠《赛博朋克：边缘行者》重新带火了，适合配合动画剧情画面一起听&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="年度电影电视剧">年度电影（电视剧）：&lt;/h2>
+&lt;ul>
+&lt;li>隐入尘烟&lt;/li>
+&lt;li>开端 (电视剧)&lt;/li>
+&lt;/ul>
+&lt;h2 id="年度图书">年度图书：&lt;/h2>
+&lt;p>无&lt;/p>
+&lt;h2 id="年度app">年度APP：&lt;/h2>
+&lt;p>无&lt;/p>
+&lt;h2 id="年度数码">年度数码：&lt;/h2>
+&lt;ul>
+&lt;li>Ulanzi像素桌面时钟&lt;/li>
+&lt;/ul>
+&lt;blockquote>
+&lt;p>一直想找一个仿lametric的像素时钟，这款基本能满足需求，还能自己开发插件，现在主要用来显示时间和github star数。&lt;/p>
+&lt;/blockquote></description></item><item><title>2021年度总结</title><link>https://blog.xenori.com/2021/12/the-summary-of-2021/</link><pubDate>Tue, 28 Dec 2021 15:03:08 +0800</pubDate><guid>https://blog.xenori.com/2021/12/the-summary-of-2021/</guid><description>&lt;img src="https://blog.xenori.com/2021/12/the-summary-of-2021/cover.jpeg" alt="Featured image of post 2021年度总结" />&lt;p>本来以为2021年新冠影响会慢慢降低，旅游也会逐步开放，但西方世界的拉垮是你想不到的。今年的西方政坛除了不断找各种理由给你使绊子，实在没做什么对世界有益的事。twitter上看到的草台理论能很好的总结现在这拉垮的世界：&lt;/p>
+&lt;p>&lt;img src="https://blog.xenori.com/2021/12/the-summary-of-2021/1.jpg"
+width="1020"
+height="560"
+srcset="https://blog.xenori.com/2021/12/the-summary-of-2021/1_hu410c2ed8c2bb49d931569825518453dd_98924_480x0_resize_q75_box.jpg 480w, https://blog.xenori.com/2021/12/the-summary-of-2021/1_hu410c2ed8c2bb49d931569825518453dd_98924_1024x0_resize_q75_box.jpg 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="182"
+data-flex-basis="437px"
+>&lt;/p>
+&lt;hugo-encrypt>
+&lt;div class="hugo-encrypt-encryption-notice">
+&lt;p class="hugo-encryptor-tips">文章的部分内容被密码保护：&lt;/p>
+&lt;noscript>&lt;span id="hugo-encrypt-enable-js">Javascript needs to be enabled to decrypt content&lt;/span>&lt;/noscript>
+&lt;div class='hugo-encrypt-form'>
+&lt;input
+class="hugo-encrypt-input"
+id="hugo-encrypt-password"
+placeholder='请输入密码'
+/>
+&lt;input
+class="hugo-encrypt-button"
+type="button"
+value='点击验证'
+id="button" onclick="hugoDecrypt(document.getElementById('hugo-encrypt-password').value,'input')"
+/>
+&lt;span class="hugo-encrypt-input-response">&lt;/span>
+&lt;/div>
+&lt;/div>
+&lt;cipher-text data-password='xenori@#$123' style="display:none;">
+&lt;p>今年本来最重要的事是找到新工作，但拖延症加上年龄过大的不自信，一直只是想想，实际没投出去一份简历。。。&lt;/p>
+&lt;p>感情生活上尝试和一个相亲对象保持了最长的联系记录，有8个月了，之前几个相亲对象都是吃完饭就断了联系。不过自己一直不想再进一步，还在犹豫是否要放弃。。。近排学到一个词是符合自己性格的：回避型依恋人格&lt;/p>
+&lt;p>今年生活状态：&lt;/p>
+&lt;ul>
+&lt;li>未找到工作&lt;/li>
+&lt;li>未有女朋友，一直相亲中。。。&lt;/li>
+&lt;li>未会游泳&lt;/li>
+&lt;/ul>
+&lt;p>明年计划：&lt;/p>
+&lt;ul>
+&lt;li>找到工作&lt;/li>
+&lt;li>认真写一个业余产品&lt;/li>
+&lt;/ul>
+&lt;/cipher-text>
+&lt;style type="text/css">div#hugo-encrypt-sha1sum {display: none;}&lt;/style>
+&lt;script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/core.js">&lt;/script>
+&lt;script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/sha1.js">&lt;/script>
+&lt;script>
+const storageKey = location.pathname + "password";
+const userStorage = localStorage ;
+function str2buf(str) {
+return new TextEncoder("utf-8").encode(str);
+}
+function buf2str(buffer) {
+return new TextDecoder("utf-8").decode(buffer);
+}
+function hex2buf(hexStr) {
+return new Uint8Array(hexStr.match(/.{2}/g).map(h => parseInt(h, 16)));
+}
+function deriveKey(passphrase, salt) {
+salt = salt || crypto.getRandomValues(new Uint8Array(8));
+return crypto.subtle
+.importKey("raw", str2buf(passphrase), "PBKDF2", false, ["deriveKey"])
+.then(key =>
+crypto.subtle.deriveKey(
+{ name: "PBKDF2", salt, iterations: 1000, hash: "SHA-256" },
+key,
+{ name: "AES-GCM", length: 256 },
+false,
+["encrypt", "decrypt"],
+),
+)
+.then(key => [key, salt]);
+}
+function decrypt(passphrase, saltIvCipherHex) {
+const [salt, iv, data] = saltIvCipherHex.split("-").map(hex2buf);
+return deriveKey(passphrase, salt)
+.then(([key]) => crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, data))
+.then(v => buf2str(new Uint8Array(v)));
+}
+function removeNotice() {
+var notices = document.getElementsByClassName("hugo-encrypt-encryption-notice");
+for (let i = 0; i &lt; notices.length; i++) {
+notices[i].remove();
+}
+}
+const hugoDecrypt = function(password, type) {
+for (const cipher of ciphers) {
+decrypt(password, cipher.innerText).then(function(decrypted_text) {
+let hash = CryptoJS.SHA1(decrypted_text.replace(/\r?\n?[^\r\n]*$/, ""));
+let sha1_sum = CryptoJS.enc.Hex.stringify(hash);
+if ( decrypted_text.includes(sha1_sum) ) {
+removeNotice();
+decrypted_text = decrypted_text.replace(/&lt;div.*?hugo-encrypt-sha1sum.*?>.*?&lt;\/div>/ig, '');
+cipher.parentNode.outerHTML = decrypted_text;
+userStorage.setItem(storageKey, password);
+console.log("Decryption successful. Storing password in Storage.");
+}
+}).catch(function(error) {
+if (type === "input") {
+cipher.parentNode.querySelector('.hugo-encrypt-input-response').innerHTML = "密码错误";
+console.log('密码错误', error);
+} else if (type === "storage") {
+userStorage.removeItem(location.pathname + "password");
+console.log("Password changed. Clearing userStorage.", error);
+}
+});
+}
+};
+&lt;/script>
+&lt;script>
+window.onload = () => {
+ciphers = Array.from(document.querySelectorAll("cipher-text"));
+if (userStorage.getItem(storageKey)) {
+console.log("Found storageKey in userStorage. Attemtping decryption");
+hugoDecrypt(userStorage.getItem(storageKey), "storage");
+}
+};
+&lt;/script>
+&lt;/hugo-encrypt>
+&lt;p>2021年年度选择如下：&lt;/p>
+&lt;h2 id="年度游戏">年度游戏：&lt;/h2>
+&lt;ul>
+&lt;li>糖豆人&lt;/li>
+&lt;/ul>
+&lt;blockquote>
+&lt;p>今年没怎么玩游戏，休闲时就玩下糖豆人，但最近被epic收购后太恶心人了，期待明年的老头环&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="年度动画">年度动画：&lt;/h2>
+&lt;ul>
+&lt;li>灵笼&lt;/li>
+&lt;li>奇巧计程车&lt;/li>
+&lt;/ul>
+&lt;blockquote>
+&lt;p>近几年国创的确崛起了，灵笼的战斗和剧情都很出色，终章白老板出场直接把期望值拉满了，期待明年的三体。奇巧计程车卡通的画风，但却有着非常吸引人的悬疑故事情节，今年最好看的日本动画。&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="年度音乐">年度音乐：&lt;/h2>
+&lt;ul>
+&lt;li>爱你 - 王贰浪&lt;/li>
+&lt;li>打开 - 黄霄雲&lt;/li>
+&lt;li>秋天前 - 硬糖少女303&lt;/li>
+&lt;/ul>
+&lt;blockquote>
+&lt;p>只记录下今年喜欢听的，没特别喜欢单曲循环的&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="年度电影电视剧">年度电影（电视剧）：&lt;/h2>
+&lt;ul>
+&lt;li>扎克·施奈德版正义联盟&lt;/li>
+&lt;li>沙丘&lt;/li>
+&lt;li>山海情（前半部）&lt;/li>
+&lt;/ul>
+&lt;h2 id="年度图书">年度图书：&lt;/h2>
+&lt;p>无&lt;/p>
+&lt;h2 id="年度app">年度APP：&lt;/h2>
+&lt;p>无&lt;/p>
+&lt;blockquote>
+&lt;p>移动互联网十年黄金发展期已过，开始进入存量博弈阶段，很难再出现有趣的app了&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="年度网站">年度网站：&lt;/h2>
+&lt;p>无&lt;/p>
+&lt;h2 id="年度数码">年度数码：&lt;/h2>
+&lt;ul>
+&lt;li>AppleTV&lt;/li>
+&lt;li>小米净水器q600&lt;/li>
+&lt;/ul>
+&lt;blockquote>
+&lt;p>AppleTV是看到有开源的第三方b站app才买的，电视内置的android系统太慢了，现在已配置满足自己所有影音需求，赞😄。小米q600净水器有我一直期望的功能：自加热，没陈水，虽然还不太完美，用到现在很满意。&lt;/p>
+&lt;/blockquote></description></item><item><title>2020年度总结</title><link>https://blog.xenori.com/2021/01/the-summary-of-2020/</link><pubDate>Fri, 15 Jan 2021 16:03:08 +0800</pubDate><guid>https://blog.xenori.com/2021/01/the-summary-of-2020/</guid><description>&lt;img src="https://blog.xenori.com/2021/01/the-summary-of-2020/cover.jpg" alt="Featured image of post 2020年度总结" />&lt;p>今年对大部分人来说，都会是难忘和难过的一年。年初新冠肺炎大爆发，到处寸步难行，食肆工厂关闭。年中中美关系加剧恶化，中印边境紧张，让人对未来几年的形势越来越担忧，年末新冠肺炎再次来袭，希望不会再出现大爆发了。&lt;/p>
+&lt;hugo-encrypt>
+&lt;div class="hugo-encrypt-encryption-notice">
+&lt;p class="hugo-encryptor-tips">文章的部分内容被密码保护：&lt;/p>
+&lt;noscript>&lt;span id="hugo-encrypt-enable-js">Javascript needs to be enabled to decrypt content&lt;/span>&lt;/noscript>
+&lt;div class='hugo-encrypt-form'>
+&lt;input
+class="hugo-encrypt-input"
+id="hugo-encrypt-password"
+placeholder='请输入密码'
+/>
+&lt;input
+class="hugo-encrypt-button"
+type="button"
+value='点击验证'
+id="button" onclick="hugoDecrypt(document.getElementById('hugo-encrypt-password').value,'input')"
+/>
+&lt;span class="hugo-encrypt-input-response">&lt;/span>
+&lt;/div>
+&lt;/div>
+&lt;cipher-text data-password='xenori@#$123' style="display:none;">
+&lt;p>生活上还是变化不大，时间越来越快了。今年活得比较颓废，现在年龄太大，工作不好找，在转行和找工作间不断徘徊。比较熟的朋友都结婚生子了，平时也不好联系他们，对未来找不到方向。&lt;/p>
+&lt;p>今年生活状态：&lt;/p>
+&lt;ul>
+&lt;li>学完车，拿到C1驾照&lt;/li>
+&lt;li>未有女朋友，未婚&lt;/li>
+&lt;li>未会游泳&lt;/li>
+&lt;/ul>
+&lt;/cipher-text>
+&lt;style type="text/css">div#hugo-encrypt-sha1sum {display: none;}&lt;/style>
+&lt;script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/core.js">&lt;/script>
+&lt;script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/sha1.js">&lt;/script>
+&lt;script>
+const storageKey = location.pathname + "password";
+const userStorage = localStorage ;
+function str2buf(str) {
+return new TextEncoder("utf-8").encode(str);
+}
+function buf2str(buffer) {
+return new TextDecoder("utf-8").decode(buffer);
+}
+function hex2buf(hexStr) {
+return new Uint8Array(hexStr.match(/.{2}/g).map(h => parseInt(h, 16)));
+}
+function deriveKey(passphrase, salt) {
+salt = salt || crypto.getRandomValues(new Uint8Array(8));
+return crypto.subtle
+.importKey("raw", str2buf(passphrase), "PBKDF2", false, ["deriveKey"])
+.then(key =>
+crypto.subtle.deriveKey(
+{ name: "PBKDF2", salt, iterations: 1000, hash: "SHA-256" },
+key,
+{ name: "AES-GCM", length: 256 },
+false,
+["encrypt", "decrypt"],
+),
+)
+.then(key => [key, salt]);
+}
+function decrypt(passphrase, saltIvCipherHex) {
+const [salt, iv, data] = saltIvCipherHex.split("-").map(hex2buf);
+return deriveKey(passphrase, salt)
+.then(([key]) => crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, data))
+.then(v => buf2str(new Uint8Array(v)));
+}
+function removeNotice() {
+var notices = document.getElementsByClassName("hugo-encrypt-encryption-notice");
+for (let i = 0; i &lt; notices.length; i++) {
+notices[i].remove();
+}
+}
+const hugoDecrypt = function(password, type) {
+for (const cipher of ciphers) {
+decrypt(password, cipher.innerText).then(function(decrypted_text) {
+let hash = CryptoJS.SHA1(decrypted_text.replace(/\r?\n?[^\r\n]*$/, ""));
+let sha1_sum = CryptoJS.enc.Hex.stringify(hash);
+if ( decrypted_text.includes(sha1_sum) ) {
+removeNotice();
+decrypted_text = decrypted_text.replace(/&lt;div.*?hugo-encrypt-sha1sum.*?>.*?&lt;\/div>/ig, '');
+cipher.parentNode.outerHTML = decrypted_text;
+userStorage.setItem(storageKey, password);
+console.log("Decryption successful. Storing password in Storage.");
+}
+}).catch(function(error) {
+if (type === "input") {
+cipher.parentNode.querySelector('.hugo-encrypt-input-response').innerHTML = "密码错误";
+console.log('密码错误', error);
+} else if (type === "storage") {
+userStorage.removeItem(location.pathname + "password");
+console.log("Password changed. Clearing userStorage.", error);
+}
+});
+}
+};
+&lt;/script>
+&lt;script>
+window.onload = () => {
+ciphers = Array.from(document.querySelectorAll("cipher-text"));
+if (userStorage.getItem(storageKey)) {
+console.log("Found storageKey in userStorage. Attemtping decryption");
+hugoDecrypt(userStorage.getItem(storageKey), "storage");
+}
+};
+&lt;/script>
+&lt;/hugo-encrypt>
+&lt;p>2020年年度选择如下：&lt;/p>
+&lt;h2 id="年度游戏">年度游戏：&lt;/h2>
+&lt;ul>
+&lt;li>2077赛博朋克&lt;/li>
+&lt;li>绝地求生（手机）&lt;/li>
+&lt;/ul>
+&lt;blockquote>
+&lt;p>为了玩 2077，下半年配了新电脑，的确算好玩的，推荐玩 PC 版。只是 BUG 比较多，主机版被批得不成人形了&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="年度动画">年度动画：&lt;/h2>
+&lt;ul>
+&lt;li>我的三体之章比海传&lt;/li>
+&lt;/ul>
+&lt;blockquote>
+&lt;p>没想到唯一的是国创😂，虽然画风精奇，但有三体剧本底子在，再加上不错的宏大画面表现和音乐，是难得的佳作。日本动画越来越低幼卖萌向，看不到出路，唯一期待的进击的巨人最终季刚出，要算到 2021 年了。&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="年度音乐">年度音乐：&lt;/h2>
+&lt;ul>
+&lt;li>推开世界的门 - 杨乃文&lt;/li>
+&lt;li>荒蛋 - 太一&lt;/li>
+&lt;li>世界不会轻易崩塌 - 打扰一下乐团&lt;/li>
+&lt;/ul>
+&lt;blockquote>
+&lt;p>今年的歌只能择优记录下，没有特别非常喜欢的，不过今年因为喜欢看综艺的原因，认识了两个新生代不错的歌手：太一、华晨宇，感觉都很有才华，创作力也强，歌词有点非常人思维😂，感觉中国流行音乐开始有些起色了。&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="年度电影电视剧">年度电影（电视剧）：&lt;/h2>
+&lt;ul>
+&lt;li>沉默的真相&lt;/li>
+&lt;li>真相捕捉&lt;/li>
+&lt;li>唐人街探案&lt;/li>
+&lt;/ul>
+&lt;blockquote>
+&lt;p>今年因疫情原因，没什么电影上映，今年都是看电视剧。《沉默的真相》和《唐人街探案》使我对国产剧大大改观了，非常好看，强烈推荐。《唐人街探案》记得只需要看前 8 集，最后 4 集是送的广告😂&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="年度图书">年度图书：&lt;/h2>
+&lt;blockquote>
+&lt;p>没看书。。。&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="年度app">年度APP：&lt;/h2>
+&lt;ul>
+&lt;li>bilibili&lt;/li>
+&lt;li>雪球&lt;/li>
+&lt;/ul>
+&lt;blockquote>
+&lt;p>日常使用，bilibili 今年股价翻了几翻了，本来刚上市时想买的，但美股开户汇金太复杂了没搞&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="年度网站">年度网站：&lt;/h2>
+&lt;blockquote>
+&lt;p>无&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="年度数码">年度数码：&lt;/h2>
+&lt;ul>
+&lt;li>Oculus Quest 2&lt;/li>
+&lt;li>Nvidia 3070&lt;/li>
+&lt;/ul>
+&lt;blockquote>
+&lt;p>第一次接触 VR，很新奇，就是近视原因佩戴不方便。&lt;/p>
+&lt;/blockquote></description></item><item><title>2019 年回顾盘点</title><link>https://blog.xenori.com/2019/12/the-inventory-of-2019/</link><pubDate>Wed, 25 Dec 2019 12:18:12 +0800</pubDate><guid>https://blog.xenori.com/2019/12/the-inventory-of-2019/</guid><description>&lt;h2 id="google--year-in-search-2019httpswwwyoutubecomwatchvzrcdorjiugu">&lt;a class="link" href="https://www.youtube.com/watch?v=ZRCdORJiUgU" target="_blank" rel="noopener"
+>Google — Year in Search 2019&lt;/a>&lt;/h2>
+&lt;p>&lt;a class="link" href="https://www.youtube.com/watch?v=ZRCdORJiUgU" target="_blank" rel="noopener"
+>&lt;img src="https://i.loli.net/2019/12/25/X32SBvUr9WK8onk.png"
+loading="lazy"
+alt="hqdefault.jpg"
+>&lt;/a>&lt;/p>
+&lt;h2 id="豆瓣---2019-年度电影httpsmoviedoubancomannual2019sourcenavigation">&lt;a class="link" href="https://movie.douban.com/annual/2019?source=navigation" target="_blank" rel="noopener"
+>豆瓣 - 2019 年度电影&lt;/a>&lt;/h2>
+&lt;p>&lt;a class="link" href="https://movie.douban.com/annual/2019?source=navigation" target="_blank" rel="noopener"
+>&lt;img src="https://i.loli.net/2019/12/25/ZmSDpvVWMRKcQwa.png"
+loading="lazy"
+alt="UTOOLS1577248653200.png"
+>&lt;/a>&lt;/p>
+&lt;h2 id="豆瓣---2019-年度音乐httpsmusicdoubancomannual2019sourcenavigation">&lt;a class="link" href="https://music.douban.com/annual/2019?source=navigation" target="_blank" rel="noopener"
+>豆瓣 - 2019 年度音乐&lt;/a>&lt;/h2>
+&lt;p>&lt;a class="link" href="https://music.douban.com/annual/2019?source=navigation" target="_blank" rel="noopener"
+>&lt;img src="https://i.loli.net/2019/12/25/4pEHQdYisOhIMet.png"
+loading="lazy"
+alt="UTOOLS1577249743149.png"
+>&lt;/a>&lt;/p>
+&lt;h2 id="the-game-award-2019httpswww2pcomarticle282303">&lt;a class="link" href="https://www.2p.com/article/282303" target="_blank" rel="noopener"
+>The Game Award 2019&lt;/a>&lt;/h2>
+&lt;p>&lt;a class="link" href="https://www.2p.com/article/282303" target="_blank" rel="noopener"
+>&lt;img src="https://i.loli.net/2019/12/25/rcWFDJUkGzb1VuY.png"
+loading="lazy"
+alt="the_game_award"
+>&lt;/a>&lt;/p>
+&lt;h2 id="新浪新闻年终盘点2019哪些瞬间值得被看见httpsweibocomtvvimskbhikjfid10344453520141647885">&lt;a class="link" href="https://weibo.com/tv/v/ImskBhikj?fid=1034:4453520141647885" target="_blank" rel="noopener"
+>新浪新闻年终盘点：#2019哪些瞬间值得被看见#&lt;/a>&lt;/h2>
+&lt;p>&lt;a class="link" href="https://weibo.com/tv/v/ImskBhikj?fid=1034:4453520141647885" target="_blank" rel="noopener"
+>&lt;img src="https://i.loli.net/2019/12/26/F795YgZpILRUjxS.png"
+loading="lazy"
+alt="UTOOLS1577345816342.png"
+>&lt;/a>&lt;/p></description></item><item><title>The Summary of 2019</title><link>https://blog.xenori.com/2019/12/the-summary-of-2019/</link><pubDate>Tue, 24 Dec 2019 15:00:08 +0800</pubDate><guid>https://blog.xenori.com/2019/12/the-summary-of-2019/</guid><description>&lt;p>今年是暖冬，所以即使已过了冬至，广州的天气还只是秋瑟中带点凉意，1111 淘宝买的冬衣还没一次穿过出街==！&lt;/p>
+&lt;hugo-encrypt>
+&lt;div class="hugo-encrypt-encryption-notice">
+&lt;p class="hugo-encryptor-tips">文章的部分内容被密码保护：&lt;/p>
+&lt;noscript>&lt;span id="hugo-encrypt-enable-js">Javascript needs to be enabled to decrypt content&lt;/span>&lt;/noscript>
+&lt;div class='hugo-encrypt-form'>
+&lt;input
+class="hugo-encrypt-input"
+id="hugo-encrypt-password"
+placeholder='请输入密码'
+/>
+&lt;input
+class="hugo-encrypt-button"
+type="button"
+value='点击验证'
+id="button" onclick="hugoDecrypt(document.getElementById('hugo-encrypt-password').value,'input')"
+/>
+&lt;span class="hugo-encrypt-input-response">&lt;/span>
+&lt;/div>
+&lt;/div>
+&lt;cipher-text data-password='xenori@#$123' style="display:none;">
+&lt;p>上周 3 刚被公司裁员，年末正式加入失业大军，现在只能游荡在图书馆，消磨下时间。现在年龄已奔四，对于继续从事开发工作，总是充满焦虑，再投简历找工作，感觉已很困难了。&lt;/p>
+&lt;p>自从去年老爸中风后，到现在有一年时间了，腿还是麻痹无力状态，还是没法自己走路。平时都需要老妈看着，的确太辛苦了。每当这时间就会感觉身体健康是多么重要。&lt;/p>
+&lt;p>今年生活状态：&lt;/p>
+&lt;ul>
+&lt;li>新房入伙，入住新房&lt;/li>
+&lt;li>未有女朋友，未婚&lt;/li>
+&lt;li>未学车&lt;/li>
+&lt;li>未会游泳&lt;/li>
+&lt;/ul>
+&lt;/cipher-text>
+&lt;style type="text/css">div#hugo-encrypt-sha1sum {display: none;}&lt;/style>
+&lt;script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/core.js">&lt;/script>
+&lt;script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/sha1.js">&lt;/script>
+&lt;script>
+const storageKey = location.pathname + "password";
+const userStorage = localStorage ;
+function str2buf(str) {
+return new TextEncoder("utf-8").encode(str);
+}
+function buf2str(buffer) {
+return new TextDecoder("utf-8").decode(buffer);
+}
+function hex2buf(hexStr) {
+return new Uint8Array(hexStr.match(/.{2}/g).map(h => parseInt(h, 16)));
+}
+function deriveKey(passphrase, salt) {
+salt = salt || crypto.getRandomValues(new Uint8Array(8));
+return crypto.subtle
+.importKey("raw", str2buf(passphrase), "PBKDF2", false, ["deriveKey"])
+.then(key =>
+crypto.subtle.deriveKey(
+{ name: "PBKDF2", salt, iterations: 1000, hash: "SHA-256" },
+key,
+{ name: "AES-GCM", length: 256 },
+false,
+["encrypt", "decrypt"],
+),
+)
+.then(key => [key, salt]);
+}
+function decrypt(passphrase, saltIvCipherHex) {
+const [salt, iv, data] = saltIvCipherHex.split("-").map(hex2buf);
+return deriveKey(passphrase, salt)
+.then(([key]) => crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, data))
+.then(v => buf2str(new Uint8Array(v)));
+}
+function removeNotice() {
+var notices = document.getElementsByClassName("hugo-encrypt-encryption-notice");
+for (let i = 0; i &lt; notices.length; i++) {
+notices[i].remove();
+}
+}
+const hugoDecrypt = function(password, type) {
+for (const cipher of ciphers) {
+decrypt(password, cipher.innerText).then(function(decrypted_text) {
+let hash = CryptoJS.SHA1(decrypted_text.replace(/\r?\n?[^\r\n]*$/, ""));
+let sha1_sum = CryptoJS.enc.Hex.stringify(hash);
+if ( decrypted_text.includes(sha1_sum) ) {
+removeNotice();
+decrypted_text = decrypted_text.replace(/&lt;div.*?hugo-encrypt-sha1sum.*?>.*?&lt;\/div>/ig, '');
+cipher.parentNode.outerHTML = decrypted_text;
+userStorage.setItem(storageKey, password);
+console.log("Decryption successful. Storing password in Storage.");
+}
+}).catch(function(error) {
+if (type === "input") {
+cipher.parentNode.querySelector('.hugo-encrypt-input-response').innerHTML = "密码错误";
+console.log('密码错误', error);
+} else if (type === "storage") {
+userStorage.removeItem(location.pathname + "password");
+console.log("Password changed. Clearing userStorage.", error);
+}
+});
+}
+};
+&lt;/script>
+&lt;script>
+window.onload = () => {
+ciphers = Array.from(document.querySelectorAll("cipher-text"));
+if (userStorage.getItem(storageKey)) {
+console.log("Found storageKey in userStorage. Attemtping decryption");
+hugoDecrypt(userStorage.getItem(storageKey), "storage");
+}
+};
+&lt;/script>
+&lt;/hugo-encrypt>
+&lt;p>2019年年度选择如下：&lt;/p>
+&lt;h2 id="年度游戏">年度游戏：&lt;/h2>
+&lt;ul>
+&lt;li>只狼&lt;/li>
+&lt;li>绝地求生（手机）&lt;/li>
+&lt;/ul>
+&lt;blockquote>
+&lt;p>只狼是今年游玩体验都好的，虽然最终 BOSS 还未通关，死的次数太多了。。。&lt;/p>
+&lt;p>手机上的绝地求生不需要压枪，适合我这种轻度玩家，现在有时间都是玩它了，吃了几次鸡&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="年度动画">年度动画：&lt;/h2>
+&lt;ul>
+&lt;li>进击巨人 第3季&lt;/li>
+&lt;li>JOJO 第4季&lt;/li>
+&lt;/ul>
+&lt;h2 id="年度音乐">年度音乐：&lt;/h2>
+&lt;ul>
+&lt;li>光年之外&lt;/li>
+&lt;li>来自天堂的魔鬼&lt;/li>
+&lt;/ul>
+&lt;blockquote>
+&lt;p>今年因为听光年之外，喜欢上了听邓紫棋的歌，特别喜欢她的《再见》的 MV，哈哈&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="年度电影">年度电影：&lt;/h2>
+&lt;ul>
+&lt;li>寄生虫&lt;/li>
+&lt;li>复仇者联盟 4&lt;/li>
+&lt;li>流浪地球&lt;/li>
+&lt;/ul>
+&lt;blockquote>
+&lt;p>今年最喜欢的是《流浪地球》，虽然还是免不了中国电影特有的有些令人尴尬的片段，但有笑点，大刘特有的科幻浪漫主义电影有表现了出来，感觉这些是好莱坞拍不出来的。本来还想去看下复映的《千与千寻》的，但最后都因一个人太懒没去成。。。&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="年度图书">年度图书：&lt;/h2>
+&lt;blockquote>
+&lt;p>今年没完整看过一本书。。。平时晚上回来就太累只看下 bilibili 了，明看要多看些书&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="年度app">年度APP：&lt;/h2>
+&lt;ul>
+&lt;li>Fxcnbeta&lt;/li>
+&lt;/ul>
+&lt;blockquote>
+&lt;p>每天地铁上看科技新闻&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="年度网站">年度网站：&lt;/h2>
+&lt;ul>
+&lt;li>bilibili&lt;/li>
+&lt;/ul>
+&lt;blockquote>
+&lt;p>每天花的时间太多了，电视和手机上都装了 APP，在上面花了大量时间&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="年度数码">年度数码：&lt;/h2>
+&lt;ul>
+&lt;li>Airpods Pro&lt;/li>
+&lt;/ul>
+&lt;blockquote>
+&lt;p>Airpods 前几年发布时就觉得是个革命性的产品，舒适无线好用，现在加上降噪后，就更完美了，只是佩戴的舒适性下降了，不过为了降噪，还是最强最好的无线蓝牙耳机&lt;/p>
+&lt;/blockquote></description></item><item><title>The Summary of 2017</title><link>https://blog.xenori.com/2018/02/the-summary-of-2017/</link><pubDate>Wed, 14 Feb 2018 11:01:07 +0800</pubDate><guid>https://blog.xenori.com/2018/02/the-summary-of-2017/</guid><description>&lt;p>还有一天就到2018农历新年了，时间实在过得太快。今年两老的身体都有些不好，就提前请假回家，现在已舒服呆在房间中了。家里的天气实在是舒服，阳光明媚，想起广州住处的阴冷天气就头痛，衣服实在不容易干。&lt;/p>
+&lt;hugo-encrypt>
+&lt;div class="hugo-encrypt-encryption-notice">
+&lt;p class="hugo-encryptor-tips">文章的部分内容被密码保护：&lt;/p>
+&lt;noscript>&lt;span id="hugo-encrypt-enable-js">Javascript needs to be enabled to decrypt content&lt;/span>&lt;/noscript>
+&lt;div class='hugo-encrypt-form'>
+&lt;input
+class="hugo-encrypt-input"
+id="hugo-encrypt-password"
+placeholder='请输入密码'
+/>
+&lt;input
+class="hugo-encrypt-button"
+type="button"
+value='点击验证'
+id="button" onclick="hugoDecrypt(document.getElementById('hugo-encrypt-password').value,'input')"
+/>
+&lt;span class="hugo-encrypt-input-response">&lt;/span>
+&lt;/div>
+&lt;/div>
+&lt;cipher-text data-password='xenori@#$123' style="display:none;">
+&lt;p>整理2017年的完成计划，发现还是有很多未完成：&lt;/p>
+&lt;ul>
+&lt;li>&lt;del>广州入户&lt;/del>&lt;/li>
+&lt;li>学车&lt;/li>
+&lt;li>学游泳&lt;/li>
+&lt;li>学英语&lt;/li>
+&lt;/ul>
+&lt;p>入户从年初一直搞到年尾的11月份才搞完，被计生证和居住证卡了很长时间，还以为今年是办不了了，还好在10月份出了新政策——取消了计生证要求，居住证也侥幸通过审核了，剩下的就等8月份收楼后，迁到新房了：）&lt;/p>
+&lt;p>学车学了几次就没动力了，开车要关注的太多了，还要养车。。。不过2018年会花多些时间学完，只要是方便接家人出去办事，到时再看下要不要买车位吧。&lt;/p>
+&lt;p>今年感情上还是没大发展，一个人的确生活惯了，发现和人相处和追人实在没动力，感觉还有一点不想结婚。。。不过一个人生活病痛是个问题，12月份出现了一次剧烈的胃痛，当时真的痛到快晕过去了，但周围没人可以依靠带去医院，有时想，假如是遇到心脏抽搐的话，可能就一直没人发现了，唉。&lt;/p>
+&lt;p>工作上也没大进展，维护的现有站点已经稳定了，技术上没什么挑战性，有些想离职，但现在年龄越来越大，找新的合适工作实在不容易，一年都在思考还适不适合做程序员，但找不到其他出路，有些想转做远程SOHO工作，但在中国不是太靠谱。&lt;/p>
+&lt;p>新的一年，希望家人身体能健康快乐些，准备学下自己做饭，到下年春节可以自己来操劳下年夜饭。&lt;/p>
+&lt;/cipher-text>
+&lt;style type="text/css">div#hugo-encrypt-sha1sum {display: none;}&lt;/style>
+&lt;script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/core.js">&lt;/script>
+&lt;script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/sha1.js">&lt;/script>
+&lt;script>
+const storageKey = location.pathname + "password";
+const userStorage = localStorage ;
+function str2buf(str) {
+return new TextEncoder("utf-8").encode(str);
+}
+function buf2str(buffer) {
+return new TextDecoder("utf-8").decode(buffer);
+}
+function hex2buf(hexStr) {
+return new Uint8Array(hexStr.match(/.{2}/g).map(h => parseInt(h, 16)));
+}
+function deriveKey(passphrase, salt) {
+salt = salt || crypto.getRandomValues(new Uint8Array(8));
+return crypto.subtle
+.importKey("raw", str2buf(passphrase), "PBKDF2", false, ["deriveKey"])
+.then(key =>
+crypto.subtle.deriveKey(
+{ name: "PBKDF2", salt, iterations: 1000, hash: "SHA-256" },
+key,
+{ name: "AES-GCM", length: 256 },
+false,
+["encrypt", "decrypt"],
+),
+)
+.then(key => [key, salt]);
+}
+function decrypt(passphrase, saltIvCipherHex) {
+const [salt, iv, data] = saltIvCipherHex.split("-").map(hex2buf);
+return deriveKey(passphrase, salt)
+.then(([key]) => crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, data))
+.then(v => buf2str(new Uint8Array(v)));
+}
+function removeNotice() {
+var notices = document.getElementsByClassName("hugo-encrypt-encryption-notice");
+for (let i = 0; i &lt; notices.length; i++) {
+notices[i].remove();
+}
+}
+const hugoDecrypt = function(password, type) {
+for (const cipher of ciphers) {
+decrypt(password, cipher.innerText).then(function(decrypted_text) {
+let hash = CryptoJS.SHA1(decrypted_text.replace(/\r?\n?[^\r\n]*$/, ""));
+let sha1_sum = CryptoJS.enc.Hex.stringify(hash);
+if ( decrypted_text.includes(sha1_sum) ) {
+removeNotice();
+decrypted_text = decrypted_text.replace(/&lt;div.*?hugo-encrypt-sha1sum.*?>.*?&lt;\/div>/ig, '');
+cipher.parentNode.outerHTML = decrypted_text;
+userStorage.setItem(storageKey, password);
+console.log("Decryption successful. Storing password in Storage.");
+}
+}).catch(function(error) {
+if (type === "input") {
+cipher.parentNode.querySelector('.hugo-encrypt-input-response').innerHTML = "密码错误";
+console.log('密码错误', error);
+} else if (type === "storage") {
+userStorage.removeItem(location.pathname + "password");
+console.log("Password changed. Clearing userStorage.", error);
+}
+});
+}
+};
+&lt;/script>
+&lt;script>
+window.onload = () => {
+ciphers = Array.from(document.querySelectorAll("cipher-text"));
+if (userStorage.getItem(storageKey)) {
+console.log("Found storageKey in userStorage. Attemtping decryption");
+hugoDecrypt(userStorage.getItem(storageKey), "storage");
+}
+};
+&lt;/script>
+&lt;/hugo-encrypt>
+&lt;p>2017年年度选择如下：&lt;/p>
+&lt;h2 id="年度游戏">年度游戏：&lt;/h2>
+&lt;ul>
+&lt;li>塞尔达传说 荒野之息&lt;/li>
+&lt;li>绝地求生&lt;/li>
+&lt;/ul>
+&lt;blockquote>
+&lt;p>发现今年是毕业工作以来想游戏最多的一年==！塞尔达传说应该是近10年来玩过最好玩的游戏了，冒险探索要素太强了，战斗系统也简单有深度，贡献了100+小时，现在还未打卡农，准备二周目再通关了。&lt;/p>
+&lt;p>绝地求生绝对是今年PC的年度游戏，重新定义了“吃鸡”这个词，横扫了中国大片网吧。不过这游戏的游戏性真的很好，适合多种玩法，就算是一身烂枪技，靠拼头脑阴人也可以找到自己生存的方法，贡献了150+小时，还在玩中。。。&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="年度动画">年度动画：&lt;/h2>
+&lt;blockquote>
+&lt;p>少看新番了，今年没特别喜欢的&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="年度音乐">年度音乐：&lt;/h2>
+&lt;ul>
+&lt;li>&lt;a class="link" href="http://music.163.com/song?id=458231324" target="_blank" rel="noopener"
+>Forerver Young&lt;/a>&lt;/li>
+&lt;li>&lt;a class="link" href="http://music.163.com/#/song?id=27810022" target="_blank" rel="noopener"
+>How Long Will I Love You&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;blockquote>
+&lt;p>音乐都是看电影或视频听到的&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="年度电影">年度电影：&lt;/h2>
+&lt;ul>
+&lt;li>疯狂原始人&lt;/li>
+&lt;li>盗钥匙的方法 / 鍵泥棒のメソッド&lt;/li>
+&lt;/ul>
+&lt;blockquote>
+&lt;p>日本电影《盗钥匙的方法》是个小惊喜，实在没猜到结局：）&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="年度图书">年度图书：&lt;/h2>
+&lt;p>无&lt;/p>
+&lt;h2 id="年度app">年度APP：&lt;/h2>
+&lt;ul>
+&lt;li>摩拜&lt;/li>
+&lt;/ul>
+&lt;blockquote>
+&lt;p>智能手机发展了10年，地盘都分完了，今年新用上又火的就是共享单车了&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="年度网站">年度网站：&lt;/h2>
+&lt;ul>
+&lt;li>bilibili&lt;/li>
+&lt;/ul>
+&lt;blockquote>
+&lt;p>每天花的时间太多了，看了很多美食视频。。。&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="年度数码">年度数码：&lt;/h2>
+&lt;ul>
+&lt;li>Nintendo Switch&lt;/li>
+&lt;li>Airpods&lt;/li>
+&lt;/ul>
+&lt;blockquote>
+&lt;p>NS创意很好，今年游戏大作不断，玩得很开心。airpods是个革命性的产品（对无线便捷的产品我都特别有好感），除了戴起来太丑外，没其他缺点，方便实用，送礼佳品，超越了其他耳机厂商3~5年的技术实力。。。苹果顶呱呱&lt;/p>
+&lt;/blockquote></description></item><item><title>2013年总结</title><link>https://blog.xenori.com/2014/01/the-summary-of-2013/</link><pubDate>Wed, 01 Jan 2014 21:14:00 +0800</pubDate><guid>https://blog.xenori.com/2014/01/the-summary-of-2013/</guid><description>&lt;p>2013年已过，过去一年生活和工作上没有大的变化。年前的计划如英语学习，学车和游戏等都没实现到，在广州现在没什么朋友和同学在，一个人执行力太差了，周六日随便找个偷懒的理由就混过了。。。&lt;/p>
+&lt;p>今年在工作上是忙碍的一年，上半年忙于把CMS系统数据层切换到数据中心，下半年因公司上市，忙于把服务器从windows切换到linux，开发语言也从最熟悉的.NET转为使用PHP。这一年忙着工作，忙着加班，计划的旅游没去到，生活状态也是越过越差，而公司上市也没为收入带来什么收益，对公司有点失望透了。2014年工作准备把重心放回到生活中，不能被工作绑架了，太累了。&lt;/p>
+&lt;p>年前因公司策略调整，开发语言变更，很多旧同事都在上半年离职，只剩下一两个人维护频道，下半年新同事陆陆续续入职，挣了半年，春节后应该就能回复到正轨了。不过现在发现怎样也融不进新团队，也不喜欢新团队气氛，只希望年后能找到不错的工作，换下环境。&lt;/p>
+&lt;p>2014年就计划专业方面学下英语，golang和看多些开源代码，业余方面学下游泳和摄影。生活上希望能变得自信豁达些，让过去都过去吧。对于家人，因为从中学后就一个人出来住和生活，的确没花太多精力关注家人，希望今年能做得更好。&lt;/p>
+&lt;p>2013年年度选择如下：&lt;/p>
+&lt;p>年度游戏：&lt;/p>
+&lt;ul>
+&lt;li>旅行Travel&lt;/li>
+&lt;li>第二次超级机器人大战OG&lt;/li>
+&lt;/ul>
+&lt;blockquote>
+&lt;p>今年工作太忙，对游戏的热情也下降了，就通了PSN游戏《旅行》，小时最喜欢的机器打了20话左右就不继续了。。。虽然不想承认，看来是过了喜欢游戏的年龄了。。。&lt;/p>
+&lt;/blockquote>
+&lt;p>年度动画：&lt;/p>
+&lt;ul>
+&lt;li>石头门&lt;/li>
+&lt;li>进击的巨人&lt;/li>
+&lt;/ul>
+&lt;blockquote>
+&lt;p>《石头门》比较惊喜，看画风是我一般不会云看的动画，但在bilibili上很多人推荐，花了一晚通宵看完，很喜欢。提名《kill la kill》&lt;/p>
+&lt;/blockquote>
+&lt;p>年度音乐：&lt;/p>
+&lt;ul>
+&lt;li>&lt;a class="link" href="http://bilibili.kankanews.com/video/av585938/" target="_blank" rel="noopener"
+>Rain piano ver.&lt;/a>&lt;/li>
+&lt;li>&lt;a class="link" href="http://www.xiami.com/song/1772423161?spm=a1z1s.6626001.229054121.68.nqdO8V" target="_blank" rel="noopener"
+>Feels Like Coming Home&lt;/a>&lt;/li>
+&lt;li>&lt;a class="link" href="http://www.xiami.com/song/1769932238?spm=a1z1s.6626001.229054121.108.UBaSfY" target="_blank" rel="noopener"
+>Everybody Hurts&lt;/a>&lt;/li>
+&lt;li>&lt;a class="link" href="http://www.xiami.com/song/1771186238?spm=a1z1s.6626001.229054121.80.UBaSfY" target="_blank" rel="noopener"
+>The Beginning&lt;/a>&lt;/li>
+&lt;li>&lt;a class="link" href="http://www.xiami.com/song/3552953?spm=a1z1s.6626001.229054121.150.569zvj" target="_blank" rel="noopener"
+>あの日タイムマシン&lt;/a>&lt;/li>
+&lt;li>&lt;a class="link" href="http://www.xiami.com/song/1770831056?spm=a1z1s.6626001.229054121.157.569zvj" target="_blank" rel="noopener"
+>Let Her Go&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;blockquote>
+&lt;p>音乐都是动画和视频的音乐，很多歌都是看bilibili视频找到的：）&lt;/p>
+&lt;/blockquote>
+&lt;p>年度电影：&lt;/p>
+&lt;ul>
+&lt;li>疯狂原始人&lt;/li>
+&lt;li>盗钥匙的方法 / 鍵泥棒のメソッド&lt;/li>
+&lt;/ul>
+&lt;blockquote>
+&lt;p>日本电影《盗钥匙的方法》是个小惊喜，实在没猜到结局：）&lt;/p>
+&lt;/blockquote>
+&lt;p>年度图书：
+无&lt;/p>
+&lt;blockquote>
+&lt;p>今年看书都转到多看了，基本不再买纸书，都是买电子版，不过没看到最特别印象深刻的。今年感觉在上班路上看了不少书，以技术书为主，但在豆瓣上看下来，也没多少==！&lt;/p>
+&lt;/blockquote>
+&lt;p>年度APP：&lt;/p>
+&lt;ul>
+&lt;li>pocket&lt;/li>
+&lt;li>知乎&lt;/li>
+&lt;li>多看&lt;/li>
+&lt;/ul>
+&lt;p>年度网站：&lt;/p>
+&lt;ul>
+&lt;li>bilibili&lt;/li>
+&lt;/ul>
+&lt;blockquote>
+&lt;p>今年看电影，看新番基本都在bilibili看，开始喜欢上bilibi应该是去年一起看《舌尖上的中国》，很热闹，哈哈。之后看《爱情公寓3》，今年末的《爸爸去哪儿》也是不小的高潮。&lt;/p>
+&lt;/blockquote>
+&lt;p>年度数码：&lt;/p>
+&lt;ul>
+&lt;li>Macbook Air&lt;/li>
+&lt;li>RX100&lt;/li>
+&lt;li>MX2&lt;/li>
+&lt;/ul>
+&lt;blockquote>
+&lt;p>air是为了工作上转linux准备的，但一年下来用得不多。。。MX2很喜欢，在国产手机中，魅族的UI和手机外形是最喜欢的了，比较iphone5好看，就是信号的确不好。&lt;/p>
+&lt;/blockquote></description></item><item><title>2011总结</title><link>https://blog.xenori.com/2012/01/summarize2011/</link><pubDate>Wed, 04 Jan 2012 13:59:21 +0000</pubDate><guid>https://blog.xenori.com/2012/01/summarize2011/</guid><description>&lt;p>虽然自己很懒，不过还是总结下2011年做过的事，可能以后回顾时会有另一番收获。
+今年因为转入了互联网行业，所以在技术上学到了很多新东西，开发时也更关注性能优化和并发，对单元测试也慢慢熟悉起来。今年稍有研究的技术有这些：&lt;/p>
+&lt;ol>
+&lt;li>负载均衡faiover。为了使部署更新到生产环境时，减少对用户的影响，特意研究了下当前热门的解决方案。当前流行的负载均衡软件有nginx和HAProxy，可惜到最后还是没用到生产环境中，现在还是不明白当我部署一台时，新的连接是否会自动路由到另一个web服务器。&lt;/li>
+&lt;li>ETL大数据量转移。最后使用SSIS完成把MySQL数据转移到SqlServer。&lt;/li>
+&lt;li>多线程开发。最后找到了个SmartThreadPool的线程池组件，很好用。&lt;/li>
+&lt;li>Redis和Memcached学习&lt;/li>
+&lt;li>数据库性能优化。对数据库索引更深入的理解，今年是多得这个网站：&lt;a class="link" href="http://use-the-index-luke.com/" target="_blank" rel="noopener"
+>http://use-the-index-luke.com/&lt;/a>，极力推荐看网站上的ebook&lt;/li>
+&lt;li>消息队列。是为了优化一个物品交易系统而学习的，觉得不错的有ZeroMq和Redis。&lt;/li>
+&lt;/ol>
+&lt;p>今年虽然接触了很多新技术，感觉很充实，可惜的是，还是没做出一个令自己满意的产品。每次看自己做的项目都像一个半成品，实在不好意思向朋友推荐，下一年的目标还是希望能做出一个好产品。&lt;/p>
+&lt;p>今年因为有了GR和微博，对行业的信息更了解了，也从别人的分享中了解很多新技术。而购买了iPad后，看书很有动力，今年看了很多英文版的书，如《CLR Via C#》、《Pro Asp.Net MVC 3》、《Programming the Mobile Web》等，年度最喜爱的书是《黑客与画家》和《大家看的设计书》(^o^)/。&lt;/p>
+&lt;p>今年感情生活还是一片空白，不过心情倒是轻松很多。过年过节看到别人一对对还有各种得意的小屁孩，心里是有点羡慕，不过已经学会很谈然了。现在对感情方面反而不强烈，更多的精力还是花在工作和攒更多钱上($$)。&lt;/p>
+&lt;p>今年差不多不上q了，游戏也因为兴趣越来越少，也很少碰。买来的ps3就通了TOX，其他时间吃灰。。。平时大多数时间都在刷微博，当然，知乎也很好，能学到很多有趣的知识。&lt;/p>
+&lt;p>又新的一年，即将迈进30大关。。。前途仍然迷茫得不知所措。
+愿我的家人永远健康幸福，我最大的愿望。&lt;/p></description></item><item><title>关于</title><link>https://blog.xenori.com/abouts/</link><pubDate>Fri, 24 Dec 2010 00:20:08 +0800</pubDate><guid>https://blog.xenori.com/abouts/</guid><description>&lt;p>IT migrant worker.&lt;/p></description></item></channel></rss>

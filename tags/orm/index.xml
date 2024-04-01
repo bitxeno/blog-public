@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>ORM on bitxeno's notes</title><link>https://blog.xenori.com/tags/orm/</link><description>Recent content in ORM on bitxeno's notes</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Mon, 09 Jan 2012 05:11:52 +0000</lastBuildDate><atom:link href="https://blog.xenori.com/tags/orm/index.xml" rel="self" type="application/rss+xml"/><item><title>小巧方便的ORM类库——PetaPoco</title><link>https://blog.xenori.com/2012/01/petapoco/</link><pubDate>Mon, 09 Jan 2012 05:11:52 +0000</pubDate><guid>https://blog.xenori.com/2012/01/petapoco/</guid><description>&lt;p>&lt;a class="link" href="http://www.toptensoftware.com/petapoco/" target="_blank" rel="noopener"
+>PetaPoco&lt;/a>是一个简单轻巧的orm开源类库，全部功能只有一个文件，可以很方便集成到项目中。代替SqlHelper辅助类的不二选择。。。&lt;/p>
+&lt;pre>&lt;code>主要功能包括：
+- 映射实体类，支持enum，Nullable等类型，可同时映射多个实例。
+- 支持分页
+- 以@0等占位符代替SqlParameter，传参更方便
+- 带有sql字符串构造器，构造条件查询sql非常方便
+- update支持指定字段更新
+- 支持T4模板
+&lt;/code>&lt;/pre>
+&lt;p>&lt;strong>使用示例：&lt;/strong>
+使用前需要先new一个数据库实例：&lt;/p>
+&lt;pre>&lt;code>var db = new PetaPoco.Database(&amp;quot;ConnectionName&amp;quot;);
+&lt;/code>&lt;/pre>
+&lt;p>&lt;!-- raw HTML omitted -->可以放心地把db实例设为static，因为实例中没有SqlConnection的引用，连接每次执行完后，会自动关闭。&lt;!-- raw HTML omitted -->
+发现有人反映在web上使用static的db实例还是会有问题，具体可看链接(&lt;a class="link" href="https://github.com/toptensoftware/PetaPoco/issues/103" target="_blank" rel="noopener"
+>Link1&lt;/a>)，StackOverflow中推荐web中每个请求使用一个单独的db实例(&lt;a class="link" href="http://stackoverflow.com/questions/7052350/how-to-create-a-dal-using-petapoco/9995413#9995413" target="_blank" rel="noopener"
+>Link2&lt;/a>).
+1、取一条记录&lt;/p>
+&lt;pre>&lt;code>var a = db.SingleOrDefault&amp;lt;article&amp;gt;(&amp;quot;SELECT * FROM articles WHERE article_id=@0&amp;quot;, 123));&amp;lt;/article&amp;gt;
+&lt;/code>&lt;/pre>
+&lt;p>2、分页&lt;/p>
+&lt;pre>&lt;code>// 分页实质在内部是用Row_Number()重写了sql，支持join
+var result=db.Page&amp;lt;article&amp;gt;(1, 20, &amp;quot;SELECT * FROM articles WHERE category=@0 ORDER BY date_created DESC&amp;quot;, &amp;quot;coolstuff&amp;quot;);&amp;lt;/article&amp;gt;
+&lt;/code>&lt;/pre>
+&lt;p>上面的分页sql，会被改写为sql：&lt;/p>
+&lt;pre>&lt;code>SELECT * FROM (
+SELECT ROW_NUMBER() OVER (ORDER BY date_created DESC) peta_rn, * FROM articles WHERE category=@0 ) peta_paged
+WHERE peta_rn&amp;gt;@1 AND peta_rn
+&lt;/code>&lt;/pre>
+&lt;p>3、部分更新&lt;/p>
+&lt;pre>&lt;code>db.Update(&amp;quot;articles&amp;quot;, &amp;quot;article_id&amp;quot;, new { title=&amp;quot;New title&amp;quot; }, 123);
+&lt;/code>&lt;/pre>
+&lt;p>4、sql条件构造&lt;/p>
+&lt;pre>&lt;code>var sql = PetaPoco.Sql.Builder
+.Append(&amp;quot;SELECT * FROM articles&amp;quot;)
+.Append(&amp;quot;WHERE article_id=@0&amp;quot;, id)
+.Append(&amp;quot;WHERE date_created&amp;gt;=@0&amp;quot;, start_date.Value)
+.Append(&amp;quot;WHERE date_created
+&lt;/code>&lt;/pre>
+&lt;p>5、直接执行sql&lt;/p>
+&lt;pre>&lt;code>db.Execute(&amp;quot;DELETE FROM articles WHERE draft&amp;lt;&amp;gt;0&amp;quot;);
+&lt;/code>&lt;/pre>
+&lt;p>6、调用存储过程&lt;/p>
+&lt;pre>&lt;code>//调用存储过程
+db.Execute(&amp;quot;exec procSomeHandler @0, @1&amp;quot;, 3, &amp;quot;2011-10-01&amp;quot;);
+//调用带输出(OUTPUT)参数的存储过程, 写的sql语句，@0参数后的“output”是关键
+var param = new SqlParameter() { Direction = ParameterDirection.Output, SqlDbType = SqlDbType.Int };
+db.Execute(&amp;quot;exec procSomeHandler @0 OUTPUT&amp;quot;, param);
+&lt;/code>&lt;/pre>
+&lt;p>7、代替返回值DataTable
+有时，我们并不想每条执行的sql都需要创建对应的实体类，这样会导致项目中存在过多的实体类，有方法能做到DataTable这样灵活就最好了。在.net4.0中，PetaPoco可以返回dynamic类型，可以很好地解决这个问题，而在.net3.5中就没办法，不过可以通过修改PetaPoco代码，实现使用Dictionary类型来代替dynamic动态类型的功能。改动代码如下：&lt;a class="link" href="https://github.com/bitxeno/PetaPoco/commit/e07746c06977f09ef8e7a0f81b718e520b4513ed" target="_blank" rel="noopener"
+>https://github.com/bitxeno/PetaPoco/commit/e07746c06977f09ef8e7a0f81b718e520b4513ed&lt;/a>&lt;/p>
+&lt;pre>&lt;code>var list = db.Fetch&amp;gt;(&amp;quot;select article_id,date_created from articles&amp;quot;);
+&lt;/code>&lt;/pre>
+&lt;p>使用petapoco时有点需要注意，就是当数据库字段数据类型是varchar等非unicode字符类型时，petapoco传参需要把string转换为AnsiString类型，否则会有性能问题。&lt;/p>
+&lt;pre>&lt;code>Ansi String Support
+DBA guru Rob Sullivan yesterday pointed out that SQL Server has pretty severe performance overhead if you try to query an index with varchar column using a unicode string parameter. To fix this the parameter needs to be bound as DbType.AnsiString. To facilitate this you can now wrap such string parameters in a new AnsiString class:
+var a = db.SingleOrDefault&amp;lt;article&amp;gt;(&amp;quot;WHERE title=@0&amp;quot;, new PetaPoco.AnsiString(&amp;quot;blah&amp;quot;));&amp;lt;/article&amp;gt;
+&lt;/code>&lt;/pre>
+&lt;p>参考资料：
+&lt;a class="link" href="http://code.google.com/p/dapper-dot-net/" target="_blank" rel="noopener"
+>http://code.google.com/p/dapper-dot-net/&lt;/a>
+&lt;a class="link" href="http://www.toptensoftware.com/petapoco/" target="_blank" rel="noopener"
+>http://www.toptensoftware.com/petapoco/&lt;/a>&lt;/p></description></item></channel></rss>

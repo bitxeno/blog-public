@@ -1,0 +1,359 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Php on bitxeno's notes</title><link>https://blog.xenori.com/tags/php/</link><description>Recent content in Php on bitxeno's notes</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Wed, 08 Jul 2015 01:33:35 +0800</lastBuildDate><atom:link href="https://blog.xenori.com/tags/php/index.xml" rel="self" type="application/rss+xml"/><item><title>使用gdb调试php的coredump文件</title><link>https://blog.xenori.com/2015/07/2015-using-gdb-to-debug-php-coredump/</link><pubDate>Wed, 08 Jul 2015 01:33:35 +0800</pubDate><guid>https://blog.xenori.com/2015/07/2015-using-gdb-to-debug-php-coredump/</guid><description>&lt;p>使用xhprof测试slim框架的性能时，发现php抛了Segment Fault错误，试着使用gdb查看是什么导致的。&lt;/p>
+&lt;h2 id="生成coredump文件">生成coredump文件&lt;/h2>
+&lt;p>要生成php的coredump文件需要对系统进行一些配置，具体查看：&lt;a class="link" href="https://rtcamp.com/tutorials/php/core-dump-php5-fpm/" target="_blank" rel="noopener"
+>Generating core-dump for php5-fpm&lt;/a>&lt;/p>
+&lt;h2 id="使用gdb调试coredump文件">使用gdb调试coredump文件&lt;/h2>
+&lt;p>执行gdb命令，因为coredump是php-fpm进程生成的，还需要指定php-fpm的路径，要不查看不了具体的代码执行信息。&lt;/p>
+&lt;pre tabindex="0">&lt;code>$ gdb /usr/local/php5/sbin/php-fpm -c /tmp/core-php-fpm.1567
+&lt;/code>&lt;/pre>&lt;h2 id="gdb调试命令">gdb调试命令&lt;/h2>
+&lt;h3 id="bt">bt&lt;/h3>
+&lt;p>bt命令打印程序执行的堆栈信息&lt;/p>
+&lt;pre tabindex="0">&lt;code>(gdb) bt
+#0 _phpi_pop (ht=&amp;lt;value optimized out&amp;gt;, return_value=0x7faf756ace10, return_value_ptr=0x0, this_ptr=&amp;lt;value optimized out&amp;gt;,
+return_value_used=&amp;lt;value optimized out&amp;gt;, off_the_end=0) at /home/apps/php-5.6.10/ext/standard/array.c:1879
+#1 0x00007faf7d8f3317 in hp_execute_internal (execute_data=0x7faf8991db40, fci=0x0, ret=1) at /home/apps/xhprof-master/extension/xhprof.c:1730
+#2 0x0000000000888cc5 in zend_do_fcall_common_helper_SPEC (execute_data=&amp;lt;value optimized out&amp;gt;) at /home/apps/php-5.6.10/Zend/zend_vm_execute.h:560
+#3 0x00000000008787d0 in execute_ex (execute_data=0x7faf8991db40) at /home/apps/php-5.6.10/Zend/zend_vm_execute.h:363
+#4 0x00007faf7d8f2ca9 in hp_execute_ex (execute_data=0x7faf8991db40) at /home/apps/xhprof-master/extension/xhprof.c:1675
+&lt;/code>&lt;/pre>&lt;h3 id="p">p&lt;/h3>
+&lt;p>p命令用于打印变量信息&lt;/p>
+&lt;pre tabindex="0">&lt;code>(gdb) p *executor_globals-&amp;gt;argument_stack
+$2 = {top = 0x7faf8991dc38, end = 0x7faf8993d848, prev = 0x0}
+&lt;/code>&lt;/pre>&lt;h3 id="f">f&lt;/h3>
+&lt;p>切换当前的栈，一般来说，程序停止时，最顶层的栈就是当前栈&lt;/p>
+&lt;pre tabindex="0">&lt;code># 切换到1层级的栈
+(gdb) f 1
+#1 0x00007f701d60c317 in hp_execute_internal (execute_data=0x7f702940a858, fci=0x0, ret=1) at /home/apps/xhprof-master/extension/xhprof.c:1730
+1730 ((zend_internal_function *) execute_data-&amp;gt;function_state.function)-&amp;gt;handler(
+# 查看当前栈信息
+(gdb) info f
+Stack level 1, frame at 0x7fff515e2090:
+rip = 0x7f701d60c317 in hp_execute_internal (/home/apps/xhprof-master/extension/xhprof.c:1730); saved rip 0x888a15
+called by frame at 0x7fff515e2150, caller of frame at 0x7fff515e2040
+source language c.
+Arglist at 0x7fff515e2038, args: execute_data=0x7f702940a858, fci=0x0, ret=1
+Locals at 0x7fff515e2038, Previous frame&amp;#39;s sp is 0x7fff515e2090
+Saved registers:
+rbx at 0x7fff515e2058, rbp at 0x7fff515e2060, r12 at 0x7fff515e2068, r13 at 0x7fff515e2070, r14 at 0x7fff515e2078, r15 at 0x7fff515e2080,
+rip at 0x7fff515e2088
+&lt;/code>&lt;/pre>&lt;h3 id="info">info&lt;/h3>
+&lt;p>查看信息&lt;/p>
+&lt;pre tabindex="0">&lt;code># 打印局部变量信息
+info locals
+# 打印全局和局部变量信息
+info variables
+# 打印参数信息
+info args
+# 打印当前堆栈信息
+info f
+&lt;/code>&lt;/pre>&lt;h2 id="php脚本调试命令">php脚本调试命令&lt;/h2>
+&lt;p>使用php脚本调试命令，需要引入php源码中的脚本文件.gdbinit。&lt;/p>
+&lt;pre tabindex="0">&lt;code>(gdb) source /home/apps/php-5.6.10/.gdbinit
+&lt;/code>&lt;/pre>&lt;h3 id="zbacktrace">zbacktrace&lt;/h3>
+&lt;p>zbacktrace可以打印php的堆栈信息，不同于bt只打印c的堆栈信息。&lt;/p>
+&lt;pre tabindex="0">&lt;code>(gdb) zbacktrace
+[0x7faf8991db40] array_shift(array(2)[0x7faf756acc88]) /var/www/html/php-framework-benchmark/slim-2.6/vendor/slim/slim/Slim/Slim.php:441
+[0x7faf8991da18] Slim\Slim-&amp;gt;mapRoute(array(2)[0x7faf897a0590]) /var/www/html/php-framework-benchmark/slim-2.6/vendor/slim/slim/Slim/Slim.php:473
+[0x7faf8991d910] Slim\Slim-&amp;gt;get(&amp;#34;/hello/index&amp;#34;, object[0x7faf897a0510]) /var/www/html/php-framework-benchmark/slim-2.6/index.php:18
+&lt;/code>&lt;/pre>&lt;h3 id="print_cvs">print_cvs&lt;/h3>
+&lt;p>print_cvs打印当前执行命令下的所有php变量&lt;/p>
+&lt;h3 id="printzv">printzv&lt;/h3>
+&lt;p>打印zval变量信息，可指定zval的指针地址，如zbacktrace返回的函数参数地址&lt;/p>
+&lt;pre tabindex="0">&lt;code>(gdb) printzv 0x7faf756acc88
+[0x7faf756acc88] (refcount=2,is_ref) array(2): {
+0 =&amp;gt; [0x7faf8979ee40] (refcount=4) string(12): &amp;#34;/hello/index&amp;#34;
+1 =&amp;gt; [0x7faf897a0510] (refcount=3) objectYou can&amp;#39;t do that without a process to debug.
+&lt;/code>&lt;/pre>&lt;h3 id="print_ht">print_ht&lt;/h3>
+&lt;p>print_ht是用打印zval变量信息&lt;/p>
+&lt;h3 id="print_htptr">print_htptr&lt;/h3>
+&lt;p>print_htptr是用打印zval指针指向的变量信息&lt;/p>
+&lt;h3 id="print_htstr">print_htstr&lt;/h3>
+&lt;p>print_htstr用于打印string构成的Hashtable变量信息&lt;/p>
+&lt;h3 id="print_ft">print_ft&lt;/h3>
+&lt;p>print_ft用于打印function table (HashTable)&lt;/p>
+&lt;h3 id="zmemcheck">zmemcheck&lt;/h3>
+&lt;p>zmemcheck用于显示当前的内在分配状态信息&lt;/p>
+&lt;h2 id="php全局对象executor_globals">php全局对象executor_globals&lt;/h2>
+&lt;p>php源码用有个用EG宏表示的全局对象executor_globals，它包含了php所有相关的执行信息，如当前执行的op_array，传递参数和函数名等信息。源码中的EG(v)实际是调用executor_globals-&amp;gt;v。executor_globals包含的变量有很多，可以用命令：&lt;/p>
+&lt;pre tabindex="0">&lt;code>p executor_globals
+&lt;/code>&lt;/pre>&lt;p>打印出来查看。&lt;/p>
+&lt;p>下面是比较重要的几个变量：&lt;/p>
+&lt;pre tabindex="0">&lt;code>argument_stack : 传递给当前调用函数的参数堆栈，可以查看参数信息
+current_execute_data : 当前执行的命令信息，如当前执行函数信息，op_array，op_code等
+prev_execute_data ：前一执行命令信息，相当于调用函数的上级函数
+active_op_array : 当前正在执行的op_array
+exception : 当前包含的异常信息
+&lt;/code>&lt;/pre>&lt;p>查看示例：&lt;/p>
+&lt;pre tabindex="0">&lt;code>## 查看当前执行命令信息
+(gdb) p *executor_globals-&amp;gt;current_execute_data
+$8 = {opline = 0x7faf76376fd0, function_state = {function = 0x1123720, arguments = 0x7faf8991dc30}, op_array = 0x7faf897bf9f8, object = 0x0,
+symbol_table = 0x0, prev_execute_data = 0x7faf8991da18, old_error_reporting = 0x0, nested = 0 &amp;#39;\000&amp;#39;, original_return_value = 0x0,
+current_scope = 0x7faf8991da28, current_called_scope = 0x0, current_this = 0x0, fast_ret = 0x0, delayed_exception = 0x0,
+call_slots = 0x7faf8991dc08, call = 0x7faf8991dc08}
+## 查看前一执行命令信息，相当于上级调用函数
+(gdb) p *executor_globals-&amp;gt;current_execute_data-&amp;gt;prev_execute_data
+$19 = {opline = 0x7faf763781e8, function_state = {function = 0x7faf897bf9f8, arguments = 0x7faf8991dad8}, op_array = 0x7faf897bf020,
+object = 0x7faf8978adf0, symbol_table = 0x0, prev_execute_data = 0x7faf8991d910, old_error_reporting = 0x0, nested = 0 &amp;#39;\000&amp;#39;,
+original_return_value = 0x0, current_scope = 0x7faf897c2d48, current_called_scope = 0x7faf897c2d48, current_this = 0x7faf8978adf0,
+fast_ret = 0x7faf897c2d48, delayed_exception = 0x0, call_slots = 0x7faf8991dab0, call = 0x7faf8991dab0}
+&lt;/code>&lt;/pre>&lt;h2 id="扩展阅读">扩展阅读&lt;/h2>
+&lt;p>&lt;a class="link" href="http://www.laruence.com/2011/06/23/2057.html" target="_blank" rel="noopener"
+>如何调试PHP的Core之获取基本信息&lt;/a>&lt;br>
+&lt;a class="link" href="http://www.php-internals.com/book/" target="_blank" rel="noopener"
+>TIPI: 深入理解PHP内核&lt;/a>&lt;/p></description></item><item><title>解决cookie冲突导致的登录循环重定向</title><link>https://blog.xenori.com/2015/04/loop-redirect-cause-by-cookie-conflict/</link><pubDate>Thu, 02 Apr 2015 00:21:00 +0000</pubDate><guid>https://blog.xenori.com/2015/04/loop-redirect-cause-by-cookie-conflict/</guid><description>&lt;p>近排开发的一个后台系统（域名：admin.test.test.com）在接入公司统一SSO时，遇到了cookie冲突引起的登录循环重定向的bug。&lt;/p>
+&lt;p>公司有一个统一的SSO登录页面，我们开发的系统是跳转到该页面实现登录验证的。有用户反映登录不了，浏览器提示循环重定向了，查看用户浏览器发现有两个相同名称的session cookie：&lt;/p>
+&lt;pre tabindex="0">&lt;code>PHPSESSID=token1; path=/; expired=/; domain=.test.com
+PHPSESSID=token2; path=/; expired=/; domain=.test.test.com
+&lt;/code>&lt;/pre>&lt;p>显然这两个cookie的domain因为都是admin.test.test.com的根域名，使浏览器都发送到php后台系统了。第一个是后台系统（admin.test.test.com）写入的，是正确的session id，而第二个是由未知系统写入的。测试打印**$_COOKIE[&amp;lsquo;PHPSESSID&amp;rsquo;]**发现输出是：&lt;/p>
+&lt;pre tabindex="0">&lt;code>token2
+&lt;/code>&lt;/pre>&lt;p>很明显php读取到了错误的session id，所以导致系统读取不到保存在session中的登录信息，而误判用户为未登录，之后再把用户跳转回SSO登录页面，跳转回SSO系统后，SSO系统知道用户已登录过，再跳转回系统。。。这样就一直循环下去了=。=&lt;/p>
+&lt;p>为什么PHP会读取到错误的session id呢？打印全局变量**$_SERVER[&amp;lsquo;HTTP_COOKIES&amp;rsquo;]**出来查看：&lt;/p>
+&lt;pre tabindex="0">&lt;code>PHPSESSID=token2;PHPSESSID=token1
+&lt;/code>&lt;/pre>&lt;p>发现PHP是能接收到两个同名COOKIE的，但只取了第一个当真正的session id！！&lt;br>
+查看php源码，在文件php_variables.c的220行，有注释出php对同名cookie的处理规则：&lt;/p>
+&lt;blockquote>
+&lt;p>&lt;a class="link" href="https://github.com/php/php-src/blob/e10e151e9b92313a7085272c85bebf6c82017fce/main/php_variables.c" target="_blank" rel="noopener"
+>https://github.com/php/php-src/blob/e10e151e9b92313a7085272c85bebf6c82017fce/main/php_variables.c&lt;/a> #220&lt;/p>
+&lt;/blockquote>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-c" data-lang="c">&lt;span class="line">&lt;span class="cl"> &lt;span class="cm">/*
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cm"> * According to rfc2965, more specific paths are listed above the less specific ones.
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cm"> * If we encounter a duplicate cookie name, we should skip it, since it is not possible
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cm"> * to have the same (plain text) cookie name for the same path and we should not overwrite
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cm"> * more specific cookies with the less specific ones.
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cm"> */&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="nf">Z_TYPE&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nf">PG&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">http_globals&lt;/span>&lt;span class="p">)[&lt;/span>&lt;span class="n">TRACK_VARS_COOKIE&lt;/span>&lt;span class="p">])&lt;/span> &lt;span class="o">!=&lt;/span> &lt;span class="n">IS_UNDEF&lt;/span> &lt;span class="o">&amp;amp;&amp;amp;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">symtable1&lt;/span> &lt;span class="o">==&lt;/span> &lt;span class="nf">Z_ARRVAL&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nf">PG&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">http_globals&lt;/span>&lt;span class="p">)[&lt;/span>&lt;span class="n">TRACK_VARS_COOKIE&lt;/span>&lt;span class="p">])&lt;/span> &lt;span class="o">&amp;amp;&amp;amp;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nf">zend_symtable_str_exists&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">symtable1&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">index&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">index_len&lt;/span>&lt;span class="p">))&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nf">zval_ptr_dtor&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="o">&amp;amp;&lt;/span>&lt;span class="n">gpc_element&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span> &lt;span class="k">else&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">gpc_element_p&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="nf">zend_symtable_str_update_ind&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">symtable1&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">index&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">index_len&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="o">&amp;amp;&lt;/span>&lt;span class="n">gpc_element&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>意思是当php遇到相同名称的cookie时，只会保留**$_SERVER[&amp;lsquo;HTTP_COOKIES&amp;rsquo;]**中的第一个cookie，而余下同名的会忽略跳过。&lt;/p>
+&lt;p>很明显，只要浏览器传cookie给php时，把token1的session id放在最前面，这样就能正确判断登录成功了！
+那么浏览器传递cookie顺序是如何的呢？参考&lt;a class="link" href="http://www.rfc-editor.org/rfc/rfc6265.txt" target="_blank" rel="noopener"
+>RFC6265 HTTP State Management Mechanism&lt;/a>，可以发现：&lt;/p>
+&lt;pre tabindex="0">&lt;code>4.2.2
+In particular,if the Cookie header contains two cookies with the same name (e.g.,
+that were set with different Path or Domain attributes), servers
+SHOULD NOT rely upon the order in which these cookies appear in the
+header.
+5.3. Storage Model
+2. The user agent SHOULD sort the cookie-list in the following
+order:
+* Cookies with longer paths are listed before cookies with
+shorter paths.
+* Among cookies that have equal-length path fields, cookies with
+earlier creation-times are listed before cookies with later
+creation-times.
+NOTE: Not all user agents sort the cookie-list in this order, but
+this order reflects common practice when this document was
+written, and, historically, there have been servers that
+(erroneously) depended on this order.
+&lt;/code>&lt;/pre>&lt;p>大概意思就是：&lt;/p>
+&lt;ol>
+&lt;li>path越长的说明匹配越精确，顺序越靠前&lt;/li>
+&lt;li>假如path相同，cookie创建时间越早的，顺序越靠前&lt;/li>
+&lt;li>顺序与domain没关系&lt;br>
+RFC同时也说明并不是所有的浏览器都遵守这个，并且服务器也不应该依赖于cookie出现的顺序。&lt;/li>
+&lt;/ol>
+&lt;p>最后通过更改保存的session id名称来避免冲突解决问题，不过倒让我加深了cookie的了解。&lt;/p></description></item><item><title>在ubuntu中编译安装php</title><link>https://blog.xenori.com/2013/11/install-php-from-source-in-ubuntu/</link><pubDate>Tue, 12 Nov 2013 01:07:00 +0800</pubDate><guid>https://blog.xenori.com/2013/11/install-php-from-source-in-ubuntu/</guid><description>&lt;h3 id="预装编译环境">预装编译环境&lt;/h3>
+&lt;p>在ubuntu中执行下面命令安装编译依赖软件&lt;/p>
+&lt;pre tabindex="0">&lt;code>&amp;gt; sudo apt-get install \
+libxml2-dev \
+libcurl4-openssl-dev \
+libjpeg-dev \
+libpng-dev \
+libxpm-dev \
+libmysqlclient-dev \
+libpq-dev \
+libicu-dev \
+libfreetype6-dev \
+libldap2-dev \
+libxslt-dev
+&lt;/code>&lt;/pre>&lt;h3 id="下载php源代码">下载php源代码&lt;/h3>
+&lt;pre tabindex="0">&lt;code>wget http://us3.php.net/get/php-5.5.5.tar.gz/from/cn2.php.net/mirror
+&lt;/code>&lt;/pre>&lt;h3 id="开始编译安装">开始编译安装&lt;/h3>
+&lt;pre tabindex="0">&lt;code>&amp;gt; tar zxf php-5.5.5.tar.gz
+&amp;gt; cd php-5.5.5
+&amp;gt; sudo ./configurate ...
+&lt;/code>&lt;/pre>&lt;h3 id="安装apc和memcache扩展">安装apc和memcache扩展&lt;/h3></description></item><item><title>捕捉php中的fatal error错误</title><link>https://blog.xenori.com/2013/11/handle-fatal-error-in-php/</link><pubDate>Mon, 04 Nov 2013 00:48:00 +0800</pubDate><guid>https://blog.xenori.com/2013/11/handle-fatal-error-in-php/</guid><description>&lt;p>php中有三个函数与捕捉运行错误有关，分别是：&lt;/p>
+&lt;blockquote>
+&lt;p>&lt;a class="link" href="http://cn2.php.net/set_error_handler" target="_blank" rel="noopener"
+>set_error_handler&lt;/a>：运行错误处理函数，php内核执行代码出错时一般是触发error，而不是抛异常，抛异常是面向对象编程中用的&lt;/p>
+&lt;/blockquote>
+&lt;blockquote>
+&lt;p>&lt;a class="link" href="http://cn2.php.net/set_exception_handler" target="_blank" rel="noopener"
+>set_exception_handler&lt;/a>：运行异常信息处理函数，当代码中throw的异常没有被try-catch捕获时，就会调用该函数。php中error和exception的区别可以看这篇回答：&lt;a class="link" href="http://stackoverflow.com/questions/841500/php-exceptions-vs-errors" target="_blank" rel="noopener"
+>php-exceptions-vs-errors&lt;/a>&lt;/p>
+&lt;/blockquote>
+&lt;blockquote>
+&lt;p>&lt;a class="link" href="http://cn2.php.net/register_shutdown_function" target="_blank" rel="noopener"
+>register_shutdown_function&lt;/a>：脚本关闭执行函数，会在php脚本每次执行完成退出前运行。&lt;/p>
+&lt;/blockquote>
+&lt;p>为了保证运行错误能被顺利捕捉到，必须保证在有错的程序执行前先注册了错误处理函数。
+一般错误处理代码结构如下：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-php" data-lang="php">&lt;span class="line">&lt;span class="cl">&lt;span class="k">function&lt;/span> &lt;span class="nf">handle_normal_error&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nv">$errno&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nv">$errstr&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nv">$errfile&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nv">$errline&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1">// 把error封装为异常，由异常处理函数统一处理
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="k">throw&lt;/span> &lt;span class="k">new&lt;/span> &lt;span class="nx">ErrorException&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nv">$errstr&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="mi">0&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nv">$errno&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nv">$errfile&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nv">$errline&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1">// don&amp;#39;t execute php default exception action
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="k">return&lt;/span> &lt;span class="k">true&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nx">set_error_handler&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s1">&amp;#39;handle_normal_error&amp;#39;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="k">E_ALL&lt;/span> &lt;span class="o">|&lt;/span> &lt;span class="nx">E_STRICT&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">function&lt;/span> &lt;span class="nf">user_exception_handler&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nv">$ex&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">switch&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="nv">$errno&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">case&lt;/span> &lt;span class="nx">E_USER_ERROR&lt;/span>&lt;span class="o">:&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">send_error_to_log_server&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nv">$msg&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">break&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">case&lt;/span> &lt;span class="nx">E_USER_WARNING&lt;/span>&lt;span class="o">:&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1">// do something
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="k">break&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">default&lt;/span>&lt;span class="o">:&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1">// do something
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="k">break&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nx">set_exception_handler&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s1">&amp;#39;user_exception_handler&amp;#39;&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">function&lt;/span> &lt;span class="nf">handle_fatal_error&lt;/span>&lt;span class="p">()&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nv">$error&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="nx">error_get_last&lt;/span>&lt;span class="p">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="nx">isset&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nv">$error&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="s1">&amp;#39;type&amp;#39;&lt;/span>&lt;span class="p">])&lt;/span> &lt;span class="o">&amp;amp;&amp;amp;&lt;/span> &lt;span class="k">E_ERROR&lt;/span> &lt;span class="o">==&lt;/span> &lt;span class="nv">$error&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="s1">&amp;#39;type&amp;#39;&lt;/span>&lt;span class="p">])&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">send_error_to_log_server&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nv">$msg&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nx">register_shutdown_function&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s1">&amp;#39;handle_fatal_error&amp;#39;&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在thinkphp 3.13中，已经做了全局导常处理，代码如下：
+{% codeblock Think.class.php %}&lt;/p>
+&lt;p>/**
+* 应用程序初始化
+* @access public
+* @return void
+*/
+static public function start() {
+// 设定错误和异常处理
+register_shutdown_function(array(&amp;lsquo;Think&amp;rsquo;,&amp;lsquo;fatalError&amp;rsquo;));
+set_error_handler(array(&amp;lsquo;Think&amp;rsquo;,&amp;lsquo;appError&amp;rsquo;));
+set_exception_handler(array(&amp;lsquo;Think&amp;rsquo;,&amp;lsquo;appException&amp;rsquo;));&lt;/p>
+&lt;pre>&lt;code> ...
+}
+&lt;/code>&lt;/pre>
+&lt;p>/**
+* 自定义异常处理
+* @access public
+* @param mixed $e 异常对象
+*/
+static public function appException($e) {
+$error = array();
+$error[&amp;lsquo;message&amp;rsquo;] = $e-&amp;gt;getMessage();
+$trace = $e-&amp;gt;getTrace();
+if(&amp;rsquo;throw_exception&amp;rsquo;==$trace[0][&amp;lsquo;function&amp;rsquo;]) {
+$error[&amp;lsquo;file&amp;rsquo;] = $trace[0][&amp;lsquo;file&amp;rsquo;];
+$error[&amp;rsquo;line&amp;rsquo;] = $trace[0][&amp;rsquo;line&amp;rsquo;];
+}else{
+$error[&amp;lsquo;file&amp;rsquo;] = $e-&amp;gt;getFile();
+$error[&amp;rsquo;line&amp;rsquo;] = $e-&amp;gt;getLine();
+}
+Log::record($error[&amp;lsquo;message&amp;rsquo;],Log::ERR);
+halt($error);
+}&lt;/p>
+&lt;pre>&lt;code>/**
+* 自定义错误处理
+* @access public
+* @param int $errno 错误类型
+* @param string $errstr 错误信息
+* @param string $errfile 错误文件
+* @param int $errline 错误行数
+* @return void
+*/
+static public function appError($errno, $errstr, $errfile, $errline) {
+switch ($errno) {
+case E_ERROR:
+case E_PARSE:
+case E_CORE_ERROR:
+case E_COMPILE_ERROR:
+case E_USER_ERROR:
+ob_end_clean();
+// 页面压缩输出支持
+if(C('OUTPUT_ENCODE')){
+$zlib = ini_get('zlib.output_compression');
+if(empty($zlib)) ob_start('ob_gzhandler');
+}
+$errorStr = &amp;quot;$errstr &amp;quot;.$errfile.&amp;quot; 第 $errline 行.&amp;quot;;
+if(C('LOG_RECORD')) Log::write(&amp;quot;[$errno] &amp;quot;.$errorStr,Log::ERR);
+function_exists('halt')?halt($errorStr):exit('ERROR:'.$errorStr);
+break;
+case E_STRICT:
+case E_USER_WARNING:
+case E_USER_NOTICE:
+default:
+$errorStr = &amp;quot;[$errno] $errstr &amp;quot;.$errfile.&amp;quot; 第 $errline 行.&amp;quot;;
+trace($errorStr,'','NOTIC');
+break;
+}
+}
+// 致命错误捕获
+static public function fatalError() {
+// 保存日志记录
+if(C('LOG_RECORD')) Log::save();
+if ($e = error_get_last()) {
+switch($e['type']){
+case E_ERROR:
+case E_PARSE:
+case E_CORE_ERROR:
+case E_COMPILE_ERROR:
+case E_USER_ERROR:
+ob_end_clean();
+function_exists('halt')?halt($e):exit('ERROR:'.$e['message']. ' in &amp;lt;b&amp;gt;'.$e['file'].'&amp;lt;/b&amp;gt; on line &amp;lt;b&amp;gt;'.$e['line'].'&amp;lt;/b&amp;gt;');
+break;
+}
+}
+}
+&lt;/code>&lt;/pre>
+&lt;p>{% endcodeblock %}&lt;/p>
+&lt;p>{% codeblock functions.php %}&lt;/p>
+&lt;p>/**&lt;/p>
+&lt;ul>
+&lt;li>错误输出&lt;/li>
+&lt;li>@param mixed $error 错误&lt;/li>
+&lt;li>@return void
+*/
+function halt($error) {
+$e = array();
+if (APP_DEBUG) {
+//调试模式下输出错误信息
+if (!is_array($error)) {
+$trace = debug_backtrace();
+$e[&amp;lsquo;message&amp;rsquo;] = $error;
+$e[&amp;lsquo;file&amp;rsquo;] = $trace[0][&amp;lsquo;file&amp;rsquo;];
+$e[&amp;rsquo;line&amp;rsquo;] = $trace[0][&amp;rsquo;line&amp;rsquo;];
+ob_start();
+debug_print_backtrace();
+$e[&amp;rsquo;trace&amp;rsquo;] = ob_get_clean();
+} else {
+$e = $error;
+}
+} else {
+//否则定向到错误页面
+$error_page = C(&amp;lsquo;ERROR_PAGE&amp;rsquo;);
+if (!empty($error_page)) {
+redirect($error_page);
+} else {
+if (C(&amp;lsquo;SHOW_ERROR_MSG&amp;rsquo;))
+$e[&amp;lsquo;message&amp;rsquo;] = is_array($error) ? $error[&amp;lsquo;message&amp;rsquo;] : $error;
+else
+$e[&amp;lsquo;message&amp;rsquo;] = C(&amp;lsquo;ERROR_MESSAGE&amp;rsquo;);
+}
+}
+// 包含异常页面模板
+include C(&amp;lsquo;TMPL_EXCEPTION_FILE&amp;rsquo;);
+exit;
+}&lt;/li>
+&lt;/ul>
+&lt;p>{% endcodeblock %}&lt;/p></description></item></channel></rss>

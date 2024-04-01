@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Adb on bitxeno's notes</title><link>https://blog.xenori.com/tags/adb/</link><description>Recent content in Adb on bitxeno's notes</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Fri, 11 Sep 2020 11:27:10 +0800</lastBuildDate><atom:link href="https://blog.xenori.com/tags/adb/index.xml" rel="self" type="application/rss+xml"/><item><title>常用adb命令</title><link>https://blog.xenori.com/2020/09/adb-commands/</link><pubDate>Fri, 11 Sep 2020 11:27:10 +0800</pubDate><guid>https://blog.xenori.com/2020/09/adb-commands/</guid><description>&lt;img src="https://blog.xenori.com/2020/09/adb-commands/cover.png" alt="Featured image of post 常用adb命令" />&lt;h2 id="1-查看连接设备">1. 查看连接设备&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl"> adb devcies
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="2-当有多个连接设备时指定执行命令的设备">2. 当有多个连接设备时，指定执行命令的设备&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">adb -s &amp;lt;deviceid&amp;gt; &amp;lt;commands&amp;gt;
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">如
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">adb -s 1e25fe71 shell pm list package
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="3-查看手机中已安装的所有apk文件">3. 查看手机中已安装的所有apk文件&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">adb shell pm list package
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="4-导出指定的-apk-包">4. 导出指定的 apk 包&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">adb shell pm path &amp;lt;com.package.name&amp;gt;
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">adb pull &amp;lt;/system/priv-app/com.package.name/package_name.apk&amp;gt; ~/download/savepath
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="5-卸载任意包括系统应用">5. 卸载任意（包括系统）应用&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">adb shell pm uninstall -k --user &lt;span class="m">0&lt;/span> &amp;lt;com.package.name&amp;gt;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="6-查看-app-的错误日志">6. 查看 app 的错误日志&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">adb logcat -v &lt;span class="nb">time&lt;/span> &lt;span class="p">|&lt;/span> grep AndroidRuntime
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="7-清空-app-日志">7. 清空 app 日志&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">adb logcat -c
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item></channel></rss>

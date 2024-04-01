@@ -1,0 +1,5 @@
+.post .post-content img {
+    max-width: 320px;
+    vertical-align: top;
+    border: solid 1px #ccc;
+}

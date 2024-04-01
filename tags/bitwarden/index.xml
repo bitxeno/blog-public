@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Bitwarden on bitxeno's notes</title><link>https://blog.xenori.com/tags/bitwarden/</link><description>Recent content in Bitwarden on bitxeno's notes</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Wed, 20 Oct 2021 22:16:11 +0800</lastBuildDate><atom:link href="https://blog.xenori.com/tags/bitwarden/index.xml" rel="self" type="application/rss+xml"/><item><title>自建Bitwarden通过cloudflare实现https访问</title><link>https://blog.xenori.com/2021/10/bitwarden-tls-with-cloudflare/</link><pubDate>Wed, 20 Oct 2021 22:16:11 +0800</pubDate><guid>https://blog.xenori.com/2021/10/bitwarden-tls-with-cloudflare/</guid><description>&lt;img src="https://blog.xenori.com/2021/10/bitwarden-tls-with-cloudflare/cover.png" alt="Featured image of post 自建Bitwarden通过cloudflare实现https访问" />&lt;div class="notices warning" >&lt;blockquote>&lt;p>本文的方案只针对局域网内使用bitwarden的情况。实现原理是使用ACME DNS验证方式验证域名所有权。&lt;/p>
+&lt;/blockquote>&lt;/div>
+&lt;p>手机app连接自建bitwarden服务时，需要接口必须是https的，经过比较，决定使用cloudflare代理来实现，这样不用考虑https证书的更新问题。&lt;/p>
+&lt;h2 id="创建bitwarden域dns记录">创建bitwarden域DNS记录&lt;/h2>
+&lt;p>在Cloudflare的DNS面板中创建一条bitwarden服务域的DNS记录，并关闭代理功能，ipv4地址填写openwrt路由地址：&lt;/p>
+&lt;p>&lt;img src="https://blog.xenori.com/2021/10/bitwarden-tls-with-cloudflare/1.jpg"
+width="2040"
+height="304"
+srcset="https://blog.xenori.com/2021/10/bitwarden-tls-with-cloudflare/1_hu3cc7554004a4f82bf46186159a47e918_51397_480x0_resize_q75_box.jpg 480w, https://blog.xenori.com/2021/10/bitwarden-tls-with-cloudflare/1_hu3cc7554004a4f82bf46186159a47e918_51397_1024x0_resize_q75_box.jpg 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="671"
+data-flex-basis="1610px"
+>&lt;/p>
+&lt;h2 id="创建-api-令牌">创建 API 令牌&lt;/h2>
+&lt;p>在Cloudflare的&lt;code>概述&lt;/code>面板中，点击右下角的&lt;code>获取您的 API 令牌&lt;/code>，进入创建令牌页。点击&lt;code>创建令牌&lt;/code>，并选择使用模板&lt;code>编辑区域DNS&lt;/code>：&lt;/p>
+&lt;p>&lt;img src="https://blog.xenori.com/2021/10/bitwarden-tls-with-cloudflare/2.jpg"
+width="1554"
+height="978"
+srcset="https://blog.xenori.com/2021/10/bitwarden-tls-with-cloudflare/2_hu3cc7554004a4f82bf46186159a47e918_164182_480x0_resize_q75_box.jpg 480w, https://blog.xenori.com/2021/10/bitwarden-tls-with-cloudflare/2_hu3cc7554004a4f82bf46186159a47e918_164182_1024x0_resize_q75_box.jpg 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="158"
+data-flex-basis="381px"
+>&lt;/p>
+&lt;p>按照下面图片所示创建访问权限，&lt;code>区域资源&lt;/code>中可限定为刚刚的DNS域，也可指定为帐号下的所有域：&lt;/p>
+&lt;p>&lt;img src="https://blog.xenori.com/2021/10/bitwarden-tls-with-cloudflare/3.jpg"
+width="1852"
+height="702"
+srcset="https://blog.xenori.com/2021/10/bitwarden-tls-with-cloudflare/3_hu3cc7554004a4f82bf46186159a47e918_129456_480x0_resize_q75_box.jpg 480w, https://blog.xenori.com/2021/10/bitwarden-tls-with-cloudflare/3_hu3cc7554004a4f82bf46186159a47e918_129456_1024x0_resize_q75_box.jpg 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="263"
+data-flex-basis="633px"
+>&lt;/p>
+&lt;p>一直点击下一步直到完成，复制出api token，并保存好，下面步骤会用到。&lt;/p>
+&lt;h2 id="下载安装caddy">下载安装caddy&lt;/h2>
+&lt;p>进入&lt;a class="link" href="https://caddyserver.com/download" target="_blank" rel="noopener"
+>caddy下载页&lt;/a>，下载对应版本，需要选上&lt;code>caddy-dns/cloudflare&lt;/code>模块。caddy如何安装，可以参考我之前的文章——&lt;a class="link" href="https://blog.xenori.com/2021/08/openwrt-caddy-replace-uhttpd/" >openwrt管理后台使用caddy代替uhttpd&lt;/a>&lt;/p>
+&lt;p>&lt;img src="https://blog.xenori.com/2021/10/bitwarden-tls-with-cloudflare/4.jpg"
+width="2770"
+height="946"
+srcset="https://blog.xenori.com/2021/10/bitwarden-tls-with-cloudflare/4_hu3cc7554004a4f82bf46186159a47e918_274587_480x0_resize_q75_box.jpg 480w, https://blog.xenori.com/2021/10/bitwarden-tls-with-cloudflare/4_hu3cc7554004a4f82bf46186159a47e918_274587_1024x0_resize_q75_box.jpg 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="292"
+data-flex-basis="702px"
+>&lt;/p>
+&lt;h2 id="配置caddy">配置caddy&lt;/h2>
+&lt;p>打开caddy配置文件，增加下面的配置：&lt;/p>
+&lt;pre tabindex="0">&lt;code>bwrs.xxx.com {
+tls {
+dns cloudflare &amp;lt;my_api_token&amp;gt;
+}
+reverse_proxy localhost:8143
+}
+&lt;/code>&lt;/pre>&lt;p>&lt;code>bwrs.xxx.com&lt;/code>请改为cloudflare的注册域，&lt;code>&amp;lt;my_api_token&amp;gt;&lt;/code>替换为刚申请的api令牌，反向代理端口&lt;code>8143&lt;/code>是bitwarden的服务端口，请按自己的情况替换。&lt;/p>
+&lt;p>修改后，重启caddy使配置生效。&lt;/p>
+&lt;h2 id="openwrt添加本地dns解释记录">openwrt添加本地DNS解释记录&lt;/h2>
+&lt;p>进入openwrt后台，点击&lt;code>网络&lt;/code> -&amp;gt; &lt;code>DHCP/DNS&lt;/code>，在&lt;code>自定义挟持域名&lt;/code>栏添加以下DNS记录：&lt;/p>
+&lt;p>&lt;img src="https://blog.xenori.com/2021/10/bitwarden-tls-with-cloudflare/5.jpg"
+width="2254"
+height="182"
+srcset="https://blog.xenori.com/2021/10/bitwarden-tls-with-cloudflare/5_hu3cc7554004a4f82bf46186159a47e918_39707_480x0_resize_q75_box.jpg 480w, https://blog.xenori.com/2021/10/bitwarden-tls-with-cloudflare/5_hu3cc7554004a4f82bf46186159a47e918_39707_1024x0_resize_q75_box.jpg 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="1238"
+data-flex-basis="2972px"
+>&lt;/p>
+&lt;p>地址请填写openwrt路由地址，到这里就全部配置完成了。&lt;/p>
+&lt;h2 id="测试是否生效">测试是否生效&lt;/h2>
+&lt;p>通过curl请求bitwarden服务看有没内容返回&lt;/p>
+&lt;pre tabindex="0">&lt;code>curl https://bwrs.xxx.com
+&lt;/code>&lt;/pre></description></item></channel></rss>

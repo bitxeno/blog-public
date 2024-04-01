@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Scala on bitxeno's notes</title><link>https://blog.xenori.com/tags/scala/</link><description>Recent content in Scala on bitxeno's notes</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Sat, 21 Jan 2012 07:06:00 +0000</lastBuildDate><atom:link href="https://blog.xenori.com/tags/scala/index.xml" rel="self" type="application/rss+xml"/><item><title>利用Eclipse+Scala搭建android开发环境</title><link>https://blog.xenori.com/2012/01/use-eclipse-scala-develop-android/</link><pubDate>Sat, 21 Jan 2012 07:06:00 +0000</pubDate><guid>https://blog.xenori.com/2012/01/use-eclipse-scala-develop-android/</guid><description>&lt;p>&lt;strong>1、安装JAVA SDK&lt;/strong>&lt;/p>
+&lt;p>到官网（&lt;a class="link" href="http://www.oracle.com/technetwork/java/javase/downloads/index.html" target="_blank" rel="noopener"
+>http://www.oracle.com/technetwork/java/javase/downloads/index.html&lt;/a> ）下载最新的javase sdk，推荐安装1.6版。安装完成后，在windows环境变量中添加[JAVA_HOME]，并把路径指向java sdk的安装根目录。&lt;/p>
+&lt;p>&lt;img src="http://images.cnblogs.com/cnblogs_com/vento/scala-android-1.jpg"
+loading="lazy"
+>&lt;/p>
+&lt;p>&lt;strong>2、安装Scala&lt;/strong>&lt;/p>
+&lt;p>从scala官网（&lt;a class="link" href="http://www.scala-lang.org/downloads" target="_blank" rel="noopener"
+>http://www.scala-lang.org/downloads&lt;/a> ）下载windows版的压缩包，推荐2.8.1 final版，直接解压到相应目录中，假设为c:\scala-2.8.1.final\，再添加下面两个环境变量：&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>新增环境变量SCALA_HOME，并设为c:\scala-2.8.1.final&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>在已有环境变量Path中，追加值c:\scala-2.8.1.final\bin&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;p>通过win-&amp;gt;run-cmd打开命令行，输入scala，能输出版本信息证明已安装成功&lt;/p>
+&lt;p>&lt;strong>3、安装Eclipse&lt;/strong>&lt;/p>
+&lt;p>到Eclipse官网（&lt;a class="link" href="http://www.eclipse.org/downloads/" target="_blank" rel="noopener"
+>http://www.eclipse.org/downloads/&lt;/a>）下载，直接解压就能使用，推荐下载Eclipse Classic/Eclipse For Java。&lt;/p>
+&lt;p>&lt;strong>4、安装Android SDK&lt;/strong>&lt;/p>
+&lt;p>到android开发社区(&lt;a class="link" href="http://developer.android.com/sdk/index.html" target="_blank" rel="noopener"
+>http://developer.android.com/sdk/index.html&lt;/a>)下载安装。安装后进入&lt;strong>开始 &amp;gt; 所有程序 &amp;gt; Android SDK &amp;gt; SDK Manager&lt;/strong>程序，软件会提示一些可安装的更新，大家可以根据需要选择安装，建议安装下面图中所示的：&lt;/p>
+&lt;p>&lt;img src="http://images.cnblogs.com/cnblogs_com/vento/QQ%E4%BA%94%E7%AC%94%E6%88%AA%E5%9B%BE%E6%9C%AA%E5%91%BD%E5%90%8D.png"
+loading="lazy"
+>&lt;/p>
+&lt;p>之后是漫长的等待&amp;hellip;&lt;/p>
+&lt;p>&lt;strong>装ADT Plugin for Eclipse&lt;/strong>
+等待android sdk安装好后，打开Eclipse，进入菜单&lt;strong>Help&lt;/strong> &amp;gt; &lt;strong>Install New Software&amp;hellip;&lt;/strong>.，点击**Add，**添加链接&lt;/p>
+&lt;pre>&lt;code>https://dl-ssl.google.com/android/eclipse/
+&lt;/code>&lt;/pre>
+&lt;p>勾选所有项目，然后点击Next安装。&lt;/p>
+&lt;p>&lt;img src="http://images.cnblogs.com/cnblogs_com/vento/scala-android-2.jpg"
+loading="lazy"
+>&lt;/p>
+&lt;p>&lt;img src="http://images.cnblogs.com/cnblogs_com/vento/scala-android-3.jpg"
+loading="lazy"
+>&lt;/p>
+&lt;p>安装完成并重启Eclipse后，进入菜单&lt;strong>Window &amp;gt; Preferences &amp;gt; Android&lt;/strong>，点击&lt;strong>Browser&lt;/strong>，把路径指向android sdk的安装目录，然后点击&lt;strong>Apply&lt;/strong>。&lt;/p>
+&lt;p>&lt;img src="http://images.cnblogs.com/cnblogs_com/vento/scala-android-6.jpg"
+loading="lazy"
+>
+&lt;strong>6、安装Scala IDE Plugin&lt;/strong>
+打开&lt;strong>Eclipse&lt;/strong>，进入菜单&lt;strong>Help&lt;/strong> &amp;gt; &lt;strong>Install New Software&amp;hellip;&lt;/strong>.，点击**Add，**添加链接&lt;/p>
+&lt;pre>&lt;code>http://download.scala-ide.org/releases-28/2.0.0-beta
+&lt;/code>&lt;/pre>
+&lt;p>勾选安装下面两项：&lt;/p>
+&lt;p>&lt;strong>JDT weaving For scala&lt;/strong>&lt;/p>
+&lt;p>**Scala IDE for Eclipse **
+&lt;img src="http://images.cnblogs.com/cnblogs_com/vento/scala-android-4.jpg"
+loading="lazy"
+>&lt;/p>
+&lt;p>&lt;img src="http://images.cnblogs.com/cnblogs_com/vento/scala-android-5.jpg"
+loading="lazy"
+>&lt;/p>
+&lt;p>&lt;strong>7、安装Treesaker **
+打开&lt;/strong>Eclipse**，进入菜单&lt;strong>Help&lt;/strong> &amp;gt; &lt;strong>Install New Software&amp;hellip;&lt;/strong>.，点击**Add，**添加链接&lt;/p>
+&lt;pre>&lt;code>http://treeshaker.googlecode.com/svn/trunk/update_site/
+&lt;/code>&lt;/pre>
+&lt;p>勾选treeshaker,点击Next安装。&lt;/p>
+&lt;p>&lt;img src="http://images.cnblogs.com/cnblogs_com/vento/scala-android-7.jpg"
+loading="lazy"
+>&lt;/p>
+&lt;p>&lt;img src="http://images.cnblogs.com/cnblogs_com/vento/scala-android-8.jpg"
+loading="lazy"
+>&lt;/p>
+&lt;p>treeshaker是一个开源的辅助插件，详细可以访问项目地址：&lt;a class="link" href="http://code.google.com/p/treeshaker/" target="_blank" rel="noopener"
+>http://code.google.com/p/treeshaker/&lt;/a>&lt;/p>
+&lt;p>&lt;strong>8、简单的helloworld&lt;/strong>&lt;/p>
+&lt;p>Eclipse中打开&lt;strong>File &amp;gt; New &amp;gt; Project &amp;gt; Android Project&lt;/strong>创建一个新的android工程项目：&lt;/p>
+&lt;p>&lt;img src="http://images.cnblogs.com/cnblogs_com/vento/scala-android-9.jpg"
+loading="lazy"
+>&lt;/p>
+&lt;p>按下面的步骤把java的项目转为scala的项目：&lt;/p>
+&lt;p>1、把src文件夹重命名为_src（右键src &amp;gt; Refactor &amp;gt; Rename)
+2、右键HelloWorld项目 &amp;gt; Configure &amp;gt; Add Scala Nature
+3、右键HelloWorld项目 &amp;gt; Add/Remove Treeshaker
+4、打开菜单Project &amp;gt; Properties &amp;gt; Builders，确保builder的顺序和如下一样：&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>Android Resource Manager&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Android Pre Compiler&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Scala Builder&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Treeshaker&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Android Package Builder&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;p>5、打开res\layout\main.xml，把下面的内容替换&lt;!-- raw HTML omitted -->中的内容：&lt;/p>
+&lt;pre>&lt;code>&amp;lt;TextView
+android:layout_width=&amp;quot;fill_parent&amp;quot;
+android:layout_height=&amp;quot;wrap_content&amp;quot;
+android:text=&amp;quot;@string/hello&amp;quot;
+android:id=&amp;quot;@+id/text&amp;quot;
+/&amp;gt;
+&amp;lt;Button
+android:id=&amp;quot;@+id/button&amp;quot;
+android:layout_width=&amp;quot;wrap_content&amp;quot;
+android:layout_height=&amp;quot;wrap_content&amp;quot;
+android:text=&amp;quot;Click me&amp;quot;
+/&amp;gt;
+&lt;/code>&lt;/pre>
+&lt;p>5、删除_src下的源文件HelloWorldActivity.java 6、创建新的scala代码文件，右键包com.test，选择New &amp;gt; Other &amp;gt; Scala Class &lt;img src="http://images.cnblogs.com/cnblogs_com/vento/scala-android-10.jpg"
+loading="lazy"
+>Name设为HelloWorldActivty，Superclass设为android.app.Activity 7、修改HelloWorldActivity.scala文件： 增加导入：&lt;/p>
+&lt;pre>&lt;code>import android.os.Bundle
+import android.view.View
+import android.widget.TextView
+import android.widget.Button
+import R._
+&lt;/code>&lt;/pre>
+&lt;p>HelloWorldAcitvity类中增加代码：&lt;/p>
+&lt;pre>&lt;code>override def onCreate(savedInstanceState: Bundle) {
+super.onCreate(savedInstanceState)
+setContentView(R.layout.main)
+val textView = findViewById(R.id.text).asInstanceOf[TextView]
+val button = findViewById(R.id.button).asInstanceOf[Button]
+button.setOnClickListener((v: View) =&amp;gt; textView.setText(&amp;quot;Hello Scala&amp;quot;))
+}
+implicit def func2OnClickListener(func : (View) =&amp;gt; Unit) : View.OnClickListener = {
+return new View.OnClickListener() {
+override def onClick(v: View) = func(v)
+}
+}
+&lt;/code>&lt;/pre>
+&lt;p>8、通过菜单Run &amp;gt; Run，应该能正常编译并在android模拟器中运行了&lt;/p>
+&lt;p>扩展阅读：&lt;/p>
+&lt;p>&lt;a class="link" href="http://code.google.com/p/treeshaker/wiki/CreateNewScalaProject" target="_blank" rel="noopener"
+>CreateNewScalaProject&lt;/a>&lt;/p>
+&lt;p>&lt;a class="link" href="http://www.slideshare.net/papamitra/scalaandroid" target="_blank" rel="noopener"
+>ScalaでAndroidアプリ開発 &lt;/a>&lt;/p>
+&lt;p>&lt;a class="link" href="http://www.nevercertain.com/2011/02/18/scala-android-intellij-win-part-3.html" target="_blank" rel="noopener"
+>Building Android Apps with Scala - IntelliJ &lt;/a>&lt;/p>
+&lt;p>&lt;a class="link" href="http://lamp.epfl.ch/~michelou/android/" target="_blank" rel="noopener"
+>Exploring Android With Scala&lt;/a>&lt;/p></description></item></channel></rss>

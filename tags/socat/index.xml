@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Socat on bitxeno's notes</title><link>https://blog.xenori.com/tags/socat/</link><description>Recent content in Socat on bitxeno's notes</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Mon, 22 May 2023 12:35:10 +0800</lastBuildDate><atom:link href="https://blog.xenori.com/tags/socat/index.xml" rel="self" type="application/rss+xml"/><item><title>Mac系统下如何抓包unix套接字（Unix Domain Socket）</title><link>https://blog.xenori.com/2023/05/how-to-capture-unix-domain-socket-on-mac/</link><pubDate>Mon, 22 May 2023 12:35:10 +0800</pubDate><guid>https://blog.xenori.com/2023/05/how-to-capture-unix-domain-socket-on-mac/</guid><description>&lt;img src="https://blog.xenori.com/2023/05/how-to-capture-unix-domain-socket-on-mac/cover.png" alt="Featured image of post Mac系统下如何抓包unix套接字（Unix Domain Socket）" />&lt;p>普通的抓包工具如 charles 等没法抓取unix套接字数据，需要借助 socat 来抓取。&lt;/p>
+&lt;h2 id="安装抓包工具-socat">安装抓包工具 socat&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">brew install socat
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="制作抓包脚本">制作抓包脚本&lt;/h2>
+&lt;p>在&lt;code>/usr/local/bin&lt;/code>下创建一个命名为&lt;code>xdump&lt;/code>的 shell 执行脚本，内容如下：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">&lt;span class="cp">#!/bin/bash
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cp">&lt;/span>restore&lt;span class="o">(){&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> mv &lt;span class="nv">$1&lt;/span>.original &lt;span class="nv">$1&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nb">echo&lt;/span> -e &lt;span class="s2">&amp;#34;\nSocket &lt;/span>&lt;span class="nv">$1&lt;/span>&lt;span class="s2"> \e[33mRESTORED&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="o">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nv">sock&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="s2">&amp;#34;&lt;/span>&lt;span class="nv">$1&lt;/span>&lt;span class="s2">&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nb">trap&lt;/span> &lt;span class="s2">&amp;#34;restore &lt;/span>&lt;span class="nv">$sock&lt;/span>&lt;span class="s2">&amp;#34;&lt;/span> EXIT
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">mv &lt;span class="s2">&amp;#34;&lt;/span>&lt;span class="nv">$sock&lt;/span>&lt;span class="s2">&amp;#34;&lt;/span> &lt;span class="s2">&amp;#34;&lt;/span>&lt;span class="nv">$sock&lt;/span>&lt;span class="s2">.original&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">socat -t100 -v UNIX-LISTEN:&lt;span class="nv">$sock&lt;/span>,mode&lt;span class="o">=&lt;/span>777,reuseaddr,fork UNIX-CONNECT:&lt;span class="nv">$sock&lt;/span>.original
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>为&lt;code>xdump&lt;/code>脚本赋执行权限：&lt;/p>
+&lt;pre tabindex="0">&lt;code>chmod +x /usr/local/bin/xdump
+&lt;/code>&lt;/pre>&lt;h2 id="开始抓包">开始抓包&lt;/h2>
+&lt;p>需要抓包时执行如下命令：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">sudo xdump /path/to/unix_socket_file
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>例如抓包 xcode 的&lt;code>usbmuxd&lt;/code>通信协议：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">sudo xdump /var/run/usbmuxd
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>输出如下：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">&amp;gt; 2023/05/22 14:17:23.000982894 &lt;span class="nv">length&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="m">472&lt;/span> &lt;span class="nv">from&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="m">0&lt;/span> &lt;span class="nv">to&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="m">471&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">........&lt;span class="se">\b&lt;/span>.......&amp;lt;?xml &lt;span class="nv">version&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="s2">&amp;#34;1.0&amp;#34;&lt;/span> &lt;span class="nv">encoding&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="s2">&amp;#34;UTF-8&amp;#34;&lt;/span>?&amp;gt;
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&amp;lt;!DOCTYPE plist PUBLIC &lt;span class="s2">&amp;#34;-//Apple//DTD PLIST 1.0//EN&amp;#34;&lt;/span> &lt;span class="s2">&amp;#34;http://www.apple.com/DTDs/PropertyList-1.0.dtd&amp;#34;&lt;/span>&amp;gt;
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&amp;lt;plist &lt;span class="nv">version&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="s2">&amp;#34;1.0&amp;#34;&lt;/span>&amp;gt;
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&amp;lt;dict&amp;gt;
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &amp;lt;key&amp;gt;BundleID&amp;lt;/key&amp;gt;
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &amp;lt;string&amp;gt;com.apple.dt.Xcode&amp;lt;/string&amp;gt;
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &amp;lt;key&amp;gt;ClientVersionString&amp;lt;/key&amp;gt;
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &amp;lt;string&amp;gt;usbmuxd-531.100.1&amp;lt;/string&amp;gt;
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &amp;lt;key&amp;gt;MessageType&amp;lt;/key&amp;gt;
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &amp;lt;string&amp;gt;ReadBUID&amp;lt;/string&amp;gt;
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &amp;lt;key&amp;gt;ProcessID&amp;lt;/key&amp;gt;
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &amp;lt;integer&amp;gt;870&amp;lt;/integer&amp;gt;
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &amp;lt;key&amp;gt;ProgName&amp;lt;/key&amp;gt;
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &amp;lt;string&amp;gt;Xcode&amp;lt;/string&amp;gt;
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&amp;lt;/dict&amp;gt;
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&amp;lt;/plist&amp;gt;
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&amp;lt; 2023/05/22 14:17:23.000985543 &lt;span class="nv">length&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="m">276&lt;/span> &lt;span class="nv">from&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="m">0&lt;/span> &lt;span class="nv">to&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="m">275&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">........&lt;span class="se">\b&lt;/span>.......&amp;lt;?xml &lt;span class="nv">version&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="s2">&amp;#34;1.0&amp;#34;&lt;/span> &lt;span class="nv">encoding&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="s2">&amp;#34;UTF-8&amp;#34;&lt;/span>?&amp;gt;
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&amp;lt;!DOCTYPE plist PUBLIC &lt;span class="s2">&amp;#34;-//Apple//DTD PLIST 1.0//EN&amp;#34;&lt;/span> &lt;span class="s2">&amp;#34;http://www.apple.com/DTDs/PropertyList-1.0.dtd&amp;#34;&lt;/span>&amp;gt;
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&amp;lt;plist &lt;span class="nv">version&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="s2">&amp;#34;1.0&amp;#34;&lt;/span>&amp;gt;
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&amp;lt;dict&amp;gt;
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &amp;lt;key&amp;gt;BUID&amp;lt;/key&amp;gt;
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &amp;lt;string&amp;gt;XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX&amp;lt;/string&amp;gt;
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&amp;lt;/dict&amp;gt;
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&amp;lt;/plist&amp;gt;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item></channel></rss>

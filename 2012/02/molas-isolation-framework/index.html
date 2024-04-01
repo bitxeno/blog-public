@@ -1,0 +1,214 @@
+<!doctype html><html lang=zh-cn dir=ltr><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><meta name=description content='Moles是由微软研究院(Microsoft Research)开发的.NET依赖分离框架，它实现了使用自定义的委托(delegate)方法来替换原有类中的方法，以达到分离依赖，方便单元测试的目的。Moles在功能和用法上与开源的IoC框架Moq很像，但Moles有一些Moq实现不了功能，如替换静态方法，去掉静态构造函数，突破访问限制等。Molas非常有利于对ASP.NET WebForm构建的网站和依赖第三方类库的程序进行单元测试。
+下载和安装 下载Moles后直接安装就可以了，里面集成有VS2010的插件，安装成功后，VS2010右键菜单中会集成Moles功能菜单。
+'><title>Molas——.NET依赖分离框架</title>
+<link rel=canonical href=https://blog.xenori.com/2012/02/molas-isolation-framework/><link rel=stylesheet href=/scss/style.min.450926226e724574a6b936335ea06111f8aeb253d932c86cb2cc807341cd2889.css><meta property='og:title' content='Molas——.NET依赖分离框架'><meta property='og:description' content='Moles是由微软研究院(Microsoft Research)开发的.NET依赖分离框架，它实现了使用自定义的委托(delegate)方法来替换原有类中的方法，以达到分离依赖，方便单元测试的目的。Moles在功能和用法上与开源的IoC框架Moq很像，但Moles有一些Moq实现不了功能，如替换静态方法，去掉静态构造函数，突破访问限制等。Molas非常有利于对ASP.NET WebForm构建的网站和依赖第三方类库的程序进行单元测试。
+下载和安装 下载Moles后直接安装就可以了，里面集成有VS2010的插件，安装成功后，VS2010右键菜单中会集成Moles功能菜单。
+'><meta property='og:url' content='https://blog.xenori.com/2012/02/molas-isolation-framework/'><meta property='og:site_name' content="bitxeno's notes"><meta property='og:type' content='article'><meta property='article:section' content='Post'><meta property='article:tag' content='.Net'><meta property='article:tag' content='单元测试'><meta property='article:published_time' content='2012-02-14T17:29:51+00:00'><meta property='article:modified_time' content='2012-02-14T17:29:51+00:00'><meta name=twitter:title content="Molas——.NET依赖分离框架"><meta name=twitter:description content="Moles是由微软研究院(Microsoft Research)开发的.NET依赖分离框架，它实现了使用自定义的委托(delegate)方法来替换原有类中的方法，以达到分离依赖，方便单元测试的目的。Moles在功能和用法上与开源的IoC框架Moq很像，但Moles有一些Moq实现不了功能，如替换静态方法，去掉静态构造函数，突破访问限制等。Molas非常有利于对ASP.NET WebForm构建的网站和依赖第三方类库的程序进行单元测试。
+下载和安装 下载Moles后直接安装就可以了，里面集成有VS2010的插件，安装成功后，VS2010右键菜单中会集成Moles功能菜单。
+"><link rel="shortcut icon" href=/favicon.ico><meta name=referrer content="no-referrer"><link href=/index.xml rel=alternate type=application/rss+xml title="bitxeno's notes"><style>.article-page article .article-content img{max-width:720px!important;max-height:720px!important;object-fit:contain;width:100%}.article-summary-more{margin-left:5px;padding:1px 5px;border-radius:5px;border:var(--card-text-color-secondary)solid 1px;color:var(--card-text-color-secondary);font-size:.8em}.article-content code{background-color:rgba(27,31,35,5%);margin:0 2px}div.hugo-encrypt-encryption-notice{margin:1.5em 0;padding:0 var(--content-padding)}.hugo-encryptor-tips{margin-top:1.5rem;color:#797979;font-style:italic}.hugo-encrypt-form .hugo-encrypt-input{padding:4px 0;border:1px solid #f596aa;border-radius:1rem;outline:none;line-height:1.25;text-align:center;color:#4a4a4a;-webkit-appearance:none}.hugo-encrypt-form .hugo-encrypt-button{margin-left:1rem;padding:4px 16px;background-color:#fafafa;border:1px solid #fff;border-radius:1rem;box-shadow:0 1px 2px rgba(0,0,0,.3);outline:none;line-height:1.25;text-align:center;color:#e16b8c;transition:all ease-out .3s}.hugo-encrypt-form .hugo-encrypt-button:hover{background-color:#e16b8c;border-color:#e16b8c;color:#fafafa;cursor:pointer}.hugo-encrypt-input-response{margin-left:1rem;color:#f08080}div.notices.warning>blockquote{border-left:var(--blockquote-border-size)solid #f0b37e;background:#fff2db}div.notices.success>blockquote{border-left:var(--blockquote-border-size)solid rgba(92,184,92,.8);background:#e6f9e6}div.notices>blockquote{border-left:var(--blockquote-border-size)solid #6ab0de;background:#e7f2fa}div.notices.error>blockquote{border-left:var(--blockquote-border-size)solid rgba(217,83,79,.8);background:#fae2e2}</style></head><body class=article-page><script>(function(){const e="StackColorScheme";localStorage.getItem(e)||localStorage.setItem(e,"auto")})()</script><script>(function(){const t="StackColorScheme",e=localStorage.getItem(t),n=window.matchMedia("(prefers-color-scheme: dark)").matches===!0;e=="dark"||e==="auto"&&n?document.documentElement.dataset.scheme="dark":document.documentElement.dataset.scheme="light"})()</script><div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky"><button class="hamburger hamburger--spin" type=button id=toggle-menu aria-label=切换菜单>
+<span class=hamburger-box><span class=hamburger-inner></span></span></button><header><figure class=site-avatar><a href=/><img src=/img/avatar_hu3ef0a0a31328f79e0f83bf1637b02207_76647_300x0_resize_box_3.png width=300 height=281 class=site-logo loading=lazy alt=Avatar>
+</a><span class=emoji>🍥</span></figure><div class=site-meta><h1 class=site-name><a href=/>bitxeno's notes</a></h1><h2 class=site-description>simple thinking, simple life.</h2></div></header><ol class=menu id=main-menu><li><a href=/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><polyline points="5 12 3 12 12 3 21 12 19 12"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/><path d="M9 21v-6a2 2 0 012-2h2a2 2 0 012 2v6"/></svg>
+<span>首页</span></a></li><li><a href=/archives/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><rect x="3" y="4" width="18" height="4" rx="2"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+<span>归档</span></a></li><li><a href=/search/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg>
+<span>搜索</span></a></li><li><a href=/star/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-star" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 17.75l-6.172 3.245 1.179-6.873-5-4.867 6.9-1 3.086-6.253 3.086 6.253 6.9 1-5 4.867 1.179 6.873z"/></svg>
+<span>推荐</span></a></li><li><a href=/abouts/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg>
+<span>关于</span></a></li><li><a href=/index.xml><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-rss" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="5" cy="19" r="1"/><path d="M4 4a16 16 0 0116 16"/><path d="M4 11a9 9 0 019 9"/></svg>
+<span>订阅</span></a></li><div class=menu-bottom-section><li id=i18n-switch><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 5h7"/><path d="M9 3v2c0 4.418-2.239 8-5 8"/><path d="M5 9c-.003 2.144 2.952 3.908 6.7 4"/><path d="M12 20l4-9 4 9"/><path d="M19.1 18h-6.2"/></svg>
+<select name=language onchange="window.location.href=this.selectedOptions[0].value"><option value=https://blog.xenori.com/ selected></option></select></li><li id=dark-mode-toggle><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="8" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="16" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<span>暗色模式</span></li></div></ol></aside><main class="main full-width"><article class=main-article><header class=article-header><div class=article-details><header class=article-category><a href=/categories/%E6%8A%80%E6%9C%AF/>技术</a></header><div class=article-title-wrapper><h2 class=article-title><a href=/2012/02/molas-isolation-framework/>Molas——.NET依赖分离框架</a></h2></div><footer class=article-time><div><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11.795 21H5a2 2 0 01-2-2V7a2 2 0 012-2h12a2 2 0 012 2v4"/><circle cx="18" cy="18" r="4"/><path d="M15 3v4"/><path d="M7 3v4"/><path d="M3 11h16"/><path d="M18 16.496V18l1 1"/></svg>
+<time class=article-time--published>2012年02月14号</time></div><div><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+<time class=article-time--reading>阅读时长: 7 分钟</time></div></footer></div></header><section class=article-content><p><img src=http://research.microsoft.com/en-us/projects/pex/pexweb.png loading=lazy><a class=link href=http://research.microsoft.com/en-us/projects/moles/ target=_blank rel=noopener>Moles</a>是由微软研究院(<a class=link href=http://research.microsoft.com target=_blank rel=noopener>Microsoft Research</a>)开发的.NET依赖分离框架，它实现了使用自定义的委托(delegate)方法来替换原有类中的方法，以达到分离依赖，方便单元测试的目的。Moles在功能和用法上与开源的IoC框架Moq很像，但Moles有一些Moq实现不了功能，如替换静态方法，去掉静态构造函数，突破访问限制等。Molas非常有利于对ASP.NET WebForm构建的网站和依赖第三方类库的程序进行单元测试。</p><h2 id=下载和安装>下载和安装</h2><p><a class=link href=http://research.microsoft.com/en-us/projects/pex/downloads.aspx target=_blank rel=noopener>下载Moles</a>后直接安装就可以了，里面集成有VS2010的插件，安装成功后，VS2010右键菜单中会集成Moles功能菜单。</p><h2 id=使用示例>使用示例</h2><p>我们试下测试2000年千年虫的bug。在VS2010中创建一个MoleDomain的类项目，并创建类Y2KChecker，代码如下：</p><pre><code>namespace MoleDomain
+{
+    public static class Y2KChecker
+    {
+        public static void Check()
+        {
+            if (DateTime.Now == new DateTime(2000, 1, 1))
+                throw new ApplicationException(&quot;y2kbug!&quot;);
+        }
+    }
+}
+</code></pre><p>现在我们要测试这段代码，确定当时间为2000/1/1时，程序能正确抛出异常。很显然这段代码没法做单元测试，因为代码中的DateTime.Now是依赖系统时钟的，只返回当前时间，我们没法改变它的值使它刚好等于2000/1/1。怎么办好呢？</p><p>使用Molas解决这个问题很简单。创建一个测试项目，并引用MoleDomain项目，单元测试代码如下：</p><pre><code>[TestMethod]
+[ExpectedException(typeof(ApplicationException))]
+public void Test()
+{
+    Y2KChecker.Check();
+}
+</code></pre><p>运行测试，会显示预期的未通过，因为DateTime.Now现在返回的还是系统时间。
+<img src=http://ww1.sinaimg.cn/large/7ce4a9f6gw1e5q1ld1fvzj20d203d74i.jpg loading=lazy alt=moles></p><p>我们试下使用Molas替换DateTime.Now的返回值，在测试项目引用列表中，右键MoleDomain，选择“Add Moles Assembly”，确定后会自动在项目中增加一个MoleDomain.moles文件，moles后缀的文件是让Moles对该程序集自动生成对应的Molas类型程序集，以便测试时使用。
+<img src=http://ww2.sinaimg.cn/large/7ce4a9f6gw1e5q1mey3gxj20c109eaas.jpg loading=lazy alt=moles>
+右键测试项目，选择“重新生成”，会发现程序自动引用了很多Moles相关的程序集，如Microsoft.Moles.Framework，还有自动生成的 MolaDomain.Moles程序集。
+<img src=http://ww2.sinaimg.cn/large/7ce4a9f6gw1e5q1mvxks5j206i08rq3d.jpg loading=lazy alt=moles>
+要使Moles正常运行，需要改下原来的单元测试代码。在测试方法上方加上HostType特性，并写下替换DateTime.Now返回值的代码：</p><pre><code>[TestMethod]
+[ExpectedException(typeof(ApplicationException))]
+[HostType(&quot;Moles&quot;)]
+public void Test()
+{
+    //利用委托替换原来的返回值
+    MDateTime.NowGet = () =&gt; new DateTime(2000, 1, 1);
+
+    Y2KChecker.Check();
+}
+</code></pre><p>再次运行测试，发现还是失败，提示错误：</p><pre><code>测试方法 MoleDomain.Test.Y2KCheckerTest.Test 引发了异常 Microsoft.Moles.Framework.Moles.MoleNotInstrumentedException，但应为异常 System.ApplicationException。异常消息: Microsoft.Moles.Framework.Moles.MoleNotInstrumentedException: The System.DateTime System.DateTime.get_Now() was not instrumented
+To resolve this issue, add the following attribute in the test project:
+
+using Microsoft.Moles.Framework;
+[assembly: MoledType(typeof(System.DateTime))]
+</code></pre><p>提示缺少一些引用配置，在测试命名空间上方加上代码：</p><pre><code>using Microsoft.Moles.Framework;
+
+[assembly: MoledType(typeof(System.DateTime))]
+namespace MoleDomain.Test
+{
+    .....
+}
+</code></pre><p>再次运行测试，终于通过测试了：）
+<img src=http://ww3.sinaimg.cn/large/7ce4a9f6gw1e5q1neh8mtj20ds027aa6.jpg loading=lazy alt=moles></p><h1 id=mole基础知识>Mole基础知识</h1><p>原始类成员方法对应的Mole类型属性如下：</p><ul><li><p>◇ 静态方法表示为mole类型的静态属性</p></li><li><p>◇ 类实例方法表示为嵌套的<strong>AllInstances</strong>类型的静态属性</p></li><li><p>◇ 类构造函数表示为mole类型的命名为<strong>Constructor</strong>的静态属性</p></li></ul><p>下面部分说明下如何使用.
+<strong>Static Methods</strong>
+为mole类型的静态属性附加委托方法可以替换类静态方法的内容。mole类型属性只能附加一个委托方法。如<strong>MyClass</strong>类有一个静态方法<strong>MyMethod</strong>：</p><pre><code>public static class MyClass {
+    public static int MyMethod() {
+        ...
+    }
+}
+</code></pre><p>我们附加一个mole到MyMethod中，使它一直返回5：</p><pre><code>MMyClass.MyMethod = () =&gt;5;
+</code></pre><p>自动生成的MMyClass类型的代码结构如下：</p><pre><code>public class MMyClass {
+    public static Func MyMethod {
+        set {
+            ...
+        }
+    }
+}
+</code></pre><p>安装Moles框架后，使用右键的“Add Moles Assembly”功能添加.mole后缀文件后，MMyClass就能自动生成。</p><p><strong>实例方法(对所有实例生效)</strong>
+和静态方法相似，也可以对所有实例方法进行mole。实例方法放置在嵌套类<strong>AllInstances</strong>的静态属性中，例如下面MyClass实例的MyMethod方法：</p><pre><code>public class MyClass {
+    public int MyMethod() {
+        ...
+    }
+}
+</code></pre><p>mole一个方法使所有实例对象都返回5：</p><pre><code>MMyClass.AllInstances.MyMethod = _ =&gt; 5;
+</code></pre><p>自动生成的MMyClass结构如下：</p><pre><code>public class MMyClass : MoleBase {
+    public static class AllInstances {
+        public static FuncMyMethod {
+            set {
+                ...
+            }
+        }
+    }
+}
+</code></pre><p><strong>实例方法(对一个实例生效)</strong>
+对不同的实例，实例方法可以mole不同的委托方法。mole的属性实际是mole类型实例自己的属性（不是静态方法)，每个mole类型实例都会有一个原始类型的实例对象。如<strong>MyClass</strong>的实例方法<strong>MyMethod</strong>：</p><pre><code>public class MyClass {
+    public int MyMethod() {
+        ...
+    }
+}
+</code></pre><p>我们可以创建两个MMyClass的实例对象，一个使它返回5，另一个使它返回10：</p><pre><code>var myClass1 = new MMyClass()
+{
+    MyMethod = () =&gt; 5
+};
+var myClass2 = new MMyClass() { MyMethod = () =&gt; 10 };
+</code></pre><p>自动生成的mole类型代码结构如下：</p><pre><code>public class MMyClass : MoleBase {
+    public Func MyMethod {
+        set {
+            ...
+        }
+    }
+public MyClass Instance {
+        get {
+            ...
+        }
+    }
+}
+</code></pre><p>原始类型对象可以通过mole实例对象的<strong>Instance</strong>属性获得：</p><pre><code>var mole = new MMyClass();
+var instance = mole.Instance;
+</code></pre><p>mole实例对象也可以隐式转换为原始类型对象，所以你可以直接赋值对原始类型，如下：</p><pre><code>var mole = new MMyClass();
+MyClassinstance = mole;
+</code></pre><p><strong>构造函数(Constructors)</strong>
+类构造函数也可以mole来进行一些赋值操作。类构造函数表示为mole类型的静态方法<strong>Constructor</strong>，如下面的MyClass类带有一个int参数的构造函数：</p><pre><code>public class MyClass {
+    public MyClass(int value) {
+        this.Value = value;
+    }
+...
+}
+</code></pre><p>通过附加构造函数使以后的所有实例的Value属性都返回-5：</p><pre><code>MMyClass.ConstructorInt32 = (@this, value) =&gt; {
+    var mole = new MMyClass(@this) {
+        ValueGet = () =&gt; -5
+    };
+};
+</code></pre><p>如果你只想mole后面一个实例，我们只需把Constructor静态属性赋null值，如：</p><pre><code>MMyClass.ConstructorInt32 = (@this, value) =&gt; {
+    ...
+MMyClass.ConstructorInt32 = null;
+};
+</code></pre><p>需要注意的是，每个mole类型都有两个构造函数，当需要一个新的mole实例对象时，使用默认的构造器；而带有一个原始类型参数的构造函数，只应该在mole构造函数时使用。</p><pre><code>public MMyClass() { }
+public MMyClass(MyClass instance) : base(instance) { }
+</code></pre><p>自动生成的MMyClass代码结构如下：</p><pre><code>public class MMyClass : MoleBase
+{
+    public static Action ConstructorInt32 {
+        set {
+            ...
+        }
+    }
+    public MMyClass() { }
+    public MMyClass(MyClass instance) : base(instance) { }
+    ...
+}
+</code></pre><p><strong>基类成员(Base Members)</strong>
+只要把子类实例作为基类构造函数的参数传入，就可以创建一个基类的mole对象，并访问到基类中的mole属性。例如，基类<strong>Base</strong>有一个MyMethod的方法，而<strong>Child</strong>是<strong>Base</strong>的子类：</p><pre><code>public abstract class Base {
+    public int MyMethod() {
+        ...
+    }
+}
+public class Child : Base {
+}
+</code></pre><p>通过创建一个<strong>MBase</strong>对象我们能设置<strong>Base</strong>的mole属性：</p><pre><code>var child = new MChild();
+new MBase(child) { MyMethod = () =&gt; 5 };
+</code></pre><p>注意这里，当<strong>MChild</strong>实例作为传入<strong>MBase</strong>构造函数时，会被隐式转换为<strong>Child</strong>实例。
+MChild和MBase的自动生成代码如下：</p><pre><code>public class MChild : MoleBase {
+    public MChild() { }
+    public MChild(Child child)
+        : base(child) { }
+}
+
+public class MBase : MoleBase {
+    public MBase(Base target) { }
+    public Func MyMethod
+    { set { ... } }
+}
+</code></pre><p><strong>静态构造函数</strong>
+静态构造函数在Moles中被特殊对待，Moles只能简单地抹去静态构造函数，而不能重新为它附加新的委托方法。Moles通过指定[MolesEraseStaticConstructor]特性来抹去一个类的静态构造函数。</p><pre><code>[assembly: MolesEraseStaticConstructor(typeof(MyStatic))]
+class MyStatic {
+    static MyStatic() {
+        throw new Exception(); // needs moling…
+    }
+}
+</code></pre><p><strong>终结器(Finalizers)</strong>
+对于终结器，Moles也是特殊对待的。Moles也是只能简单抹去终结器，通过指定[MolesEraseFinalizer]特性实现。</p><pre><code>[assembly: MolesEraseFinalizer(typeof(MyFinalizer))]
+class MyFinalizer {
+    ~MyFinalizer() {
+        throw new Exception(); // needs moling…
+    }
+}
+</code></pre><p><strong>私有方法</strong>
+假如私有方法的签名类型是可见的，Moles会为私有方法自动生成mole属性。签名类型可见是指，参数类型或返回值类型是可见的，不是私有类型。</p><p><strong>绑定接口</strong>
+当类有实现接口时，Moles自动生成的mole类型会提供立即绑定接口成员的方法。例如，MyClass实现了s IEnumerable接口：</p><pre><code>public class MyClass : IEnumerable {
+    public IEnumerator GetEnumerator() {
+        ...
+    }
+...
+}
+</code></pre><p>通过mole类型的<strong>Bind</strong>方法，我们可以简捷地mole接口实现：</p><pre><code>var myClass = new MMyClass();
+myClass.Bind(new int[] { 1, 2, 3 });
+</code></pre><p>自动生成的<strong>MMyClass</strong>代码结构如下：</p><pre><code>public class MMyClass : MoleBase {
+    public MMyClass Bind(IEnumerable target) {
+        ...
+    }
+}
+</code></pre><h2 id=moles缺点>Moles缺点</h2><p>Moles缺点是，测试运行比较慢，还有测试代码只能在本机上才能测试通过，假如同伴获取代码后需要运行单元测试，必须也安装Molas环境。</p><h2 id=参考资料>参考资料</h2><p><a class=link href=http://research.microsoft.com/en-us/projects/pex/molesmanual.pdf target=_blank rel=noopener>http://research.microsoft.com/en-us/projects/pex/molesmanual.pdf</a></p><p><a class=link href=http://research.microsoft.com/en-us/projects/pex/documentation.aspx target=_blank rel=noopener>http://research.microsoft.com/en-us/projects/pex/documentation.aspx</a></p></section><footer class=article-footer><section class=article-tags><a href=/tags/.net/>.Net</a>
+<a href=/tags/%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95/>单元测试</a></section><section class=article-copyright><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><path d="M14.5 9a3.5 4 0 100 6"/></svg>
+<span>Licensed under CC BY-NC-SA 4.0</span></section><section class=article-lastmod><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+<span>最后更新于 2012年02月14号 17:29 UTC</span></section></footer></article><aside class=related-contents--wrapper><h2 class=section-title>相关文章</h2><div class=related-contents><div class="flex article-list--tile"><article><a href=/2012/05/use-mono-cecil-to-change-dll-attribute/><div class=article-details><h2 class=article-title>使用Mono.Cecil更改程序集dll特性</h2></div></a></article><article><a href=/2012/01/config-windows-services-install-name/><div class=article-details><h2 class=article-title>使windows服务安装名称可配置</h2></div></a></article><article><a href=/2012/01/smartthreadpool/><div class=article-details><h2 class=article-title>开源线程池组件SmartThreadPool</h2></div></a></article><article class=has-image><a href=/2024/02/github-download-enhance-speed/><div class=article-image><img src=/2024/02/github-download-enhance-speed/cover.907d6794ed4df001931ba88a291d4e34_hu97c93a104dd71fdb6ecb2b1c8317cee1_61791_250x150_fill_box_smart1_3.png width=250 height=150 loading=lazy alt="Featured image of post github 下载加速" data-key=github-download-enhance-speed data-hash="md5-kH1nlO1N8AGTG6iKKR1ONA=="></div><div class=article-details><h2 class=article-title>github 下载加速</h2></div></a></article><article class=has-image><a href=/2023/05/how-to-capture-unix-domain-socket-on-mac/><div class=article-image><img src=/2023/05/how-to-capture-unix-domain-socket-on-mac/cover.2483343cfa511ede213bce287baa46fb_huc84318aa5eda95760760b181358c47b2_188996_250x150_fill_box_smart1_3.png width=250 height=150 loading=lazy alt="Featured image of post Mac系统下如何抓包unix套接字（Unix Domain Socket）" data-key=how-to-capture-unix-domain-socket-on-mac data-hash="md5-JIM0PPpRHt4hO84oe6pG+w=="></div><div class=article-details><h2 class=article-title>Mac系统下如何抓包unix套接字（Unix Domain Socket）</h2></div></a></article></div></div></aside><script src=https://giscus.app/client.js data-repo=bitxeno/blog-public data-repo-id=R_kgDOLoFOYw data-category=Announcements data-category-id=DIC_kwDOLoFOY84CeXb1 data-mapping=pathname data-reactions-enabled=1 data-emit-metadata=0 data-theme=noborder_light data-lang=zh-CN crossorigin=anonymous async></script><script>function setGiscusTheme(e){let t=document.querySelector("iframe.giscus-frame");t&&t.contentWindow.postMessage({giscus:{setConfig:{theme:e}}},"https://giscus.app")}(function(){addEventListener("message",t=>{if(event.origin!=="https://giscus.app")return;e()}),window.addEventListener("onColorSchemeChange",e);function e(){setGiscusTheme(document.documentElement.dataset.scheme==="light"?"noborder_light":"noborder_gray")}})()</script><footer class=site-footer><section class=copyright>&copy;
+2021 -
+2024 bitxeno's notes</section><section class=powerby>Built with <a href=https://gohugo.io/ target=_blank rel=noopener>Hugo</a><br>主题 <b><a href=https://github.com/CaiJimmy/hugo-theme-stack target=_blank rel=noopener data-version=3.11.0>Stack</a></b> 由 <a href=https://jimmycai.com target=_blank rel=noopener>Jimmy</a> 设计</section></footer><div class=pswp tabindex=-1 role=dialog aria-hidden=true><div class=pswp__bg></div><div class=pswp__scroll-wrap><div class=pswp__container><div class=pswp__item></div><div class=pswp__item></div><div class=pswp__item></div></div><div class="pswp__ui pswp__ui--hidden"><div class=pswp__top-bar><div class=pswp__counter></div><button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+<button class="pswp__button pswp__button--share" title=Share></button>
+<button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+<button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button><div class=pswp__preloader><div class=pswp__preloader__icn><div class=pswp__preloader__cut><div class=pswp__preloader__donut></div></div></div></div></div><div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap"><div class=pswp__share-tooltip></div></div><button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+</button>
+<button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)"></button><div class=pswp__caption><div class=pswp__caption__center></div></div></div></div></div><script src=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo=" crossorigin=anonymous defer></script><script src=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU=" crossorigin=anonymous defer></script><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.css integrity="sha256-c0uckgykQ9v5k+IqViZOZKc47Jn7KQil4/MP3ySA3F8=" crossorigin=anonymous><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.css integrity="sha256-SBLU4vv6CA6lHsZ1XyTdhyjJxCjPif/TRkjnsyGAGnE=" crossorigin=anonymous></main><aside class="sidebar right-sidebar sticky"><section class="widget archives"><div class=widget-icon><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg></div><h2 class="widget-title section-title">目录</h2><div class=widget--toc><nav id=TableOfContents><ol><li><a href=#下载和安装>下载和安装</a></li><li><a href=#使用示例>使用示例</a></li></ol><ol><li><a href=#moles缺点>Moles缺点</a></li><li><a href=#参考资料>参考资料</a></li></ol></nav></div></section></aside></div><script src=https://cdn.jsdelivr.net/npm/node-vibrant@3.1.5/dist/vibrant.min.js integrity="sha256-5NovOZc4iwiAWTYIFiIM7DxKUXKWvpVEuMEPLzcm5/g=" crossorigin=anonymous></script><script type=text/javascript src=/ts/main.js defer></script><script>(function(){const e=document.createElement("link");e.href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap",e.type="text/css",e.rel="stylesheet",document.head.appendChild(e)})()</script></body></html>

@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Ip on bitxeno's notes</title><link>https://blog.xenori.com/tags/ip/</link><description>Recent content in Ip on bitxeno's notes</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Mon, 09 Jan 2012 07:39:49 +0000</lastBuildDate><atom:link href="https://blog.xenori.com/tags/ip/index.xml" rel="self" type="application/rss+xml"/><item><title>获取客户端的真实ip代码改进</title><link>https://blog.xenori.com/2012/01/get-client-ip/</link><pubDate>Mon, 09 Jan 2012 07:39:49 +0000</pubDate><guid>https://blog.xenori.com/2012/01/get-client-ip/</guid><description>&lt;p>现在系统中常用的获取客户端真实ip的代码如下：&lt;/p>
+&lt;pre>&lt;code>// 获取IP地址
+protected string GetIPAddress()
+{
+string result = &amp;quot;&amp;quot;;
+try
+{
+//透过代理取客户端ip
+result = HttpContext.Current.Request.ServerVariables[&amp;quot;HTTP_X_FORWARDED_FOR&amp;quot;] ?? &amp;quot;&amp;quot;;
+if (result == &amp;quot;&amp;quot;)
+{
+//连接主机ip
+result = HttpContext.Current.Request.ServerVariables[&amp;quot;REMOTE_ADDR&amp;quot;] ?? &amp;quot;&amp;quot;;
+}
+if (result == &amp;quot;&amp;quot;)
+{
+result = HttpContext.Current.Request.UserHostAddress;
+}
+}
+catch (Exception ex)
+{
+}
+return result;
+}
+&lt;/code>&lt;/pre>
+&lt;p>这段代码有两个问题：
+1、根据&lt;a class="link" href="http://www.openinfo.co.uk/apache/index.html" target="_blank" rel="noopener"
+>这篇文章&lt;/a>说明，当请求经常多个代理时，HTTP_X_FORWARDED_FOR可能会附加上多个服务器ip，格式如下：&lt;/p>
+&lt;p>X-Forwarded-For: client1, proxy1, proxy2, &amp;hellip;&lt;/p>
+&lt;p>正确的客户端ip应该只是第一个ip地址&lt;/p>
+&lt;!-- raw HTML omitted -->
+&lt;p>2、当用户手机是用CMWAP访问网站时，上面代码返回的是10.xxx的私有网络ip，而真实的服务器ip是在REMOTE_ADDR中，如下图所示：
+&lt;a class="link" href="http://bitxeno.me/wp-content/uploads/2012/01/serverip.jpg" target="_blank" rel="noopener"
+>&lt;img src="http://bitxeno.me/wp-content/uploads/2012/01/serverip-300x238.jpg"
+loading="lazy"
+>&lt;/a>
+所以对于获取来的ip，需要做是否私有网络ip的判断。所有私有网络的ip段如下：&lt;/p>
+&lt;pre>&lt;code>private static readonly long[,] privateIpRange = { //私有网络ip段,长整形表示
+{0,50331647}, //{&amp;quot;0.0.0.0&amp;quot;,&amp;quot;2.255.255.255&amp;quot;},
+{167772160,184549375}, //{&amp;quot;10.0.0.0&amp;quot;,&amp;quot;10.255.255.255&amp;quot;},
+{2130706432,2147483647}, //{&amp;quot;127.0.0.0&amp;quot;,&amp;quot;127.255.255.255&amp;quot;},
+{2851995648,2852061183}, //{&amp;quot;169.254.0.0&amp;quot;,&amp;quot;169.254.255.255&amp;quot;},
+{2886729728,2887778303}, //{&amp;quot;172.16.0.0&amp;quot;,&amp;quot;172.31.255.255&amp;quot;},
+{3221225984,3221226239}, //{&amp;quot;192.0.2.0&amp;quot;,&amp;quot;192.0.2.255&amp;quot;},
+{3232235520,3232301055}, //{&amp;quot;192.168.0.0&amp;quot;,&amp;quot;192.168.255.255&amp;quot;},
+{4294967040,4294967295}}; //{&amp;quot;255.255.255.0&amp;quot;,&amp;quot;255.255.255.255&amp;quot;}
+&lt;/code>&lt;/pre></description></item><item><title>通过新浪接口抓取ip库</title><link>https://blog.xenori.com/2012/01/crawl-sina-ip-data/</link><pubDate>Mon, 09 Jan 2012 07:23:24 +0000</pubDate><guid>https://blog.xenori.com/2012/01/crawl-sina-ip-data/</guid><description>&lt;p>新浪有开放ip查询的接口（&lt;a class="link" href="http://int.dpool.sina.com.cn/iplookup/iplookup.php?format=json&amp;amp;ip=123.124.2.85" target="_blank" rel="noopener"
+>http://int.dpool.sina.com.cn/iplookup/iplookup.php?format=json&amp;amp;ip=123.124.2.85&lt;/a>），通过不断查询就能抓取到ip信息。不过要遍历所有的ip地址不现实，数据存储和查询都是问题，一般我们面对的是中国的用户，只需要遍历抓取下中国范围的ip信息就行，而且ip地址最后一位的256个ip一般分配到同一地区，所以最后一位只需遍历.0的ip就可以了。
+目前ip4地址已经分配完，中国的ip段可以在以下网址找到：
+&lt;a class="link" href="https://www.countryipblocks.net/e_country_data/CN_range.txt" target="_blank" rel="noopener"
+>https://www.countryipblocks.net/e_country_data/CN_range.txt&lt;/a>
+首先需要处理，把上面的ip段转换为具体的ip地址：&lt;/p>
+&lt;p>private static List&lt;!-- raw HTML omitted --> HandleIpRange()
+{
+var list = new List&lt;!-- raw HTML omitted -->();
+var lines = File.ReadAllLines(&amp;ldquo;CN_range.txt&amp;rdquo;);
+var pattern = @&amp;quot;(\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3})\s-\s(\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3})&amp;quot;;
+foreach (var line in lines)
+{
+var match = Regex.Match(line, pattern, RegexOptions.IgnoreCase);
+if (match.Success)
+{
+var begin = match.Groups[1].Value;
+var end = match.Groups[2].Value;&lt;/p>
+&lt;pre>&lt;code> var beginInt = Ip3ToInt(begin);
+var endInt = Ip3ToInt(end);
+while (beginInt &amp;lt;= endInt)
+{
+list.Add(IntToIp3(beginInt));
+beginInt += 1;
+}
+}
+}
+return list;
+}
+private static int Ip3ToInt(string ip4)
+{
+var arr = ip4.Split('.');
+var p0 = int.Parse(arr[0]);
+var p1 = int.Parse(arr[1]);
+var p2 = int.Parse(arr[2]);
+return (p0 &amp;lt;&amp;lt; 16) | (p1 &amp;lt;&amp;lt; 8) | p2;
+}
+private static string IntToIp3(int s)
+{
+var p0 = s &amp;gt;&amp;gt; 16 &amp;amp; 0xFF;
+var p1 = s &amp;gt;&amp;gt; 8 &amp;amp; 0xFF;
+var p2 = s &amp;amp; 0xFF;
+return string.Format(&amp;quot;{0}.{1}.{2}.0&amp;quot;, p0, p1, p2);
+}
+&lt;/code>&lt;/pre>
+&lt;p>剩下只需用多线程请求新浪接口，把结果保存到数据库就可以了。&lt;/p>
+&lt;p>&lt;strong>数据修正：&lt;/strong>
+从新浪接口查询回来的数据，有一部分国家和省市都是空的，还有一部分国家是美国等，这部分数据需要修正下。数据修正可以查询ip138网站，它的数据来源是APNIC，比较新，请求地址如下（&lt;a class="link" href="http://www.ip138.com/ips8.asp?action=2&amp;amp;ip=223.72.166.0" target="_blank" rel="noopener"
+>http://www.ip138.com/ips8.asp?action=2&amp;amp;ip=223.72.166.0&lt;/a>）。把请求回来的内容用正则解析并update到数据库就可以了。&lt;/p>
+&lt;p>&lt;strong>进一步减少数据大小：&lt;/strong>
+新浪接口返回的内容都会带有start和end的ip段，表示ip段中的ip都是属于同一地区。可以把start和end的ip转换为int值，再把int表示的ip段和地区信息保存到另一张表中。查询用户ip所属时，只需把用户ip也转换为int值，再找出int值所在的ip段对应的地区就可以了。&lt;/p></description></item><item><title>门户网站的ip查询接口</title><link>https://blog.xenori.com/2011/12/ip-lookup/</link><pubDate>Sun, 25 Dec 2011 06:09:12 +0000</pubDate><guid>https://blog.xenori.com/2011/12/ip-lookup/</guid><description>&lt;p>腾讯：&lt;a class="link" href="http://ip.qq.com/cgi-bin/searchip?searchip1=121.236.225.37" target="_blank" rel="noopener"
+>http://ip.qq.com/cgi-bin/searchip?searchip1=121.236.225.37&lt;/a>
+现在只能通过解析页面内容到取得&lt;/p>
+&lt;p>新浪：&lt;a class="link" href="http://int.dpool.sina.com.cn/iplookup/iplookup.php?format=json&amp;amp;ip=123.124.2.85" target="_blank" rel="noopener"
+>http://int.dpool.sina.com.cn/iplookup/iplookup.php?format=json&amp;amp;ip=123.124.2.85&lt;/a>&lt;/p>
+&lt;p>网易： &lt;a class="link" href="http://www.youdao.com/smartresult-xml/search.s?type=ip&amp;amp;q=123.124.2.85" target="_blank" rel="noopener"
+>http://www.youdao.com/smartresult-xml/search.s?type=ip&amp;amp;q=123.124.2.85&lt;/a>&lt;/p>
+&lt;p>ip地址在各个国家的分配情况表：
+&lt;a class="link" href="http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest" target="_blank" rel="noopener"
+>http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest&lt;/a>
+&lt;a class="link" href="http://www.countryipblocks.net/country-blocks/ip-range-format/" target="_blank" rel="noopener"
+>http://www.countryipblocks.net/country-blocks/ip-range-format/&lt;/a>&lt;/p></description></item></channel></rss>

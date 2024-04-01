@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>华硕 on bitxeno's notes</title><link>https://blog.xenori.com/tags/%E5%8D%8E%E7%A1%95/</link><description>Recent content in 华硕 on bitxeno's notes</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Tue, 22 Dec 2020 13:27:10 +0800</lastBuildDate><atom:link href="https://blog.xenori.com/tags/%E5%8D%8E%E7%A1%95/index.xml" rel="self" type="application/rss+xml"/><item><title>华硕主板AX200网卡如何开启WOL网络唤醒</title><link>https://blog.xenori.com/2020/12/intel-ax200-wol/</link><pubDate>Tue, 22 Dec 2020 13:27:10 +0800</pubDate><guid>https://blog.xenori.com/2020/12/intel-ax200-wol/</guid><description>&lt;img src="https://blog.xenori.com/2020/12/intel-ax200-wol/cover.png" alt="Featured image of post 华硕主板AX200网卡如何开启WOL网络唤醒" />&lt;p>&lt;a class="link" href="https://en.wikipedia.org/wiki/Wake-on-LAN" target="_blank" rel="noopener"
+>WOL网络唤醒&lt;/a>是用来实现通过特定的指令唤醒同一局域网下已关机 PC 的功能。现在常用的 &lt;code>DLNA&lt;/code> 和 &lt;code>moonlight&lt;/code> 软件都支持 WOL 功能，这篇文章只要记录下华硕主板如何打开 WOL 功能（其他厂商的主板大同小异，只要是 BIOS 选项和网卡选项会有些差别）。实现 WOL 功能的 PC 主机是必须通过网线连接在同一局域网下的，只有 WIFI 连接没法实现。&lt;/p>
+&lt;h2 id="1主板-bios-中打开-wol-功能">1、主板 BIOS 中打开 WOL 功能&lt;/h2>
+&lt;p>进入主板BIOS，把如下配置项设为&lt;code>enabled&lt;/code>（不同的主板 BIOS 可能会有出入，请以说明书为准）：&lt;/p>
+&lt;pre tabindex="0">&lt;code>Advanced -&amp;gt; APM Configuration -&amp;gt; Power On By PCI-E/PCI -&amp;gt; Enabled
+&lt;/code>&lt;/pre>&lt;p>&lt;img src="https://blog.xenori.com/2020/12/intel-ax200-wol/bios.jpg"
+width="1689"
+height="752"
+srcset="https://blog.xenori.com/2020/12/intel-ax200-wol/bios_hu3c3bff7c1814fb83f5fd3fc244e253df_134841_480x0_resize_q75_box.jpg 480w, https://blog.xenori.com/2020/12/intel-ax200-wol/bios_hu3c3bff7c1814fb83f5fd3fc244e253df_134841_1024x0_resize_q75_box.jpg 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="224"
+data-flex-basis="539px"
+>&lt;/p>
+&lt;p>&lt;code>Restore AC Power Loss&lt;/code>最好也设置为&lt;code>Last State&lt;/code>，这样可以保证断电恢复后，也能保持唤醒。&lt;/p>
+&lt;p>保存后重启进入 windows&lt;/p>
+&lt;h2 id="2配置-windows-10-网卡属性">2、配置 windows 10 网卡属性&lt;/h2>
+&lt;div class="notices warning" >&lt;blockquote>&lt;p>假如网络设置中找不到以上选项，可以尝试下载安装最新的网卡驱动，windows默认的网卡驱动有时会缺少以上选项的。&lt;/p>
+&lt;/blockquote>&lt;/div>
+&lt;p>点击 windows 任务栏右下角网络连接图标，选择&lt;code>网络和Internet设置&lt;/code>：&lt;/p>
+&lt;p>&lt;img src="https://blog.xenori.com/2020/12/intel-ax200-wol/1.jpg"
+width="750"
+height="538"
+srcset="https://blog.xenori.com/2020/12/intel-ax200-wol/1_hu3cc7554004a4f82bf46186159a47e918_90079_480x0_resize_q75_box.jpg 480w, https://blog.xenori.com/2020/12/intel-ax200-wol/1_hu3cc7554004a4f82bf46186159a47e918_90079_1024x0_resize_q75_box.jpg 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="139"
+data-flex-basis="334px"
+>&lt;/p>
+&lt;p>选择&lt;code>高级网络设置 -&amp;gt; 更改适配器选项&lt;/code>：&lt;/p>
+&lt;p>&lt;img src="https://blog.xenori.com/2020/12/intel-ax200-wol/2.jpg"
+width="2204"
+height="1454"
+srcset="https://blog.xenori.com/2020/12/intel-ax200-wol/2_hu3cc7554004a4f82bf46186159a47e918_213301_480x0_resize_q75_box.jpg 480w, https://blog.xenori.com/2020/12/intel-ax200-wol/2_hu3cc7554004a4f82bf46186159a47e918_213301_1024x0_resize_q75_box.jpg 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="151"
+data-flex-basis="363px"
+>&lt;/p>
+&lt;p>右键&lt;code>以太网&lt;/code>链接，选择&lt;code>属性&lt;/code>，再点击&lt;code>配置&lt;/code>：&lt;/p>
+&lt;p>&lt;img src="https://blog.xenori.com/2020/12/intel-ax200-wol/3.jpg"
+width="1356"
+height="950"
+srcset="https://blog.xenori.com/2020/12/intel-ax200-wol/3_hu3cc7554004a4f82bf46186159a47e918_168571_480x0_resize_q75_box.jpg 480w, https://blog.xenori.com/2020/12/intel-ax200-wol/3_hu3cc7554004a4f82bf46186159a47e918_168571_1024x0_resize_q75_box.jpg 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="142"
+data-flex-basis="342px"
+>&lt;/p>
+&lt;p>&lt;img src="https://blog.xenori.com/2020/12/intel-ax200-wol/4.jpg"
+width="842"
+height="1190"
+srcset="https://blog.xenori.com/2020/12/intel-ax200-wol/4_hu3cc7554004a4f82bf46186159a47e918_208543_480x0_resize_q75_box.jpg 480w, https://blog.xenori.com/2020/12/intel-ax200-wol/4_hu3cc7554004a4f82bf46186159a47e918_208543_1024x0_resize_q75_box.jpg 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="70"
+data-flex-basis="169px"
+>&lt;/p>
+&lt;p>点击属性的&lt;code>电源管理&lt;/code>，把图片中的如下三项都勾选上：&lt;/p>
+&lt;p>&lt;img src="https://blog.xenori.com/2020/12/intel-ax200-wol/5.jpg"
+width="930"
+height="1066"
+srcset="https://blog.xenori.com/2020/12/intel-ax200-wol/5_hu3cc7554004a4f82bf46186159a47e918_128409_480x0_resize_q75_box.jpg 480w, https://blog.xenori.com/2020/12/intel-ax200-wol/5_hu3cc7554004a4f82bf46186159a47e918_128409_1024x0_resize_q75_box.jpg 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="87"
+data-flex-basis="209px"
+>&lt;/p>
+&lt;p>再点击&lt;code>高级&lt;/code>，确保&lt;code>唤醒模式匹配&lt;/code>和&lt;code>唤醒魔包&lt;/code>都是&lt;code>启用&lt;/code>状态：&lt;/p>
+&lt;p>&lt;img src="https://blog.xenori.com/2020/12/intel-ax200-wol/6.jpg"
+width="928"
+height="1066"
+srcset="https://blog.xenori.com/2020/12/intel-ax200-wol/6_hu3cc7554004a4f82bf46186159a47e918_182177_480x0_resize_q75_box.jpg 480w, https://blog.xenori.com/2020/12/intel-ax200-wol/6_hu3cc7554004a4f82bf46186159a47e918_182177_1024x0_resize_q75_box.jpg 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="87"
+data-flex-basis="208px"
+>&lt;/p>
+&lt;blockquote>
+&lt;p>在&lt;code>高级&lt;/code>选项卡中，看下是否存在&lt;code>启用 PME&lt;/code>，有的话，也需要启用，启用这项是为了避免关机后主板切断网口的电源，导致没法唤醒
+&lt;img src="https://blog.xenori.com/2020/12/intel-ax200-wol/7.jpg"
+width="928"
+height="1060"
+srcset="https://blog.xenori.com/2020/12/intel-ax200-wol/7_hu3cc7554004a4f82bf46186159a47e918_177395_480x0_resize_q75_box.jpg 480w, https://blog.xenori.com/2020/12/intel-ax200-wol/7_hu3cc7554004a4f82bf46186159a47e918_177395_1024x0_resize_q75_box.jpg 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="87"
+data-flex-basis="210px"
+>&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="3关闭-windows-10-快速启动">3、关闭 windows 10 快速启动&lt;/h2>
+&lt;p>在打开快速启动电源选项时，windows默认关机功能是进入S4状态，这种状态是不能WOL唤醒的，需要在&lt;code>控制面板 -&amp;gt; 电源选项 -&amp;gt; 选择电源按钮的功能&lt;/code>中，关闭快速启动。&lt;/p>
+&lt;p>&lt;img src="https://blog.xenori.com/2020/12/intel-ax200-wol/8.png"
+width="1080"
+height="691"
+srcset="https://blog.xenori.com/2020/12/intel-ax200-wol/8_hu36807877dde4530faafb021916780f6e_178683_480x0_resize_box_3.png 480w, https://blog.xenori.com/2020/12/intel-ax200-wol/8_hu36807877dde4530faafb021916780f6e_178683_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="156"
+data-flex-basis="375px"
+>&lt;/p>
+&lt;h2 id="4测试-wol">4、测试 WOL&lt;/h2>
+&lt;p>关机后，假如有线网口连接灯一直闪烁，就证明 WOL 已经配置成功了，可通过如下软件测试是否成功。&lt;/p>
+&lt;p>MAC：&lt;/p>
+&lt;pre tabindex="0">&lt;code>brew install wakeonlan
+wakeonlan XX:XX:XX:00:4C:00
+&lt;/code>&lt;/pre>&lt;p>Android：&lt;/p>
+&lt;p>下载&lt;a class="link" href="https://play.google.com/store/apps/details?id=co.uk.mrwebb.wakeonlan" target="_blank" rel="noopener"
+>Wake On Lan&lt;/a> app&lt;/p>
+&lt;p>IPhone：&lt;/p>
+&lt;p>下载&lt;a class="link" href="https://apps.apple.com/tw/app/mocha-wol/id422625778" target="_blank" rel="noopener"
+>mocha-wol&lt;/a> app&lt;/p>
+&lt;h2 id="5如何实现远程关闭-pc">5、如何实现远程关闭 PC&lt;/h2>
+&lt;p>可以通过安装&lt;a class="link" href="https://github.com/karpach/remote-shutdown-pc" target="_blank" rel="noopener"
+>Remote Shutdown Manager&lt;/a>实现，详细请参考：&lt;/p>
+&lt;pre tabindex="0">&lt;code>https://github.com/karpach/remote-shutdown-pc
+&lt;/code>&lt;/pre>&lt;p>结合&lt;code>homeassistant&lt;/code>还能实现语音控制 PC 开关😄&lt;/p>
+&lt;h2 id="参考资料">参考资料&lt;/h2>
+&lt;ul>
+&lt;li>&lt;a class="link" href="https://post.smzdm.com/p/amx025p4/" target="_blank" rel="noopener"
+>WOL 网络唤醒避坑指南：常见问题的分析与内容补充&lt;/a>&lt;/li>
+&lt;/ul></description></item></channel></rss>

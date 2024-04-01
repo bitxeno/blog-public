@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Electron on bitxeno's notes</title><link>https://blog.xenori.com/tags/electron/</link><description>Recent content in Electron on bitxeno's notes</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Thu, 26 Dec 2019 14:10:18 +0800</lastBuildDate><atom:link href="https://blog.xenori.com/tags/electron/index.xml" rel="self" type="application/rss+xml"/><item><title>解决npm 安装 electron 卡住，无法完成</title><link>https://blog.xenori.com/2019/12/fix-npm-hang-when-install-electron/</link><pubDate>Thu, 26 Dec 2019 14:10:18 +0800</pubDate><guid>https://blog.xenori.com/2019/12/fix-npm-hang-when-install-electron/</guid><description>&lt;p>使用最新的 node v12 安装 electron 时，发现每次跑到下面的语句就会挂住，无法继续安装：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">&amp;gt; electron@7.1.7 postinstall /Users/cxf/Dev/CapsIndicator/node_modules/electron
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&amp;gt; node install.js
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>查看网上相关解决方案，发现是因为 npm 需要连接 github 下载 electron 安装包导致，安装包有 60M 左右，但从 github 下载却只有几 KB，所以感觉是卡住了。但改使用淘宝的 cnpm 发现还是会卡住，这是因为 electron 的包默认还是指向 github 下载，还有 electron 提供了修改下载地址的环境变量&lt;code>electron_mirror&lt;/code>，使用&lt;code>npm config&lt;/code>设置配置变量&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">npm config &lt;span class="nb">set&lt;/span> electron_mirror &lt;span class="s2">&amp;#34;https://npm.taobao.org/mirrors/electron/&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>再次执行安装命令，虽然不会卡住了，但变为直接提示404安装失败：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">&amp;gt; electron@7.1.7 postinstall /Users/cxf/Dev/CapsIndicator/node_modules/electron
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&amp;gt; node install.js
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="o">(&lt;/span>node:2216&lt;span class="o">)&lt;/span> UnhandledPromiseRejectionWarning: HTTPError: Response code &lt;span class="m">404&lt;/span> &lt;span class="o">(&lt;/span>Not Found&lt;span class="o">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> at EventEmitter.&amp;lt;anonymous&amp;gt; &lt;span class="o">(&lt;/span>/Users/cxf/Dev/CapsIndicator/node_modules/got/source/as-stream.js:35:24&lt;span class="o">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> at EventEmitter.emit &lt;span class="o">(&lt;/span>events.js:210:5&lt;span class="o">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> at module.exports &lt;span class="o">(&lt;/span>/Users/cxf/Dev/CapsIndicator/node_modules/got/source/get-response.js:22:10&lt;span class="o">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> at ClientRequest.handleResponse &lt;span class="o">(&lt;/span>/Users/cxf/Dev/CapsIndicator/node_modules/got/source/request-as-event-emitter.js:155:5&lt;span class="o">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> at Object.onceWrapper &lt;span class="o">(&lt;/span>events.js:300:26&lt;span class="o">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> at ClientRequest.emit &lt;span class="o">(&lt;/span>events.js:215:7&lt;span class="o">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> at ClientRequest.origin.emit &lt;span class="o">(&lt;/span>/Users/cxf/Dev/CapsIndicator/node_modules/@szmarczak/http-timer/source/index.js:37:11&lt;span class="o">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> at HTTPParser.parserOnIncomingClient &lt;span class="o">[&lt;/span>as onIncoming&lt;span class="o">]&lt;/span> &lt;span class="o">(&lt;/span>_http_client.js:583:27&lt;span class="o">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> at HTTPParser.parserOnHeadersComplete &lt;span class="o">(&lt;/span>_http_common.js:115:17&lt;span class="o">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> at TLSSocket.socketOnData &lt;span class="o">(&lt;/span>_http_client.js:456:22&lt;span class="o">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="o">(&lt;/span>node:2216&lt;span class="o">)&lt;/span> UnhandledPromiseRejectionWarning: Unhandled promise rejection. This error originated either by throwing inside of an async &lt;span class="k">function&lt;/span> without a catch block, or by rejecting a promise which was not handled with .catch&lt;span class="o">()&lt;/span>. &lt;span class="o">(&lt;/span>rejection id: 1&lt;span class="o">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="o">(&lt;/span>node:2216&lt;span class="o">)&lt;/span> &lt;span class="o">[&lt;/span>DEP0018&lt;span class="o">]&lt;/span> DeprecationWarning: Unhandled promise rejections are deprecated. In the future, promise rejections that are not handled will terminate the Node.js process with a non-zero &lt;span class="nb">exit&lt;/span> code.
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">npm WARN capsindicator@1.0.0 license should be a valid SPDX license expression
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>查看 github &lt;a class="link" href="https://github.com/electron/electron-packager/issues/1050" target="_blank" rel="noopener"
+>issue#1050&lt;/a> 后，发现是因为淘宝保存的版本目录和官方的不同，淘宝去掉了&lt;code>v&lt;/code>前缀。&lt;/p>
+&lt;pre tabindex="0">&lt;code>// 官方
+https://npm.taobao.org/mirrors/electron/v7.1.7/electron-v7.1.7-linux-x64.zip
+// 淘宝
+https://npm.taobao.org/mirrors/electron/7.1.7/electron-v7.1.7-linux-x64.zip
+&lt;/code>&lt;/pre>&lt;p>好在 electron 官方也提供了修改目录名称的环境变量&lt;code>electron_custom_dir&lt;/code>，配置改下：&lt;/p>
+&lt;pre tabindex="0">&lt;code>npm config set electron_custom_dir &amp;#34;7.1.7&amp;#34;
+&lt;/code>&lt;/pre>&lt;p>再次运行安装命令，这次终于成功了😂&lt;/p>
+&lt;blockquote>
+&lt;p>官方相关的&lt;a class="link" href="https://github.com/electron/electron/blob/9c442e0a7e1ee5945c4d1f9f67a814c855b7e440/docs/tutorial/installation.md#custom-mirrors-and-caches" target="_blank" rel="noopener"
+>安装说明&lt;/a>：&lt;/p>
+&lt;p>&lt;img src="https://i.loli.net/2019/12/26/7QUYwhvlXny8sNG.png"
+loading="lazy"
+alt="UTOOLS1577342703742.png"
+>&lt;/p>
+&lt;/blockquote></description></item></channel></rss>

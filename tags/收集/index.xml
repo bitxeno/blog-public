@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>收集 on bitxeno's notes</title><link>https://blog.xenori.com/tags/%E6%94%B6%E9%9B%86/</link><description>Recent content in 收集 on bitxeno's notes</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Mon, 22 Feb 2021 16:58:10 +0800</lastBuildDate><atom:link href="https://blog.xenori.com/tags/%E6%94%B6%E9%9B%86/index.xml" rel="self" type="application/rss+xml"/><item><title>常用git命令</title><link>https://blog.xenori.com/2021/02/git-commands/</link><pubDate>Mon, 22 Feb 2021 16:58:10 +0800</pubDate><guid>https://blog.xenori.com/2021/02/git-commands/</guid><description>&lt;img src="https://blog.xenori.com/2021/02/git-commands/cover.png" alt="Featured image of post 常用git命令" />&lt;h2 id="创建分支">创建分支&lt;/h2>
+&lt;h3 id="根据-commit-创建新分支">根据 commit 创建新分支&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">git checkout -b branch_name commit_id_xxx
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="回滚">回滚&lt;/h2>
+&lt;h3 id="还原本地修改过的文件">还原本地修改过的文件&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># 会还原本地所有修改过的文件！！&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">git checkout .
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># 删除新增未监视的文件(untracked files)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">git clean -fd
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="丢弃本地上一次提交">丢弃本地上一次提交&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># 回退到上一个 commit 版本&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">git reset HEAD^
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="回滚到指定版本">回滚到指定版本&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># 还原到指定的旧版本&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">git reset --hard &amp;lt;old_commit_id&amp;gt;
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># 还原到上一版本&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">git reset HEAD^
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># 新修改处理...&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># 强制push更新覆盖远程仓库&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">git push -f origin master
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="标签-tag">标签 tag&lt;/h2>
+&lt;h3 id="删除指定-tag">删除指定 tag&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># 先删除远程tag&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">git push origin :refs/tags/v0.x.x
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># 再删除本地tag&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">git tag -d v0.x.x
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="删除匹配的部分-tag">删除匹配的部分 tag&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># 先删除远程tag，支持*模糊匹配&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">git push -d origin &lt;span class="k">$(&lt;/span>git tag -l &lt;span class="s2">&amp;#34;v0.1*&amp;#34;&lt;/span>&lt;span class="k">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># 再删除本地tag&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">git tag -d &lt;span class="k">$(&lt;/span>git tag -l &lt;span class="s2">&amp;#34;v0.1*&amp;#34;&lt;/span>&lt;span class="k">)&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="删除所有-tags">删除所有 tags&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># 先删除所有远程tag&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">git tag -l &lt;span class="p">|&lt;/span> xargs -n &lt;span class="m">1&lt;/span> git push --delete origin
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># 再删除所有本地tag&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">git tag &lt;span class="p">|&lt;/span> xargs git tag -d
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="commit-修改">Commit 修改&lt;/h2>
+&lt;h3 id="清空所有历史-commit">清空所有历史 commit&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># 创建新的master分支&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">git checkout --orphan new_master
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">git add -A
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">git commit -am &lt;span class="s2">&amp;#34;First commit&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># 删除旧master分支&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">git branch -D master
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># 新master分支改名为master&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">git branch -m master
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># 强制push更新覆盖远程仓库&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">git push -f origin master
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="合并多个-commit">合并多个 commit&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># 切换回master分支，并获取最新代码&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">git checkout master
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">git pull
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># 把分支的多个提交合并为一个&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">git merge --squash feature-branch-xxxx
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">git commit -m &lt;span class="s2">&amp;#34;merge commit message&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">git push
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="多帐号">多帐号&lt;/h2>
+&lt;h3 id="提交时提示输入帐号">提交时提示输入帐号&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">git config --local credential.helper &lt;span class="s2">&amp;#34;&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># git地址要使用http协议&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">git remote set-url origin https://xxx.com/xxx.git
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>常用adb命令</title><link>https://blog.xenori.com/2020/09/adb-commands/</link><pubDate>Fri, 11 Sep 2020 11:27:10 +0800</pubDate><guid>https://blog.xenori.com/2020/09/adb-commands/</guid><description>&lt;img src="https://blog.xenori.com/2020/09/adb-commands/cover.png" alt="Featured image of post 常用adb命令" />&lt;h2 id="1-查看连接设备">1. 查看连接设备&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl"> adb devcies
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="2-当有多个连接设备时指定执行命令的设备">2. 当有多个连接设备时，指定执行命令的设备&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">adb -s &amp;lt;deviceid&amp;gt; &amp;lt;commands&amp;gt;
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">如
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">adb -s 1e25fe71 shell pm list package
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="3-查看手机中已安装的所有apk文件">3. 查看手机中已安装的所有apk文件&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">adb shell pm list package
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="4-导出指定的-apk-包">4. 导出指定的 apk 包&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">adb shell pm path &amp;lt;com.package.name&amp;gt;
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">adb pull &amp;lt;/system/priv-app/com.package.name/package_name.apk&amp;gt; ~/download/savepath
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="5-卸载任意包括系统应用">5. 卸载任意（包括系统）应用&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">adb shell pm uninstall -k --user &lt;span class="m">0&lt;/span> &amp;lt;com.package.name&amp;gt;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="6-查看-app-的错误日志">6. 查看 app 的错误日志&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">adb logcat -v &lt;span class="nb">time&lt;/span> &lt;span class="p">|&lt;/span> grep AndroidRuntime
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="7-清空-app-日志">7. 清空 app 日志&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">adb logcat -c
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>各种开发相关的国内源</title><link>https://blog.xenori.com/2020/05/china-speedup-source-for-develop/</link><pubDate>Thu, 07 May 2020 11:27:10 +0800</pubDate><guid>https://blog.xenori.com/2020/05/china-speedup-source-for-develop/</guid><description>&lt;pre tabindex="0">&lt;code>阿里云统一官方镜像站：https://developer.aliyun.com/mirror/
+包含了所有开源的国内镜像源，如homebrew，npm，pip，centos等，差不多满足所有开发需求， 🐂🍻
+&lt;/code>&lt;/pre>&lt;h2 id="go-get-国内源">go get 国内源&lt;/h2>
+&lt;p>七牛：https://goproxy.cn&lt;/p>
+&lt;p>官方全球加速CDN：https://goproxy.io/&lt;/p>
+&lt;p>第三方：https://gocenter.io&lt;/p>
+&lt;h2 id="pip-国内源">pip 国内源&lt;/h2>
+&lt;p>清华：https://pypi.tuna.tsinghua.edu.cn/simple&lt;/p>
+&lt;p>阿里云：http://mirrors.aliyun.com/pypi/simple/&lt;/p>
+&lt;p>中国科技大学 &lt;a class="link" href="https://pypi.mirrors.ustc.edu.cn/simple/" target="_blank" rel="noopener"
+>https://pypi.mirrors.ustc.edu.cn/simple/&lt;/a>&lt;/p>
+&lt;p>华中理工大学：http://pypi.hustunique.com/&lt;/p>
+&lt;p>山东理工大学：http://pypi.sdutlinux.org/&lt;/p>
+&lt;p>豆瓣：http://pypi.douban.com/simple/&lt;/p>
+&lt;h3 id="使用方法">使用方法&lt;/h3>
+&lt;p>临时使用：&lt;/p>
+&lt;pre tabindex="0">&lt;code>pip install pyspider -i https://pypi.tuna.tsinghua.edu.cn/simple
+&lt;/code>&lt;/pre>&lt;p>永久修改，一劳永逸：&lt;/p>
+&lt;p>Linux下，修改 ~/.pip/pip.conf (没有就创建一个文件夹及文件。文件夹要加“.”，表示是隐藏文件夹)&lt;/p>
+&lt;p>内容如下：&lt;/p>
+&lt;pre tabindex="0">&lt;code>[global]
+index-url = https://pypi.tuna.tsinghua.edu.cn/simple
+[install]
+trusted-host=mirrors.aliyun.com
+&lt;/code>&lt;/pre>&lt;h2 id="gradle国内源">gradle国内源&lt;/h2>
+&lt;p>阿里：http://maven.aliyun.com/nexus/content/groups/public&lt;/p>
+&lt;h3 id="使用方法-1">使用方法&lt;/h3>
+&lt;p>配置只在当前项目生效：
+在 build.gradle 文件内修改/添加 repositories 配置&lt;/p>
+&lt;pre tabindex="0">&lt;code>repositories {
+maven {
+url &amp;#34;http://maven.aliyun.com/nexus/content/groups/public&amp;#34;
+}
+}
+&lt;/code>&lt;/pre>&lt;p>配置全局生效：
+找到 (用户家目录)/.gradle/init.gradle 文件，如果找不到 init.gradle 文件，自己新建一个修改/添加 init.gradle 文件内的 repositories 配置&lt;/p>
+&lt;pre tabindex="0">&lt;code>allprojects {
+repositories {
+maven {
+url &amp;#34;http://maven.aliyun.com/nexus/content/groups/public&amp;#34;
+}
+}
+}
+&lt;/code>&lt;/pre></description></item><item><title>门户网站的ip查询接口</title><link>https://blog.xenori.com/2011/12/ip-lookup/</link><pubDate>Sun, 25 Dec 2011 06:09:12 +0000</pubDate><guid>https://blog.xenori.com/2011/12/ip-lookup/</guid><description>&lt;p>腾讯：&lt;a class="link" href="http://ip.qq.com/cgi-bin/searchip?searchip1=121.236.225.37" target="_blank" rel="noopener"
+>http://ip.qq.com/cgi-bin/searchip?searchip1=121.236.225.37&lt;/a>
+现在只能通过解析页面内容到取得&lt;/p>
+&lt;p>新浪：&lt;a class="link" href="http://int.dpool.sina.com.cn/iplookup/iplookup.php?format=json&amp;amp;ip=123.124.2.85" target="_blank" rel="noopener"
+>http://int.dpool.sina.com.cn/iplookup/iplookup.php?format=json&amp;amp;ip=123.124.2.85&lt;/a>&lt;/p>
+&lt;p>网易： &lt;a class="link" href="http://www.youdao.com/smartresult-xml/search.s?type=ip&amp;amp;q=123.124.2.85" target="_blank" rel="noopener"
+>http://www.youdao.com/smartresult-xml/search.s?type=ip&amp;amp;q=123.124.2.85&lt;/a>&lt;/p>
+&lt;p>ip地址在各个国家的分配情况表：
+&lt;a class="link" href="http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest" target="_blank" rel="noopener"
+>http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest&lt;/a>
+&lt;a class="link" href="http://www.countryipblocks.net/country-blocks/ip-range-format/" target="_blank" rel="noopener"
+>http://www.countryipblocks.net/country-blocks/ip-range-format/&lt;/a>&lt;/p></description></item></channel></rss>

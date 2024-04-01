@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Ubuntu on bitxeno's notes</title><link>https://blog.xenori.com/tags/ubuntu/</link><description>Recent content in Ubuntu on bitxeno's notes</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Tue, 30 Oct 2012 15:14:22 +0000</lastBuildDate><atom:link href="https://blog.xenori.com/tags/ubuntu/index.xml" rel="self" type="application/rss+xml"/><item><title>ubuntu日常操作</title><link>https://blog.xenori.com/2012/10/ubuntu-daily/</link><pubDate>Tue, 30 Oct 2012 15:14:22 +0000</pubDate><guid>https://blog.xenori.com/2012/10/ubuntu-daily/</guid><description>&lt;p>工作用电脑将会切换到ubuntu上了，记录下ubuntu常用操作。&lt;/p>
+&lt;h3 id="升级到php54">===升级到php5.4===&lt;/h3>
+&lt;pre>&lt;code>For Ubuntu 11.10/12.04:
+sudo add-apt-repository ppa:ondrej/php5
+sudo apt-get update
+sudo apt-get install php5
+For Ubuntu 10.04 LTS, run the following commands (Thanks to Ivan Castellanos for the extra tip):
+sudo echo &amp;quot;deb http://ppa.launchpad.net/ondrej/php5/ubuntu lucid main&amp;quot; &amp;gt;&amp;gt; /etc/apt/sources.list
+sudo echo &amp;quot;deb-src http://ppa.launchpad.net/ondrej/php5/ubuntu lucid main&amp;quot; &amp;gt;&amp;gt; /etc/apt/sources.list
+sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E5267A6C
+sudo apt-get update
+sudo apt-get install php5
+You can check if PHP 5.4.x is successfully installed with this command:
+php5 -v
+&lt;/code>&lt;/pre>
+&lt;p>&lt;a class="link" href="http://www.zimbio.com/Ubuntu&amp;#43;Linux/articles/D_AsJR2qAL6/How&amp;#43;Upgrade&amp;#43;PHP&amp;#43;5&amp;#43;4&amp;#43;Ubuntu" target="_blank" rel="noopener"
+>http://www.zimbio.com/Ubuntu+Linux/articles/D_AsJR2qAL6/How+Upgrade+PHP+5+4+Ubuntu&lt;/a>&lt;/p>
+&lt;h3 id="开启ubuntu的root帐号">===开启ubuntu的root帐号===&lt;/h3>
+&lt;pre>&lt;code>$ sudo passwd root
+[sudo] password for ramesh:
+Enter new UNIX password:
+Retype new UNIX password:
+passwd: password updated successfully
+&lt;/code>&lt;/pre>
+&lt;p>&lt;a class="link" href="http://www.thegeekstuff.com/2009/09/ubuntu-tips-how-to-login-using-su-command-su-gives-authentication-failure-error-message/" target="_blank" rel="noopener"
+>http://www.thegeekstuff.com/2009/09/ubuntu-tips-how-to-login-using-su-command-su-gives-authentication-failure-error-message/&lt;/a>&lt;/p>
+&lt;h3 id="安装ssh连接服务">===安装SSH连接服务===&lt;/h3>
+&lt;pre>&lt;code>sudo apt-get install openssh-server
+&lt;/code>&lt;/pre>
+&lt;p>&lt;a class="link" href="https://help.ubuntu.com/10.04/serverguide/openssh-server.html" target="_blank" rel="noopener"
+>https://help.ubuntu.com/10.04/serverguide/openssh-server.html&lt;/a>&lt;/p>
+&lt;h3 id="apache卸载nginx和php安装">===apache卸载、nginx和php安装===&lt;/h3>
+&lt;p>&lt;a class="link" href="http://cc.ecjtu.net/posts/php-5-4-Nginx-ubuntu-make-install" target="_blank" rel="noopener"
+>http://cc.ecjtu.net/posts/php-5-4-Nginx-ubuntu-make-install&lt;/a>&lt;/p>
+&lt;p>php交互命令行：http://phpsh.org/&lt;/p></description></item><item><title>如何在ubuntu server 10.04中安装vmware tools</title><link>https://blog.xenori.com/2012/02/how-to-install-vmware-tools-in-ubuntu-server/</link><pubDate>Sun, 19 Feb 2012 08:07:01 +0000</pubDate><guid>https://blog.xenori.com/2012/02/how-to-install-vmware-tools-in-ubuntu-server/</guid><description>&lt;p>本人的ubuntu server版本是10.04.4，安装在免费的vmware player 4.0中。
+安装vmware-tools需要gcc和对应的linux-headers进行编译，需先执行下面两个命令进行安装：&lt;/p>
+&lt;pre>&lt;code>sudo apt-get gcc
+sudo apt-get install build-essential linux-headers-$(uname -r)
+&lt;/code>&lt;/pre>
+&lt;p>安装后，点击vmware player菜单“Virtual Machine-&amp;gt;Install VMware Tools”，画面下方会出现黄色的VMware Tools安装提示框。
+1、把安装光盘绑定到一个文件夹：&lt;/p>
+&lt;pre>&lt;code>mkdir /mnt/cdrom
+sudo mount /dev/cdrom /mnt/cdrom
+&lt;/code>&lt;/pre>
+&lt;p>2、解压安装文件到临时目录/tmp：&lt;/p>
+&lt;pre>&lt;code>cd /tmp
+tar zxpf /mnt/cdrom/VMwareTools-8.0.0-&amp;lt;xxxx&amp;gt;.tar.gz
+&amp;lt;/xxxx&amp;gt;
+&lt;/code>&lt;/pre>
+&lt;p>3、执行安装：&lt;/p>
+&lt;pre>&lt;code>cd vmware-tools-distrib
+sudo ./vmware-install.pl
+&lt;/code>&lt;/pre>
+&lt;p>4、之后按照安装提示，一直按Enter键确认就可以了。
+5、安装后执行reboot重启：&lt;/p>
+&lt;pre>&lt;code>sudo reboot
+&lt;/code>&lt;/pre>
+&lt;p>参考资料：
+&lt;a class="link" href="http://ubuntu-tutorials.com/2007/10/02/how-to-install-vmware-tools-on-ubuntu-guests/" target="_blank" rel="noopener"
+>http://www.vmware.com/support/ws55/doc/ws_newguest_tools_linux.html#wp1127177&lt;/a>
+&lt;a class="link" href="http://ubuntuforums.org/showthread.php?t=1561822" target="_blank" rel="noopener"
+>http://ubuntuforums.org/showthread.php?t=1561822&lt;/a>
+&lt;a class="link" href="http://ubuntu-tutorials.com/2007/10/02/how-to-install-vmware-tools-on-ubuntu-guests/" target="_blank" rel="noopener"
+>http://ubuntu-tutorials.com/2007/10/02/how-to-install-vmware-tools-on-ubuntu-guests/&lt;/a>&lt;/p></description></item></channel></rss>
