@@ -27,5 +27,5 @@
 >http://192.168.x.x:9000&lt;/a> 的代理地址。&lt;/p>
 &lt;h3 id="ubuntu-运行-graftcp">ubuntu 运行 graftcp&lt;/h3>
 &lt;p>在 ubuntu 中执行命令：&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">mgraftcp --enable-debug-log --http_proxy&lt;span class="o">=&lt;/span>192.168.x.x:9000 &lt;span class="o">[&lt;/span>指定程序路径&lt;span class="o">]&lt;/span> &lt;span class="o">[&lt;/span>程序参数&lt;span class="o">]&lt;/span>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">mgraftcp --enable-debug-log --select_proxy_mode&lt;span class="o">=&lt;/span>only_http_proxy --http_proxy&lt;span class="o">=&lt;/span>192.168.x.x:9000 &lt;span class="o">[&lt;/span>指定程序路径&lt;span class="o">]&lt;/span> &lt;span class="o">[&lt;/span>程序参数&lt;span class="o">]&lt;/span>
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>这样目标程序的所有网络请求就会路由到 reqable 中，reqable 界面也能看到所有的 http 网络请求了。&lt;/p></description></item></channel></rss>
