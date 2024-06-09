@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Reqable on bitxeno's notes</title><link>https://blog.xenori.com/tags/reqable/</link><description>Recent content in Reqable on bitxeno's notes</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Sun, 09 Jun 2024 13:45:42 +0800</lastBuildDate><atom:link href="https://blog.xenori.com/tags/reqable/index.xml" rel="self" type="application/rss+xml"/><item><title>在 Ubuntu 中使用 graftcp 抓取程序网络请求</title><link>https://blog.xenori.com/2024/06/capture-ubuntu-network-with-graftcp/</link><pubDate>Sun, 09 Jun 2024 13:45:42 +0800</pubDate><guid>https://blog.xenori.com/2024/06/capture-ubuntu-network-with-graftcp/</guid><description>&lt;p>在开发中有时需要抓取指定程序的网络请求，以便进行分析处理。&lt;a class="link" href="https://github.com/hmgle/graftcp" target="_blank" rel="noopener"
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Reqable on bitxeno's notes</title><link>https://blog.xenori.com/tags/reqable/</link><description>Recent content in Reqable on bitxeno's notes</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Sun, 09 Jun 2024 13:45:42 +0800</lastBuildDate><atom:link href="https://blog.xenori.com/tags/reqable/index.xml" rel="self" type="application/rss+xml"/><item><title>在 Ubuntu 中使用 graftcp 抓取程序网络请求</title><link>https://blog.xenori.com/2024/06/capture-ubuntu-network-with-graftcp/</link><pubDate>Sun, 09 Jun 2024 13:45:42 +0800</pubDate><guid>https://blog.xenori.com/2024/06/capture-ubuntu-network-with-graftcp/</guid><description>&lt;img src="https://blog.xenori.com/2024/06/capture-ubuntu-network-with-graftcp/cover.png" alt="Featured image of post 在 Ubuntu 中使用 graftcp 抓取程序网络请求" />&lt;p>在开发中有时需要抓取指定程序的网络请求，以便进行分析处理。&lt;a class="link" href="https://github.com/hmgle/graftcp" target="_blank" rel="noopener"
 >graftcp&lt;/a> 是一个可以辅助抓取网络流量的开源程序，和 ProxyChains 一样，不需要对目标程序进行修改，就可以把任何指定程序（应用程序、脚本、shell 等）的 TCP 连接重定向到 SOCKS5 或 HTTP 代理。&lt;/p>
 &lt;h2 id="本机安装抓包程序">本机安装抓包程序&lt;/h2>
 &lt;h3 id="安装配置-reqable">安装配置 reqable&lt;/h3>
@@ -9,23 +9,23 @@
 &lt;h3 id="安装-graftcp">安装 graftcp&lt;/h3>
 &lt;p>访问 &lt;a class="link" href="https://github.com/hmgle/graftcp/releases" target="_blank" rel="noopener"
 >graftcp release&lt;/a> 下载最新版安装，或执行命令：&lt;/p>
-&lt;pre tabindex="0">&lt;code>wget https://github.com/hmgle/graftcp/releases/download/v0.4.0/graftcp_0.4.0-1_amd64.deb
-dpkg -i graftcp_0.4.0-1_amd64.deb
-&lt;/code>&lt;/pre>&lt;h3 id="安装-reqable-证书">安装 reqable 证书&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">wget https://github.com/hmgle/graftcp/releases/download/v0.4.0/graftcp_0.4.0-1_amd64.deb
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">dpkg -i graftcp_0.4.0-1_amd64.deb
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="安装-reqable-证书">安装 reqable 证书&lt;/h3>
 &lt;ol>
 &lt;li>在&lt;code>/usr/share/ca-certificates&lt;/code> 创建目录 &lt;code>reqable&lt;/code>，并把前面下载的&lt;code>reqable-ca.crt&lt;/code> 证书放入其中&lt;/li>
 &lt;li>使用 &lt;code>vim&lt;/code> 修改 &lt;code>/etc/ca-certificates.conf&lt;/code> 文件，在末尾追加一行：&lt;/li>
 &lt;/ol>
-&lt;pre tabindex="0">&lt;code>reqable/reqable-ca.crt
-&lt;/code>&lt;/pre>&lt;ol start="3">
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">reqable/reqable-ca.crt
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="3">
 &lt;li>执行命令刷新系统证书&lt;/li>
 &lt;/ol>
-&lt;pre tabindex="0">&lt;code> update-ca-certificates
-&lt;/code>&lt;/pre>&lt;h2 id="抓包流程">抓包流程&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl"> update-ca-certificates
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="抓包流程">抓包流程&lt;/h2>
 &lt;h3 id="本机启动-reqable-抓包">本机启动 reqable 抓包&lt;/h3>
 &lt;p>这时 reqable 会监听 &lt;a class="link" href="http://192.168.x.x:9000" target="_blank" rel="noopener"
 >http://192.168.x.x:9000&lt;/a> 的代理地址。&lt;/p>
 &lt;h3 id="ubuntu-运行-graftcp">ubuntu 运行 graftcp&lt;/h3>
 &lt;p>在 ubuntu 中执行命令：&lt;/p>
-&lt;pre tabindex="0">&lt;code>mgraftcp --enable-debug-log --http_proxy=192.168.x.x:9000 [指定程序路径] [程序参数]
-&lt;/code>&lt;/pre>&lt;p>这样目标程序的所有网络请求就会路由到 reqable 中，reqable 界面也能看到所有的 http 网络请求了。&lt;/p></description></item></channel></rss>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">mgraftcp --enable-debug-log --http_proxy&lt;span class="o">=&lt;/span>192.168.x.x:9000 &lt;span class="o">[&lt;/span>指定程序路径&lt;span class="o">]&lt;/span> &lt;span class="o">[&lt;/span>程序参数&lt;span class="o">]&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>这样目标程序的所有网络请求就会路由到 reqable 中，reqable 界面也能看到所有的 http 网络请求了。&lt;/p></description></item></channel></rss>
