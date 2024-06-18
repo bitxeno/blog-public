@@ -14,13 +14,13 @@
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="安装-reqable-证书">安装 reqable 证书&lt;/h3>
 &lt;ol>
 &lt;li>在&lt;code>/usr/share/ca-certificates&lt;/code> 创建目录 &lt;code>reqable&lt;/code>，并把前面下载的&lt;code>reqable-ca.crt&lt;/code> 证书放入其中&lt;/li>
-&lt;li>使用 &lt;code>vim&lt;/code> 修改 &lt;code>/etc/ca-certificates.conf&lt;/code> 文件，在末尾追加一行：&lt;/li>
 &lt;/ol>
-&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">reqable/reqable-ca.crt
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="3">
-&lt;li>执行命令刷新系统证书&lt;/li>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">mkdir /usr/share/ca-certificates/reqable
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="2">
+&lt;li>修改 &lt;code>/etc/ca-certificates.conf&lt;/code> 文件，在末尾追加一行&lt;code>reqable/reqable-ca.crt&lt;/code>，并刷新系统证书&lt;/li>
 &lt;/ol>
-&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl"> update-ca-certificates
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">&lt;span class="nb">echo&lt;/span> &lt;span class="s1">&amp;#39;reqable/reqable-ca.crt&amp;#39;&lt;/span> &amp;gt;&amp;gt; /etc/ca-certificates.conf
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">update-ca-certificates
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="抓包流程">抓包流程&lt;/h2>
 &lt;h3 id="本机启动-reqable-抓包">本机启动 reqable 抓包&lt;/h3>
 &lt;p>这时 reqable 会监听 &lt;a class="link" href="http://192.168.x.x:9000" target="_blank" rel="noopener"
@@ -28,7 +28,12 @@
 &lt;h3 id="ubuntu-运行-graftcp">ubuntu 运行 graftcp&lt;/h3>
 &lt;p>在 ubuntu 中执行命令：&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">mgraftcp --enable-debug-log --select_proxy_mode&lt;span class="o">=&lt;/span>only_http_proxy --http_proxy&lt;span class="o">=&lt;/span>192.168.x.x:9000 &lt;span class="o">[&lt;/span>指定程序路径&lt;span class="o">]&lt;/span> &lt;span class="o">[&lt;/span>程序参数&lt;span class="o">]&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>这样目标程序的所有网络请求就会路由到 reqable 中，reqable 界面也能看到所有的 http 网络请求了。&lt;/p></description></item><item><title>通过 WSA 抓取 android 的 https 网络请求包</title><link>https://blog.xenori.com/2023/05/capture-android-https-network-packet-with-wsa/</link><pubDate>Mon, 15 May 2023 15:27:10 +0800</pubDate><guid>https://blog.xenori.com/2023/05/capture-android-https-network-packet-with-wsa/</guid><description>&lt;img src="https://blog.xenori.com/2023/05/capture-android-https-network-packet-with-wsa/cover.jpeg" alt="Featured image of post 通过 WSA 抓取 android 的 https 网络请求包" />&lt;p>android 9 以上版本，app 不再信任用户安装的证书，只能通过 root 手机把证书移动到 system 分区才能实现抓包。一般日常使用手机为了安全是不可能 root 的，这里通过 Windows 的 WSA 来实现抓包。&lt;/p>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>这样目标程序的所有网络请求就会路由到 reqable 中，reqable 界面也能看到所有的 http 网络请求了。&lt;/p>
+&lt;h2 id="程序抓包替换脚本">程序抓包替换脚本&lt;/h2>
+&lt;p>先备份原程序，再使用下面的脚本直接替换原程序，这样第三方调用程序都会被抓包。&lt;/p>
+&lt;pre tabindex="0">&lt;code>#!/bin/bash
+mgraftcp --enable-debug-log --select_proxy_mode=only_http_proxy --http_proxy=192.168.x.x:9000 [指向原程序路径] &amp;#34;$@&amp;#34;
+&lt;/code>&lt;/pre></description></item><item><title>通过 WSA 抓取 android 的 https 网络请求包</title><link>https://blog.xenori.com/2023/05/capture-android-https-network-packet-with-wsa/</link><pubDate>Mon, 15 May 2023 15:27:10 +0800</pubDate><guid>https://blog.xenori.com/2023/05/capture-android-https-network-packet-with-wsa/</guid><description>&lt;img src="https://blog.xenori.com/2023/05/capture-android-https-network-packet-with-wsa/cover.jpeg" alt="Featured image of post 通过 WSA 抓取 android 的 https 网络请求包" />&lt;p>android 9 以上版本，app 不再信任用户安装的证书，只能通过 root 手机把证书移动到 system 分区才能实现抓包。一般日常使用手机为了安全是不可能 root 的，这里通过 Windows 的 WSA 来实现抓包。&lt;/p>
 &lt;h2 id="准备环境">准备环境&lt;/h2>
 &lt;ol>
 &lt;li>
