@@ -137,46 +137,21 @@ data-flex-basis="362px"
 >Magisk app&lt;/a>，并安装&lt;/p>
 &lt;/li>
 &lt;/ol>
-&lt;h2 id="安装-charles-证书">安装 charles 证书&lt;/h2>
+&lt;h2 id="安装-reqable-证书到-system-分区">安装 Reqable 证书到 system 分区&lt;/h2>
 &lt;ol>
 &lt;li>
-&lt;p>打开 &lt;strong>charles&lt;/strong>，选择菜单 &lt;code>Help -&amp;gt; SSL Proxying -&amp;gt; Save Charles Root Certificate&lt;/code>，并选择把证书保存为 &lt;code>.cer&lt;/code> 格式&lt;/p>
+&lt;p>打开 &lt;strong>Reqable&lt;/strong>，选择菜单 &lt;code>证书 -&amp;gt; 安装根证书到 Android 设备 -&amp;gt; Magisk 模块&lt;/code>，并下载 Magisk 模块 &lt;code>reqable-magisk.zip&lt;/code>&lt;/p>
 &lt;/li>
 &lt;li>
 &lt;p>打开&lt;strong>WSA 工具箱&lt;/strong>，使用&lt;code>文件传输&lt;/code>功能把刚刚保存的证书上传到 wsa 的&lt;code>Download&lt;/code>目录&lt;/p>
 &lt;/li>
 &lt;li>
-&lt;p>点击&lt;strong>WSA 工具箱&lt;/strong>首页的&lt;code>Android设置&lt;/code>，选择&lt;code>安全-&amp;gt;更多安全设置-&amp;gt;加密与凭据-&amp;gt;安装证书&lt;/code>菜单，选择并安装&lt;code>Download&lt;/code>目录的&lt;code>charles&lt;/code>证书&lt;/p>
+&lt;p>下载 &lt;strong>Magisk&lt;/strong> 的&lt;a class="link" href="https://github.com/NVISOsecurity/MagiskTrustUserCerts/releases" target="_blank" rel="noopener"
+>MagiskTrustUserCerts&lt;/a>模块压缩包，并通过&lt;strong>WSA 工具箱&lt;/strong>上传到&lt;code>Download&lt;/code>目录&lt;/p>
 &lt;/li>
 &lt;/ol>
-&lt;p>&lt;img src="https://blog.xenori.com/2023/05/capture-android-https-network-packet-with-wsa/2.png"
-width="1390"
-height="864"
-srcset="https://blog.xenori.com/2023/05/capture-android-https-network-packet-with-wsa/2_huc11281a385f0323f7fb22346342b05c5_278663_480x0_resize_box_3.png 480w, https://blog.xenori.com/2023/05/capture-android-https-network-packet-with-wsa/2_huc11281a385f0323f7fb22346342b05c5_278663_1024x0_resize_box_3.png 1024w"
-loading="lazy"
-class="gallery-image"
-data-flex-grow="160"
-data-flex-basis="386px"
->&lt;/p>
 &lt;ol start="4">
-&lt;li>证书安装成功后，正常在&lt;code>加密与凭据-&amp;gt;信任的凭据-&amp;gt;用户&lt;/code>项中能看到已安装的证书&lt;/li>
-&lt;/ol>
-&lt;p>&lt;img src="https://blog.xenori.com/2023/05/capture-android-https-network-packet-with-wsa/3.png"
-width="582"
-height="688"
-srcset="https://blog.xenori.com/2023/05/capture-android-https-network-packet-with-wsa/3_hu6752eb6c708844501a8d4a854f8e7790_62810_480x0_resize_box_3.png 480w, https://blog.xenori.com/2023/05/capture-android-https-network-packet-with-wsa/3_hu6752eb6c708844501a8d4a854f8e7790_62810_1024x0_resize_box_3.png 1024w"
-loading="lazy"
-class="gallery-image"
-data-flex-grow="84"
-data-flex-basis="203px"
->&lt;/p>
-&lt;h2 id="把用户区证书移动到-system-分区">把用户区证书移动到 system 分区&lt;/h2>
-&lt;ol>
-&lt;li>下载 &lt;strong>Magisk&lt;/strong> 的&lt;a class="link" href="https://github.com/NVISOsecurity/MagiskTrustUserCerts/releases" target="_blank" rel="noopener"
->MagiskTrustUserCerts&lt;/a>模块压缩包，并通过&lt;strong>WSA 工具箱&lt;/strong>上传到&lt;code>Download&lt;/code>目录&lt;/li>
-&lt;/ol>
-&lt;ol start="2">
-&lt;li>打开 &lt;strong>Magisk&lt;/strong> app，点击&lt;code>模块 -&amp;gt; 从本地安装&lt;/code>，选择刚刚上传的&lt;code>Download&lt;/code>目录下的&lt;code>AlwaysTrustUserCerts&lt;/code>压缩包&lt;/li>
+&lt;li>打开 &lt;strong>Magisk&lt;/strong> app，点击&lt;code>模块 -&amp;gt; 从本地安装&lt;/code>，选择刚刚上传的&lt;code>Download&lt;/code>目录下的&lt;code>reqable-magisk.zip&lt;/code>和&lt;code>AlwaysTrustUserCerts&lt;/code>压缩包&lt;/li>
 &lt;/ol>
 &lt;p>&lt;img src="https://blog.xenori.com/2023/05/capture-android-https-network-packet-with-wsa/4.png"
 width="544"
@@ -192,46 +167,54 @@ data-flex-basis="181px"
 &lt;p>安装成功后，正常会提示你重启 wsa，没的话，在命令行中执行&lt;code>adb reboot&lt;/code>手工重启下&lt;/p>
 &lt;/li>
 &lt;li>
-&lt;p>重启后正常能在&lt;code>加密与凭据-&amp;gt;信任的凭据-&amp;gt;系统&lt;/code>中，看到&lt;code>charles&lt;/code>证书&lt;/p>
+&lt;p>重启后，点击&lt;strong>WSA 工具箱&lt;/strong>首页的&lt;code>Android设置&lt;/code>，正常能在&lt;code>安全-&amp;gt;更多安全设置-&amp;gt;加密与凭据-&amp;gt;信任的凭据-&amp;gt;系统&lt;/code>中，看到&lt;code>reqable&lt;/code>证书&lt;/p>
 &lt;/li>
 &lt;/ol>
 &lt;p>&lt;img src="https://blog.xenori.com/2023/05/capture-android-https-network-packet-with-wsa/5.png"
 width="544"
-height="696"
-srcset="https://blog.xenori.com/2023/05/capture-android-https-network-packet-with-wsa/5_hub5c871cd5d01a8af30fa5218ac6cbbd2_106297_480x0_resize_box_3.png 480w, https://blog.xenori.com/2023/05/capture-android-https-network-packet-with-wsa/5_hub5c871cd5d01a8af30fa5218ac6cbbd2_106297_1024x0_resize_box_3.png 1024w"
+height="773"
+srcset="https://blog.xenori.com/2023/05/capture-android-https-network-packet-with-wsa/5_huc9847cd38447f5a4bda3dca8572e0f43_147258_480x0_resize_box_3.png 480w, https://blog.xenori.com/2023/05/capture-android-https-network-packet-with-wsa/5_huc9847cd38447f5a4bda3dca8572e0f43_147258_1024x0_resize_box_3.png 1024w"
 loading="lazy"
 class="gallery-image"
-data-flex-grow="78"
-data-flex-basis="187px"
+data-flex-grow="70"
+data-flex-basis="168px"
 >&lt;/p>
+&lt;blockquote>
+&lt;p>WSA 工具箱假如连接不上，可以在命令行中使用 &lt;code>adb connect 127.0.0.1:58526&lt;/code> 命令重启adb server&lt;/p>
+&lt;/blockquote>
 &lt;h2 id="配置代理抓包">配置代理抓包&lt;/h2>
 &lt;ol>
-&lt;li>打开 &lt;strong>charles&lt;/strong>，选择菜单&lt;code>Proxy -&amp;gt; SSL Proxying Settings...&lt;/code>，勾选 &lt;code>Enable SSL Proxying&lt;/code>，并添加新的 location，&lt;code>Host&lt;/code>填&lt;code>*&lt;/code>，&lt;code>Port&lt;/code>填&lt;code>443&lt;/code>&lt;/li>
-&lt;/ol>
-&lt;p>&lt;img src="https://blog.xenori.com/2023/05/capture-android-https-network-packet-with-wsa/6.png"
-width="1620"
-height="808"
-srcset="https://blog.xenori.com/2023/05/capture-android-https-network-packet-with-wsa/6_hudd5d61aff7f94b1e6ad1eb93fdacf997_349536_480x0_resize_box_3.png 480w, https://blog.xenori.com/2023/05/capture-android-https-network-packet-with-wsa/6_hudd5d61aff7f94b1e6ad1eb93fdacf997_349536_1024x0_resize_box_3.png 1024w"
-loading="lazy"
-class="gallery-image"
-data-flex-grow="200"
-data-flex-basis="481px"
->&lt;/p>
-&lt;ol start="2">
-&lt;li>打开命令行，执行下面的命令设置 WSA 代理：&lt;/li>
+&lt;li>
+&lt;p>打开 &lt;strong>Reqable&lt;/strong>，启动抓包&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>打开命令行，执行下面的命令设置 WSA 代理：&lt;/p>
+&lt;/li>
 &lt;/ol>
 &lt;pre tabindex="0">&lt;code>adb connect 127.0.0.1:58526
-adb shell settings put global http_proxy 192.168.x.x:8888
-&lt;/code>&lt;/pre>&lt;p>其中&lt;code>192.168.x.x&lt;/code>需改为&lt;strong>charles&lt;/strong>所在的 ip 地址&lt;/p>
+adb shell settings put global http_proxy 192.168.x.x:9000
+&lt;/code>&lt;/pre>&lt;p>其中&lt;code>192.168.x.x&lt;/code>需改为&lt;strong>Reqable&lt;/strong>所在的 ip 地址&lt;/p>
 &lt;ol start="3">
-&lt;li>下载安装需要抓包的 app，访问就能在&lt;strong>charles&lt;/strong>看到 https 流量了：）&lt;/li>
+&lt;li>下载安装需要抓包的 app，访问就能在&lt;strong>Reqable&lt;/strong>看到 https 流量了：）&lt;/li>
 &lt;/ol>
 &lt;h2 id="删除代理">删除代理&lt;/h2>
 &lt;p>去掉代理需执行下面命令：&lt;/p>
 &lt;pre tabindex="0">&lt;code>adb shell settings delete global http_proxy
 adb shell settings delete global global_http_proxy_host
 adb shell settings delete global global_http_proxy_port
-&lt;/code>&lt;/pre></description></item><item><title>如何抓取 AppleTV (tvOS) 的 https 网络请求包</title><link>https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/</link><pubDate>Sun, 14 May 2023 11:27:10 +0800</pubDate><guid>https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/</guid><description>&lt;img src="https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/cover.webp" alt="Featured image of post 如何抓取 AppleTV (tvOS) 的 https 网络请求包" />&lt;p>AppleTV 无法直接安装证书和修改代理，需要借助添加自定义描述文件的方式来实现，才能对 app 进行抓包。&lt;/p>
+&lt;/code>&lt;/pre>&lt;h2 id="部分-app-抓不到包">部分 app 抓不到包&lt;/h2>
+&lt;ol>
+&lt;li>app 可能使用了 http3(quic) 协议&lt;/li>
+&lt;/ol>
+&lt;p>很多手机厂商的官方 app 都是使用 quic 协议，而现在抓包软件一般都不支持。可以使用 &lt;a class="link" href="https://github.com/skylot/jadx" target="_blank" rel="noopener"
+>jadx&lt;/a> 打开 apk 搜索 &lt;code>quic&lt;/code>，看能不能找到相关信息。&lt;/p>
+&lt;p>解决方法可以参考文章 &lt;a class="link" href="https://xz.aliyun.com/t/13245" target="_blank" rel="noopener"
+>APP逆向分析&lt;/a>，使用 &lt;code>Frida&lt;/code> hook 修改 app ，强制降级为 https 协议。&lt;/p>
+&lt;h2 id="参考资料">参考资料&lt;/h2>
+&lt;p>&lt;a class="link" href="https://bbs.kanxue.com/thread-281892.htm" target="_blank" rel="noopener"
+>一种对QUIC协议的抓包方案&lt;/a>
+&lt;a class="link" href="https://hyb.life/archives/203" target="_blank" rel="noopener"
+>快手v8.x版本抓包分析&lt;/a>&lt;/p></description></item><item><title>如何抓取 AppleTV (tvOS) 的 https 网络请求包</title><link>https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/</link><pubDate>Sun, 14 May 2023 11:27:10 +0800</pubDate><guid>https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/</guid><description>&lt;img src="https://blog.xenori.com/2023/05/how-capture-appletv-https-network-packet/cover.webp" alt="Featured image of post 如何抓取 AppleTV (tvOS) 的 https 网络请求包" />&lt;p>AppleTV 无法直接安装证书和修改代理，需要借助添加自定义描述文件的方式来实现，才能对 app 进行抓包。&lt;/p>
 &lt;h2 id="准备环境">准备环境&lt;/h2>
 &lt;ol>
 &lt;li>
