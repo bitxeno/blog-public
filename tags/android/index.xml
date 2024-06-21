@@ -20,15 +20,19 @@ data-flex-basis="362px"
 >&lt;/p>
 &lt;ol start="3">
 &lt;li>
-&lt;p>安装&lt;a class="link" href="https://www.microsoft.com/store/productId/9P2JFQ43FPPG" target="_blank" rel="noopener"
+&lt;p>安装 &lt;a class="link" href="https://www.microsoft.com/store/productId/9P2JFQ43FPPG" target="_blank" rel="noopener"
 >APK 安装程序&lt;/a>，实现双击安装 apk 和自动安装 adb 命令工具&lt;/p>
 &lt;/li>
 &lt;li>
-&lt;p>安装&lt;a class="link" href="ms-windows-store://pdp/?productid=9PPSP2MKVTGT" >WSA 工具箱&lt;/a>，用于上传文件到 WSA&lt;/p>
+&lt;p>安装 &lt;a class="link" href="ms-windows-store://pdp/?productid=9PPSP2MKVTGT" >WSA 工具箱&lt;/a>，用于上传文件到 WSA&lt;/p>
 &lt;/li>
 &lt;li>
-&lt;p>下载&lt;a class="link" href="https://github.com/topjohnwu/Magisk/releases" target="_blank" rel="noopener"
+&lt;p>下载 &lt;a class="link" href="https://github.com/topjohnwu/Magisk/releases" target="_blank" rel="noopener"
 >Magisk app&lt;/a>，并安装&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>下载 &lt;a class="link" href="https://reqable.com/" target="_blank" rel="noopener"
+>Reqable&lt;/a> 抓包工具，并安装&lt;/p>
 &lt;/li>
 &lt;/ol>
 &lt;h2 id="安装-reqable-证书到-system-分区">安装 Reqable 证书到 system 分区&lt;/h2>
@@ -106,8 +110,8 @@ adb shell settings delete global global_http_proxy_port
 >APP逆向分析&lt;/a>，使用 &lt;code>Frida&lt;/code> hook 修改 app ，强制降级为 https 协议。&lt;/p>
 &lt;h2 id="参考资料">参考资料&lt;/h2>
 &lt;p>&lt;a class="link" href="https://bbs.kanxue.com/thread-281892.htm" target="_blank" rel="noopener"
->一种对QUIC协议的抓包方案&lt;/a>
-&lt;a class="link" href="https://hyb.life/archives/203" target="_blank" rel="noopener"
+>一种对QUIC协议的抓包方案&lt;/a>&lt;/p>
+&lt;p>&lt;a class="link" href="https://hyb.life/archives/203" target="_blank" rel="noopener"
 >快手v8.x版本抓包分析&lt;/a>&lt;/p></description></item><item><title>常用adb命令</title><link>https://blog.xenori.com/2020/09/adb-commands/</link><pubDate>Fri, 11 Sep 2020 11:27:10 +0800</pubDate><guid>https://blog.xenori.com/2020/09/adb-commands/</guid><description>&lt;img src="https://blog.xenori.com/2020/09/adb-commands/cover.png" alt="Featured image of post 常用adb命令" />&lt;h2 id="1-查看连接设备">1. 查看连接设备&lt;/h2>
 &lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl"> adb devcies
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="2-当有多个连接设备时指定执行命令的设备">2. 当有多个连接设备时，指定执行命令的设备&lt;/h2>
