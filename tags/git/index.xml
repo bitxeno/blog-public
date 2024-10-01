@@ -10,6 +10,9 @@
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="丢弃本地上一次提交">丢弃本地上一次提交&lt;/h3>
 &lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># 回退到上一个 commit 版本&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">git reset HEAD^
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># 回退首次提交 commit 版本&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">git update-ref -d HEAD
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="回滚到指定版本">回滚到指定版本&lt;/h3>
 &lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># 还原到指定的旧版本&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">git reset --hard &amp;lt;old_commit_id&amp;gt;
@@ -57,8 +60,17 @@
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">git merge --squash feature-branch-xxxx
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">git commit -m &lt;span class="s2">&amp;#34;merge commit message&amp;#34;&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">git push
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="cherry-pick-另一仓库的-commit">cherry-pick 另一仓库的 commit&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># 添加另一仓库为远程仓库，并获取相关 commit 信息&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">git remote add other https://example.link/repository.git
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">git fetch other
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># cherry-pick 操作&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># 删除不再使用的远程仓库&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">git remote remove other
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="多帐号">多帐号&lt;/h2>
-&lt;h3 id="提交时提示输入帐号">提交时提示输入帐号&lt;/h3>
+&lt;h3 id="让提交时提示输入帐号">让提交时提示输入帐号&lt;/h3>
 &lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">git config --local credential.helper &lt;span class="s2">&amp;#34;&amp;#34;&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># git地址要使用http协议&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">git remote set-url origin https://xxx.com/xxx.git
